@@ -1,9 +1,9 @@
 import { Route, Routes } from 'react-router';
-import '@styles/index.css';
 import Home from '@pages/home';
 import Login from '@pages/login';
 import Application from '@pages/application';
 
+import '@styles/index.css';
 const App = () => {
   return (
     <Routes>
