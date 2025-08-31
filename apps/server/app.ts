@@ -1,9 +1,10 @@
+import 'reflect-metadata';
 import Koa from 'koa';
-import { registerMiddlewares } from './middlewares/index.ts';
+import { initMiddlewares } from './middlewares/index.ts';
 
 const app = new Koa();
 
-registerMiddlewares(app);
+initMiddlewares(app);
 
 app.listen(3000, () => {
   console.log('server started at http://localhost:3000');

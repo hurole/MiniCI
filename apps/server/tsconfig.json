@@ -2,5 +2,10 @@
   "extends": [
     "@tsconfig/node22/tsconfig.json",
     "@tsconfig/node-ts/tsconfig.json"
-  ]
+  ],
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": ["reflect-metadata"]
+  }
 }
