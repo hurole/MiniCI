@@ -23,9 +23,6 @@ importers:
       koa:
         specifier: ^3.0.1
         version: 3.0.1
-      reflect-metadata:
-        specifier: ^0.1.13
-        version: 0.1.14
     devDependencies:
       '@tsconfig/node-ts':
         specifier: ^23.6.1
@@ -1462,9 +1459,6 @@ packages:
 
   reduce-configs@1.1.1:
     resolution: {integrity: sha512-EYtsVGAQarE8daT54cnaY1PIknF2VB78ug6Zre2rs36EsJfC40EG6hmTU2A2P1ZuXnKAt2KI0fzOGHcX7wzdPw==}
-
-  reflect-metadata@0.1.14:
-    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
 
   resize-observer-polyfill@1.5.1:
     resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
@@ -2935,8 +2929,6 @@ snapshots:
   readdirp@4.1.2: {}
 
   reduce-configs@1.1.1: {}
-
-  reflect-metadata@0.1.14: {}
 
   resize-observer-polyfill@1.5.1: {}
 

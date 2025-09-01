@@ -12,8 +12,7 @@
   "dependencies": {
     "@koa/router": "^14.0.0",
     "@prisma/client": "^6.15.0",
-    "koa": "^3.0.1",
-    "reflect-metadata": "^0.1.13"
+    "koa": "^3.0.1"
   },
   "devDependencies": {
     "@tsconfig/node-ts": "^23.6.1",

@@ -4,8 +4,7 @@
     "@tsconfig/node-ts/tsconfig.json"
   ],
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "types": ["reflect-metadata"]
+    "target": "ES2022",
+    "useDefineForClassFields": false
   }
 }

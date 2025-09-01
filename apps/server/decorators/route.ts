@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 /**
  * 路由元数据键
  */
@@ -20,70 +18,107 @@ export interface RouteMetadata {
 }
 
 /**
- * 创建HTTP方法装饰器的工厂函数
+ * 元数据存储（降级方案）
+ */
+const metadataStore = new WeakMap<any, Map<string | symbol, any>>();
+
+/**
+ * 设置元数据（降级方案）
+ */
+function setMetadata<T = any>(key: string | symbol, value: T, target: any): void {
+  if (!metadataStore.has(target)) {
+    metadataStore.set(target, new Map());
+  }
+  metadataStore.get(target)!.set(key, value);
+}
+
+/**
+ * 获取元数据（降级方案）
+ */
+function getMetadata<T = any>(key: string | symbol, target: any): T | undefined {
+  return metadataStore.get(target)?.get(key);
+}
+
+/**
+ * 创建HTTP方法装饰器的工厂函数（TC39标准）
  */
 function createMethodDecorator(method: HttpMethod) {
   return function (path: string = '') {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-      // 获取现有的路由元数据
-      const existingRoutes: RouteMetadata[] = (Reflect as any).getMetadata(ROUTE_METADATA_KEY, target.constructor) || [];
+    return function <This, Args extends any[], Return>(
+      target: (this: This, ...args: Args) => Return,
+      context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>
+    ) {
+      // 在类初始化时执行
+      context.addInitializer(function () {
+        // 使用 this.constructor 时需要类型断言
+        const constructor = (this as any).constructor;
 
-      // 添加新的路由元数据
-      const newRoute: RouteMetadata = {
-        method,
-        path,
-        propertyKey
-      };
+        // 获取现有的路由元数据
+        const existingRoutes: RouteMetadata[] = getMetadata(ROUTE_METADATA_KEY, constructor) || [];
 
-      existingRoutes.push(newRoute);
+        // 添加新的路由元数据
+        const newRoute: RouteMetadata = {
+          method,
+          path,
+          propertyKey: String(context.name)
+        };
 
-      // 保存路由元数据到类的构造函数上
-      (Reflect as any).defineMetadata(ROUTE_METADATA_KEY, existingRoutes, target.constructor);
+        existingRoutes.push(newRoute);
 
-      return descriptor;
+        // 保存路由元数据到类的构造函数上
+        setMetadata(ROUTE_METADATA_KEY, existingRoutes, constructor);
+      });
+
+      return target;
     };
   };
 }
 
 /**
- * GET 请求装饰器
+ * GET 请求装饰器（TC39标准）
  * @param path 路由路径
  */
 export const Get = createMethodDecorator('GET');
 
 /**
- * POST 请求装饰器
+ * POST 请求装饰器（TC39标准）
  * @param path 路由路径
  */
 export const Post = createMethodDecorator('POST');
 
 /**
- * PUT 请求装饰器
+ * PUT 请求装饰器（TC39标准）
  * @param path 路由路径
  */
 export const Put = createMethodDecorator('PUT');
 
 /**
- * DELETE 请求装饰器
+ * DELETE 请求装饰器（TC39标准）
  * @param path 路由路径
  */
 export const Delete = createMethodDecorator('DELETE');
 
 /**
- * PATCH 请求装饰器
+ * PATCH 请求装饰器（TC39标准）
  * @param path 路由路径
  */
 export const Patch = createMethodDecorator('PATCH');
 
 /**
- * 控制器装饰器
+ * 控制器装饰器（TC39标准）
  * @param prefix 路由前缀
  */
 export function Controller(prefix: string = '') {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    // 保存控制器前缀到元数据
-    (Reflect as any).defineMetadata('prefix', prefix, constructor);
-    return constructor;
+  return function <T extends abstract new (...args: any) => any>(
+    target: T,
+    context: ClassDecoratorContext<T>
+  ) {
+    // 在类初始化时保存控制器前缀
+    context.addInitializer(function () {
+      setMetadata('prefix', prefix, this);
+    });
+
+    return target;
   };
 }
 
@@ -91,12 +126,12 @@ export function Controller(prefix: string = '') {
  * 获取控制器的路由元数据
  */
 export function getRouteMetadata(constructor: any): RouteMetadata[] {
-  return (Reflect as any).getMetadata(ROUTE_METADATA_KEY, constructor) || [];
+  return getMetadata(ROUTE_METADATA_KEY, constructor) || [];
 }
 
 /**
  * 获取控制器的路由前缀
  */
 export function getControllerPrefix(constructor: any): string {
-  return (Reflect as any).getMetadata('prefix', constructor) || '';
+  return getMetadata('prefix', constructor) || '';
 }
