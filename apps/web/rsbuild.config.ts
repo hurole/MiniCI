@@ -1,16 +1,24 @@
-import { ArcoDesignPlugin } from "@arco-plugins/unplugin-react";
-import { defineConfig } from "@rsbuild/core";
-import { pluginReact } from "@rsbuild/plugin-react";
-import { pluginLess } from "@rsbuild/plugin-less";
+import { ArcoDesignPlugin } from '@arco-plugins/unplugin-react';
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginLess } from '@rsbuild/plugin-less';
 import { pluginSvgr } from '@rsbuild/plugin-svgr';
 
 export default defineConfig({
   plugins: [pluginReact(), pluginLess(), pluginSvgr()],
+  html: {
+    title: 'Foka CI',
+  },
+  source: {
+    define: {
+      'process.env.BASE_URL': JSON.stringify(process.env.BASE_URL),
+    },
+  },
   tools: {
     rspack: {
       plugins: [
         new ArcoDesignPlugin({
-          defaultLanguage: "zh-CN",
+          defaultLanguage: 'zh-CN',
         }),
       ],
     },

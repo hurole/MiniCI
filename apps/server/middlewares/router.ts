@@ -1,36 +1,16 @@
 import KoaRouter from '@koa/router';
 import type Koa from 'koa';
 import type { Middleware } from './types.ts';
-import { createAutoSuccessResponse } from './exception.ts';
 import { RouteScanner } from '../libs/route-scanner.ts';
 import { ApplicationController } from '../controllers/application.ts';
 import { UserController } from '../controllers/user.ts';
-import * as application from '../controllers/application.ts';
-
-/**
- * 包装控制器函数，统一处理响应格式
- */
-function wrapController(controllerFn: Function) {
-  return async (ctx: Koa.Context, next: Koa.Next) => {
-    try {
-      // 调用控制器函数获取返回数据
-      const result = await controllerFn(ctx, next);
-
-      // 如果控制器返回了数据，则包装成统一响应格式
-      if (result !== undefined) {
-        ctx.body = createAutoSuccessResponse(result);
-      }
-      // 如果控制器没有返回数据，说明已经自己处理了响应
-    } catch (error) {
-      // 错误由全局异常处理中间件处理
-      throw error;
-    }
-  };
-}
+import { AuthController } from '../controllers/auth.ts';
+import { log } from '../libs/logger.ts';
 
 export class Router implements Middleware {
   private router: KoaRouter;
   private routeScanner: RouteScanner;
+  private readonly TAG = 'Router';
 
   constructor() {
     this.router = new KoaRouter({
@@ -54,14 +34,18 @@ export class Router implements Middleware {
     // 注册所有使用装饰器的控制器
     this.routeScanner.registerControllers([
       ApplicationController,
-      UserController
+      UserController,
+      AuthController,
     ]);
 
     // 输出注册的路由信息
     const routes = this.routeScanner.getRegisteredRoutes();
-    console.log('装饰器路由注册完成:');
-    routes.forEach(route => {
-      console.log(`  ${route.method} ${route.path} -> ${route.controller}.${route.action}`);
+    log.debug(this.TAG, '装饰器路由注册完成:');
+    routes.forEach((route) => {
+      log.debug(
+        this.TAG,
+        `  ${route.method} ${route.path} -> ${route.controller}.${route.action}`,
+      );
     });
   }
 

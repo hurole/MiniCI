@@ -1,14 +1,15 @@
 import type Koa from 'koa';
 import type { Middleware } from './types.ts';
+import { log } from '../libs/logger.ts';
 
 /**
  * 统一响应体结构
  */
 export interface ApiResponse<T = any> {
-  code: number;        // 状态码：0表示成功，其他表示失败
-  message: string;     // 响应消息
-  data?: T;           // 响应数据
-  timestamp: number;   // 时间戳
+  code: number; // 状态码：0表示成功，其他表示失败
+  message: string; // 响应消息
+  data?: T; // 响应数据
+  timestamp: number; // 时间戳
 }
 
 /**
@@ -36,11 +37,11 @@ export class Exception implements Middleware {
         await next();
 
         // 如果没有设置响应体，则返回404
-        if (ctx.status === 404 && !ctx.body) {
-          this.sendResponse(ctx, 404, '接口不存在', null, 404);
+        if (ctx.status === 404) {
+          this.sendResponse(ctx, 404, 'Not Found', null, 404);
         }
       } catch (error) {
-        console.error('全局异常捕获:', error);
+        log.error('Exception', 'catch error: %o', error);
         this.handleError(ctx, error);
       }
     });
@@ -55,11 +56,16 @@ export class Exception implements Middleware {
       this.sendResponse(ctx, error.code, error.message, null, error.httpStatus);
     } else if (error.status) {
       // Koa HTTP 错误
-      const message = error.status === 401 ? '未授权访问' :
-                     error.status === 403 ? '禁止访问' :
-                     error.status === 404 ? '资源不存在' :
-                     error.status === 422 ? '请求参数错误' :
-                     error.message || '请求失败';
+      const message =
+        error.status === 401
+          ? '未授权访问'
+          : error.status === 403
+            ? '禁止访问'
+            : error.status === 404
+              ? '资源不存在'
+              : error.status === 422
+                ? '请求参数错误'
+                : error.message || '请求失败';
 
       this.sendResponse(ctx, error.status, message, null, error.status);
     } else {
@@ -80,13 +86,13 @@ export class Exception implements Middleware {
     code: number,
     message: string,
     data: any = null,
-    httpStatus = 200
+    httpStatus = 200,
   ): void {
     const response: ApiResponse = {
       code,
       message,
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     ctx.status = httpStatus;
@@ -98,12 +104,15 @@ export class Exception implements Middleware {
 /**
  * 创建成功响应的辅助函数
  */
-export function createSuccessResponse<T>(data: T, message = '操作成功'): ApiResponse<T> {
+export function createSuccessResponse<T>(
+  data: T,
+  message = '操作成功',
+): ApiResponse<T> {
   return {
     code: 0,
     message,
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }
 
@@ -128,11 +137,15 @@ export function createAutoSuccessResponse<T>(data: T): ApiResponse<T> {
 /**
  * 创建失败响应的辅助函数
  */
-export function createErrorResponse(code: number, message: string, data?: any): ApiResponse {
+export function createErrorResponse(
+  code: number,
+  message: string,
+  data?: any,
+): ApiResponse {
   return {
     code,
     message,
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }

@@ -11,7 +11,7 @@ import {
 } from '@arco-design/web-react/icon';
 import { useState } from 'react';
 import Logo from '@assets/images/logo.svg?react';
-import { Outlet } from 'react-router';
+import { Link, Outlet } from 'react-router';
 
 function Home() {
   const [collapsed, setCollapsed] = useState(false);
@@ -33,24 +33,16 @@ function Home() {
           defaultSelectedKeys={['0_1']}
         >
           <Menu.Item key="0">
-            <IconApps />
-            Navigation 1
+            <Link to="/project" className="flex flex-row items-center">
+              <IconApps fontSize={18} />
+              项目管理
+            </Link>
           </Menu.Item>
           <Menu.Item key="1">
-            <IconRobot />
-            Navigation 2
-          </Menu.Item>
-          <Menu.Item key="2">
-            <IconBulb />
-            Navigation 3
-          </Menu.Item>
-          <Menu.Item key="3">
-            <IconSafe />
-            Navigation 4
-          </Menu.Item>
-          <Menu.Item key="4">
-            <IconFire />
-            Navigation 5
+            <Link to="/env" className="flex flex-row items-center">
+              <IconRobot fontSize={18} />
+              环境管理
+            </Link>
           </Menu.Item>
         </Menu>
       </Layout.Sider>

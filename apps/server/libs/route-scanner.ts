@@ -74,8 +74,6 @@ export class RouteScanner {
         default:
           console.warn(`未支持的HTTP方法: ${route.method}`);
       }
-
-      console.log(`注册路由: ${route.method} ${fullPath} -> ${ControllerClass.name}.${route.propertyKey}`);
     });
   }
 
@@ -115,10 +113,7 @@ export class RouteScanner {
         const result = await method.call(instance, ctx, next);
 
         // 如果控制器返回了数据，则包装成统一响应格式
-        if (result !== undefined) {
-          ctx.body = createAutoSuccessResponse(result);
-        }
-        // 如果控制器没有返回数据，说明已经自己处理了响应
+        ctx.body = createAutoSuccessResponse(result);
       } catch (error) {
         // 错误由全局异常处理中间件处理
         throw error;

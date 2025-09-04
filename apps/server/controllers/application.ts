@@ -1,5 +1,6 @@
 import type { Context } from 'koa';
 import prisma from '../libs/db.ts';
+import { log } from '../libs/logger.ts';
 import { BusinessError } from '../middlewares/exception.ts';
 import { Controller, Get } from '../decorators/route.ts';
 
@@ -7,6 +8,7 @@ import { Controller, Get } from '../decorators/route.ts';
 export class ApplicationController {
   @Get('/list')
   async list(ctx: Context) {
+    log.debug('app', 'session %o', ctx.session);
     try {
       const list = await prisma.application.findMany({
         where: {
@@ -24,27 +26,15 @@ export class ApplicationController {
 
   @Get('/detail/:id')
   async detail(ctx: Context) {
-    try {
-      const { id } = ctx.params;
-      const app = await prisma.application.findUnique({
-        where: { id: Number(id) },
-      });
+    const { id } = ctx.params;
+    const app = await prisma.application.findUnique({
+      where: { id: Number(id) },
+    });
 
-      if (!app) {
-        throw new BusinessError('应用不存在', 1002, 404);
-      }
-
-      return app;
-    } catch (error) {
-      if (error instanceof BusinessError) {
-        throw error;
-      }
-      throw new BusinessError('获取应用详情失败', 1003, 500);
+    if (!app) {
+      throw new BusinessError('应用不存在', 1002, 404);
     }
+
+    return app;
   }
 }
-
-// 保持向后兼容的导出方式
-const applicationController = new ApplicationController();
-export const list = applicationController.list.bind(applicationController);
-export const detail = applicationController.detail.bind(applicationController);

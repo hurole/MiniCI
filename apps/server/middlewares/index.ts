@@ -1,7 +1,9 @@
 import { Router } from './router.ts';
-import { ResponseTime } from './responseTime.ts';
 import { Exception } from './exception.ts';
 import { BodyParser } from './body-parser.ts';
+import { Session } from './session.ts';
+import { CORS } from './cors.ts';
+import { HttpLogger } from './logger.ts';
 import type Koa from 'koa';
 
 /**
@@ -9,17 +11,19 @@ import type Koa from 'koa';
  * @param app Koa
  */
 export function initMiddlewares(app: Koa) {
+  // 日志中间件需要最早注册，记录所有请求
+  new HttpLogger().apply(app);
+
   // 全局异常处理中间件必须最先注册
-  const exception = new Exception();
-  exception.apply(app);
+  new Exception().apply(app);
+
+  // Session 中间件需要在请求体解析之前注册
+  new Session().apply(app);
 
   // 请求体解析中间件
-  const bodyParser = new BodyParser();
-  bodyParser.apply(app);
+  new BodyParser().apply(app);
 
-  const responseTime = new ResponseTime();
-  responseTime.apply(app);
+  new CORS().apply(app);
 
-  const router = new Router();
-  router.apply(app);
+  new Router().apply(app);
 }

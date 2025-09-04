@@ -33,3 +33,17 @@ model Environment {
   createdBy   String
   updatedBy   String
 }
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String
+  login      String
+  email      String
+  avatar_url String?
+  active     Boolean  @default(true)
+  valid      Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+}
