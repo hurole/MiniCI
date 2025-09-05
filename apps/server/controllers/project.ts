@@ -4,8 +4,8 @@ import { log } from '../libs/logger.ts';
 import { BusinessError } from '../middlewares/exception.ts';
 import { Controller, Get } from '../decorators/route.ts';
 
-@Controller('/application')
-export class ApplicationController {
+@Controller('/project')
+export class ProjectController {
   @Get('/list')
   async list(ctx: Context) {
     log.debug('app', 'session %o', ctx.session);

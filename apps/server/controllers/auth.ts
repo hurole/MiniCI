@@ -20,7 +20,7 @@ export class AuthController {
     if (!ctx.session.isNew) {
       return ctx.session.user;
     }
-    const { code } = (ctx.request as any).body;
+    const { code } = ctx.request.body as LoginRequestBody;
     const { access_token } = await gitea.getToken(code);
     const giteaUser = await gitea.getUserInfo(access_token);
     log.debug(this.TAG, 'gitea user: %o', giteaUser);
@@ -63,4 +63,8 @@ export class AuthController {
     }
     return ctx.session.user;
   }
+}
+
+interface LoginRequestBody {
+  code: string;
 }

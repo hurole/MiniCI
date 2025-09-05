@@ -2,7 +2,7 @@ import KoaRouter from '@koa/router';
 import type Koa from 'koa';
 import type { Middleware } from './types.ts';
 import { RouteScanner } from '../libs/route-scanner.ts';
-import { ApplicationController } from '../controllers/application.ts';
+import { ProjectController } from '../controllers/project.ts';
 import { UserController } from '../controllers/user.ts';
 import { AuthController } from '../controllers/auth.ts';
 import { log } from '../libs/logger.ts';
@@ -33,7 +33,7 @@ export class Router implements Middleware {
   private registerDecoratorRoutes(): void {
     // 注册所有使用装饰器的控制器
     this.routeScanner.registerControllers([
-      ApplicationController,
+      ProjectController,
       UserController,
       AuthController,
     ]);

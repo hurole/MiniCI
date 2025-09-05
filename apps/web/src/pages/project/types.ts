@@ -8,7 +8,7 @@ export interface Project {
   id: string;
   name: string;
   description: string;
-  git: string;
+  repository: string;
   env: Record<string, string>;
   createdAt: string;
   status: BuildStatus;

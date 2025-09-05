@@ -1,12 +1,9 @@
 import { Avatar, Layout, Menu } from '@arco-design/web-react';
 import {
   IconApps,
-  IconBulb,
-  IconFire,
   IconMenuFold,
   IconMenuUnfold,
   IconRobot,
-  IconSafe,
   IconUser,
 } from '@arco-design/web-react/icon';
 import { useState } from 'react';
@@ -21,9 +18,15 @@ function Home() {
       <Layout.Sider
         collapsible
         onCollapse={setCollapsed}
-        trigger={collapsed ? <IconMenuUnfold /> : <IconMenuFold />}
+        trigger={
+          collapsed ? (
+            <IconMenuUnfold fontSize={16} />
+          ) : (
+            <IconMenuFold fontSize={16} />
+          )
+        }
       >
-        <div className="flex flex-row items-center justify-center px-2 py-3">
+        <div className="flex flex-row items-center justify-center h-[56px]">
           <Logo />
           {!collapsed && <h2 className="ml-4 text-xl font-medium">Foka CI</h2>}
         </div>
@@ -31,16 +34,17 @@ function Home() {
           className="flex-1"
           defaultOpenKeys={['0']}
           defaultSelectedKeys={['0_1']}
+          collapse={collapsed}
         >
           <Menu.Item key="0">
-            <Link to="/project" className="flex flex-row items-center">
-              <IconApps fontSize={18} />
-              项目管理
+            <Link to="/project">
+              <IconApps fontSize={16} />
+              <span>项目管理</span>
             </Link>
           </Menu.Item>
           <Menu.Item key="1">
-            <Link to="/env" className="flex flex-row items-center">
-              <IconRobot fontSize={18} />
+            <Link to="/env">
+              <IconRobot fontSize={16} />
               环境管理
             </Link>
           </Menu.Item>
