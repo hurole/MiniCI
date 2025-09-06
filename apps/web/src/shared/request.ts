@@ -8,6 +8,24 @@ class Net {
       timeout: 20000,
       withCredentials: true,
     });
+
+    this.applyInterceptors(this.instance);
+  }
+
+  private applyInterceptors(instance: Axios) {
+    instance.interceptors.response.use(
+      (response) => {
+        return response;
+      },
+      (error) => {
+        console.log('error', error)
+        if (error.status === 401 && error.config.url !== '/api/auth/info') {
+          window.location.href = '/login';
+          return;
+        }
+        return Promise.reject(error);
+      },
+    );
   }
 
   async request<T>(config: AxiosRequestConfig): Promise<T> {

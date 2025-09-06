@@ -63,6 +63,11 @@ export class AuthController {
     }
     return ctx.session.user;
   }
+
+  @Get('info')
+  async info(ctx: Context) {
+    return ctx.session?.user;
+  }
 }
 
 interface LoginRequestBody {

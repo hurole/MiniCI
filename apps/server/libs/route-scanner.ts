@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import KoaRouter from '@koa/router';
 import { getRouteMetadata, getControllerPrefix, type RouteMetadata } from '../decorators/route.ts';
-import { createAutoSuccessResponse } from '../middlewares/exception.ts';
+import { createSuccessResponse } from '../middlewares/exception.ts';
 
 /**
  * 控制器类型
@@ -102,22 +102,16 @@ export class RouteScanner {
    */
   private wrapControllerMethod(instance: any, methodName: string) {
     return async (ctx: Koa.Context, next: Koa.Next) => {
-      try {
-        // 调用控制器方法
-        const method = instance[methodName];
-        if (typeof method !== 'function') {
-          throw new Error(`控制器方法 ${methodName} 不存在或不是函数`);
-        }
-
-        // 绑定this并调用方法
-        const result = await method.call(instance, ctx, next);
-
-        // 如果控制器返回了数据，则包装成统一响应格式
-        ctx.body = createAutoSuccessResponse(result);
-      } catch (error) {
-        // 错误由全局异常处理中间件处理
-        throw error;
+      // 调用控制器方法
+      const method = instance[methodName];
+      if (typeof method !== 'function') {
+        ctx.throw(401, 'Not Found')
       }
+
+      // 绑定this并调用方法
+      const result = await method.call(instance, ctx, next) ?? null;
+
+      ctx.body = createSuccessResponse(result);
     };
   }
 

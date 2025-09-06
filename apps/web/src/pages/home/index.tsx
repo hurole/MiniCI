@@ -1,17 +1,19 @@
-import { Avatar, Layout, Menu } from '@arco-design/web-react';
+import { Avatar, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import {
   IconApps,
+  IconExport,
   IconMenuFold,
   IconMenuUnfold,
   IconRobot,
-  IconUser,
 } from '@arco-design/web-react/icon';
 import { useState } from 'react';
 import Logo from '@assets/images/logo.svg?react';
 import { Link, Outlet } from 'react-router';
+import { useGlobalStore } from '../../stores/global';
 
 function Home() {
   const [collapsed, setCollapsed] = useState(false);
+  const globalStore = useGlobalStore();
 
   return (
     <Layout className="h-screen w-full">
@@ -53,12 +55,32 @@ function Home() {
       <Layout>
         <Layout.Header className="h-14 border-b-gray-100 border-b-[1px]">
           <div className="flex items-center justify-end px-4 h-full">
-            <Avatar>
-              <IconUser />
-            </Avatar>
+            <Dropdown
+              trigger={'click'}
+              droplist={
+                <Menu className="px-3">
+                  <Menu.Item key="1">
+                    <IconExport />
+                    <span className="ml-2">退出登录</span>
+                  </Menu.Item>
+                </Menu>
+              }
+            >
+              <div className="p-2 rounded-xl cursor-pointer flex items-center hover:bg-[rgba(0,0,0,0.03)]">
+                <Avatar size={28}>
+                  <img
+                    alt="avatar"
+                    src={globalStore.user?.avatar_url.replace('https', 'http')}
+                  />
+                </Avatar>
+                <span className="ml-2 font-semibold text-gray-500">
+                  {globalStore.user?.username}
+                </span>
+              </div>
+            </Dropdown>
           </div>
         </Layout.Header>
-        <Layout.Content>
+        <Layout.Content className="overflow-y-auto bg-gray-100">
           <Outlet />
         </Layout.Content>
       </Layout>

@@ -5,6 +5,7 @@ import { Session } from './session.ts';
 import { CORS } from './cors.ts';
 import { HttpLogger } from './logger.ts';
 import type Koa from 'koa';
+import { Authorization } from './Authorization.ts';
 
 /**
  * 初始化中间件
@@ -20,10 +21,12 @@ export function initMiddlewares(app: Koa) {
   // Session 中间件需要在请求体解析之前注册
   new Session().apply(app);
 
+  new CORS().apply(app);
+
+  new Authorization().apply(app);
+
   // 请求体解析中间件
   new BodyParser().apply(app);
-
-  new CORS().apply(app);
 
   new Router().apply(app);
 }

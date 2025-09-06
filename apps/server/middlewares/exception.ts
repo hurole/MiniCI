@@ -122,7 +122,7 @@ export class Exception implements Middleware {
  */
 export function createSuccessResponse<T>(
   data: T,
-  message = '操作成功',
+  message = 'success',
 ): ApiResponse<T> {
   return {
     code: 0,
@@ -130,24 +130,6 @@ export function createSuccessResponse<T>(
     data,
     timestamp: Date.now(),
   };
-}
-
-/**
- * 创建成功响应的辅助函数（自动设置消息）
- */
-export function createAutoSuccessResponse<T>(data: T): ApiResponse<T> {
-  let message = '操作成功';
-
-  // 根据数据类型自动生成消息
-  if (Array.isArray(data)) {
-    message = `获取列表成功，共${data.length}条记录`;
-  } else if (data && typeof data === 'object') {
-    message = '获取数据成功';
-  } else if (data === null || data === undefined) {
-    message = '操作完成';
-  }
-
-  return createSuccessResponse(data, message);
 }
 
 /**
