@@ -1,7 +1,8 @@
 import { net } from '@shared';
-import type { AuthURLResponse } from './types';
+import type { AuthURLResponse, AuthLoginResponse } from './types';
 import type { NavigateFunction } from 'react-router';
-import { Notification } from '@arco-design/web-react';
+import { Message, Notification } from '@arco-design/web-react';
+import { useGlobalStore } from '../../stores/global';
 
 class LoginService {
   async getAuthUrl() {
@@ -18,7 +19,7 @@ class LoginService {
   }
 
   async login(authCode: string, navigate: NavigateFunction) {
-    const { data, code } = await net.request<AuthURLResponse>({
+    const { data, code } = await net.request<AuthLoginResponse>({
       method: 'POST',
       url: '/api/auth/login',
       data: {
@@ -26,12 +27,23 @@ class LoginService {
       },
     });
     if (code === 0) {
-      localStorage.setItem('user', JSON.stringify(data));
+      useGlobalStore.getState().setUser(data);
       navigate('/');
       Notification.success({
         title: '提示',
-        content: '登录成功'
+        content: '登录成功',
       });
+    }
+  }
+
+  async logout() {
+    const { code } = await net.request<AuthURLResponse>({
+      method: 'GET',
+      url: '/api/auth/logout',
+    });
+    if (code === 0) {
+      Message.success('登出成功');
+      window.location.href = '/login';
     }
   }
 }

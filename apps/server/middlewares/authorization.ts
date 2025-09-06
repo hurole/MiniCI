@@ -10,11 +10,10 @@ export class Authorization implements Middleware {
 
   apply(app: Koa) {
     app.use(async (ctx: Koa.Context, next: Koa.Next) => {
-      console.log('ctx.path', ctx.path)
       if (this.ignoreAuth.includes(ctx.path)) {
         return next();
       }
-      if (ctx.session.isNew) {
+      if (ctx.session.user == null) {
         ctx.throw(401, 'Unauthorized');
       }
       await next();

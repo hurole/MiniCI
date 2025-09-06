@@ -11,11 +11,13 @@ interface User {
 
 interface GlobalStore {
   user: User | null;
+  setUser: (user: User) => void;
   refreshUser: () => Promise<void>;
 }
 
 export const useGlobalStore = create<GlobalStore>((set) => ({
   user: null,
+  setUser: (user: User) => set({ user }),
   async refreshUser() {
     const { data } = await net.request<APIResponse<User>>({
       method: 'GET',

@@ -17,11 +17,17 @@ export class AuthController {
 
   @Post('/login')
   async login(ctx: Context) {
-    if (!ctx.session.isNew) {
+    if (ctx.session.user) {
       return ctx.session.user;
     }
     const { code } = ctx.request.body as LoginRequestBody;
-    const { access_token } = await gitea.getToken(code);
+    const { access_token, refresh_token, expires_in } =
+      await gitea.getToken(code);
+    const giteaAuth = {
+      access_token,
+      refresh_token,
+      expires_at: Date.now() + expires_in * 1000,
+    };
     const giteaUser = await gitea.getUserInfo(access_token);
     log.debug(this.TAG, 'gitea user: %o', giteaUser);
     const exist = await prisma.user.findFirst({
@@ -61,7 +67,13 @@ export class AuthController {
       log.debug(this.TAG, '更新用户信息成功 %o', updatedUser);
       ctx.session.user = updatedUser;
     }
+    ctx.session.gitea = giteaAuth;
     return ctx.session.user;
+  }
+
+  @Get('logout')
+  async logout(ctx: Context) {
+    ctx.session.user = null;
   }
 
   @Get('info')
