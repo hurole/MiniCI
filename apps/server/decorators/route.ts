@@ -51,10 +51,10 @@ function createMethodDecorator(method: HttpMethod) {
       // 在类初始化时执行
       context.addInitializer(function () {
         // 使用 this.constructor 时需要类型断言
-        const constructor = (this as any).constructor;
+        const ctor = (this as any).constructor;
 
         // 获取现有的路由元数据
-        const existingRoutes: RouteMetadata[] = getMetadata(ROUTE_METADATA_KEY, constructor) || [];
+        const existingRoutes: RouteMetadata[] = getMetadata(ROUTE_METADATA_KEY, ctor) || [];
 
         // 添加新的路由元数据
         const newRoute: RouteMetadata = {
@@ -66,7 +66,7 @@ function createMethodDecorator(method: HttpMethod) {
         existingRoutes.push(newRoute);
 
         // 保存路由元数据到类的构造函数上
-        setMetadata(ROUTE_METADATA_KEY, existingRoutes, constructor);
+        setMetadata(ROUTE_METADATA_KEY, existingRoutes, ctor);
       });
 
       return target;
@@ -125,13 +125,13 @@ export function Controller(prefix: string = '') {
 /**
  * 获取控制器的路由元数据
  */
-export function getRouteMetadata(constructor: any): RouteMetadata[] {
-  return getMetadata(ROUTE_METADATA_KEY, constructor) || [];
+export function getRouteMetadata(ctor: any): RouteMetadata[] {
+  return getMetadata(ROUTE_METADATA_KEY, ctor) || [];
 }
 
 /**
  * 获取控制器的路由前缀
  */
-export function getControllerPrefix(constructor: any): string {
-  return getMetadata('prefix', constructor) || '';
+export function getControllerPrefix(ctor: any): string {
+  return getMetadata('prefix', ctor) || '';
 }

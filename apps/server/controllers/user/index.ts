@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
-import { Controller, Get, Post, Put, Delete } from '../decorators/route.ts';
-import { BusinessError } from '../middlewares/exception.ts';
+import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
+import { BusinessError } from '../../middlewares/exception.ts';
 
 /**
  * 用户控制器

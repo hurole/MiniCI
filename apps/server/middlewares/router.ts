@@ -2,9 +2,11 @@ import KoaRouter from '@koa/router';
 import type Koa from 'koa';
 import type { Middleware } from './types.ts';
 import { RouteScanner } from '../libs/route-scanner.ts';
-import { ProjectController } from '../controllers/project.ts';
-import { UserController } from '../controllers/user.ts';
-import { AuthController } from '../controllers/auth.ts';
+import {
+  ProjectController,
+  UserController,
+  AuthController,
+} from '../controllers/index.ts';
 import { log } from '../libs/logger.ts';
 
 export class Router implements Middleware {

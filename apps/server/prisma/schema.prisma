@@ -11,7 +11,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Application {
+model Project {
   id          Int      @id @default(autoincrement())
   name        String
   description String?

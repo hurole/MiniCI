@@ -9,7 +9,10 @@ export interface Project {
   name: string;
   description: string;
   repository: string;
-  env: Record<string, string>;
+  valid: number;
   createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
   status: BuildStatus;
 }

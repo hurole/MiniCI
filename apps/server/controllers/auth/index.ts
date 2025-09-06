@@ -1,8 +1,8 @@
 import type { Context } from 'koa';
-import { Controller, Get, Post } from '../decorators/route.ts';
-import prisma from '../libs/db.ts';
-import { log } from '../libs/logger.ts';
-import { gitea } from '../libs/gitea.ts';
+import { Controller, Get, Post } from '../../decorators/route.ts';
+import prisma from '../../libs/db.ts';
+import { log } from '../../libs/logger.ts';
+import { gitea } from '../../libs/gitea.ts';
 
 @Controller('/auth')
 export class AuthController {
