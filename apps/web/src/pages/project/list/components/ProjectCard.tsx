@@ -1,7 +1,27 @@
-import { Card, Tag, Avatar, Space, Typography, Button, Tooltip, Dropdown, Menu, Modal } from '@arco-design/web-react';
-import { IconBranch, IconCalendar, IconEye, IconCloud, IconEdit, IconMore, IconDelete } from '@arco-design/web-react/icon';
-import type { Project } from '../types';
+import {
+  Card,
+  Tag,
+  Avatar,
+  Space,
+  Typography,
+  Button,
+  Tooltip,
+  Dropdown,
+  Menu,
+  Modal,
+} from '@arco-design/web-react';
+import {
+  IconBranch,
+  IconCalendar,
+  IconCloud,
+  IconEdit,
+  IconMore,
+  IconDelete,
+} from '@arco-design/web-react/icon';
+import type { Project } from '../../types';
 import IconGitea from '@assets/images/gitea.svg?react';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router';
 
 const { Text, Paragraph } = Typography;
 
@@ -12,6 +32,7 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
+  const navigate = useNavigate();
   // 处理删除操作
   const handleDelete = () => {
     Modal.confirm({
@@ -30,7 +51,7 @@ function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   // 获取环境信息
   const environments = [
     { name: 'staging', color: 'orange', icon: '🚧' },
-    { name: 'production', color: 'green', icon: '🚀' }
+    { name: 'production', color: 'green', icon: '🚀' },
   ];
 
   // 渲染环境标签
@@ -56,11 +77,16 @@ function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
     );
   };
 
+  const onProjectClick = useCallback(() => {
+    navigate(`/project/${project.id}`);
+  }, [navigate, project.id]);
+
   return (
     <Card
-      className="foka-card !rounded-xl border border-gray-200 h-[320px] hover:border-blue-200 transition-all duration-300 hover:shadow-md"
+      className="foka-card !rounded-xl border border-gray-200 h-[280px] cursor-pointer"
       hoverable
       bodyStyle={{ padding: '20px' }}
+      onClick={onProjectClick}
     >
       {/* 项目头部 */}
       <div className="flex items-center justify-between mb-4">
@@ -90,10 +116,7 @@ function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
           <Dropdown
             droplist={
               <Menu>
-                <Menu.Item
-                  key="edit"
-                  onClick={() => onEdit?.(project)}
-                >
+                <Menu.Item key="edit" onClick={() => onEdit?.(project)}>
                   <IconEdit className="mr-2" />
                   编辑
                 </Menu.Item>
@@ -120,9 +143,7 @@ function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
       </div>
 
       {/* 项目描述 */}
-      <Paragraph
-        className="!m-0 !mb-4 !text-gray-600 !text-sm !leading-6 h-[42px] overflow-hidden line-clamp-2"
-      >
+      <Paragraph className="!m-0 !mb-4 !text-gray-600 !text-sm !leading-6 h-[42px] overflow-hidden line-clamp-2">
         {project.description || '暂无描述'}
       </Paragraph>
 
@@ -151,25 +172,6 @@ function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
             <Text className="text-xs text-gray-500">3个提交</Text>
           </div>
         </Space>
-      </div>
-
-      {/* 操作按钮 */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <Button
-          type="text"
-          size="small"
-          icon={<IconEye />}
-          className="text-gray-500 hover:text-blue-500 transition-colors"
-        >
-          查看详情
-        </Button>
-        <Button
-          type="text"
-          size="small"
-          className="text-blue-500 hover:text-blue-600 font-medium transition-colors"
-        >
-          管理项目 →
-        </Button>
       </div>
     </Card>
   );
