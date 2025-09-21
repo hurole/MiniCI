@@ -12,26 +12,19 @@ datasource db {
 }
 
 model Project {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
   description String?
   repository  String
-  valid       Int      @default(1)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String
-  updatedBy   String
-}
+  // Relations
+  deployments Deployment[]
+  pipelines   Pipeline[]
 
-model Environment {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  valid       Int      @default(1)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String
-  updatedBy   String
+  valid     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+  updatedBy String
 }
 
 model User {
@@ -46,4 +39,57 @@ model User {
   updatedAt  DateTime @updatedAt
   createdBy  String   @default("system")
   updatedBy  String   @default("system")
+}
+
+model Pipeline {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  valid       Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  updatedBy   String
+
+  // Relations
+  projectId Int?
+  Project   Project? @relation(fields: [projectId], references: [id])
+  steps     Step[]
+}
+
+model Step {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  order       Int
+  status      String?
+  valid       Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  updatedBy   String
+
+  pipelineId  Int
+  pipeline    Pipeline @relation(fields: [pipelineId], references: [id])
+}
+
+model Deployment {
+  id            Int       @id @default(autoincrement())
+  branch        String
+  env           String?
+  status        String // pending, running, success, failed, cancelled
+  commitHash    String?
+  commitMessage String?
+  buildLog      String?
+  startedAt     DateTime  @default(now())
+  finishedAt    DateTime?
+  valid         Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String
+  updatedBy     String
+
+  projectId     Int
+  Project       Project?  @relation(fields: [projectId], references: [id])
+  pipelineId    Int
 }
