@@ -1,5 +1,5 @@
-import ReactDOM from 'react-dom/client';
 import App from '@pages/App';
+import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import { useGlobalStore } from './stores/global';
 

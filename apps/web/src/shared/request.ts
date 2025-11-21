@@ -1,4 +1,4 @@
-import axios, { Axios, type AxiosRequestConfig } from 'axios';
+import axios, { type Axios, type AxiosRequestConfig } from 'axios';
 
 class Net {
   private readonly instance: Axios;
@@ -18,7 +18,7 @@ class Net {
         return response;
       },
       (error) => {
-        console.log('error', error)
+        console.log('error', error);
         if (error.status === 401 && error.config.url !== '/api/auth/info') {
           window.location.href = '/login';
           return;
@@ -29,8 +29,16 @@ class Net {
   }
 
   async request<T>(config: AxiosRequestConfig): Promise<T> {
-    const { data } = await this.instance.request<T>(config);
-    return data;
+    try {
+      const response = await this.instance.request<T>(config);
+      if (!response || !response.data) {
+        throw new Error('Invalid response');
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Request failed:', error);
+      throw error;
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { net, type APIResponse } from '@shared';
+import { type APIResponse, net } from '@shared';
 import { create } from 'zustand';
 
 interface User {

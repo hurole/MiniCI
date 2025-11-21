@@ -1,4 +1,4 @@
-import { List, Tag, Space } from '@arco-design/web-react';
+import { List, Space, Tag } from '@arco-design/web-react';
 
 // 部署记录类型定义
 interface DeployRecord {
@@ -76,9 +76,7 @@ function DeployRecordItem({
             <Space size="medium" wrap>
               <span className="text-sm text-gray-500">
                 分支:{' '}
-                <span className="font-medium text-gray-700">
-                  {item.branch}
-                </span>
+                <span className="font-medium text-gray-700">{item.branch}</span>
               </span>
               <span className="text-sm text-gray-500">
                 环境: {getEnvTag(item.env)}

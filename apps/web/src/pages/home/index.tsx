@@ -6,11 +6,11 @@ import {
   IconMenuUnfold,
   IconRobot,
 } from '@arco-design/web-react/icon';
-import { useState } from 'react';
 import Logo from '@assets/images/logo.svg?react';
+import { loginService } from '@pages/login/service';
+import { useState } from 'react';
 import { Link, Outlet } from 'react-router';
 import { useGlobalStore } from '../../stores/global';
-import { loginService } from '@pages/login/service';
 
 function Home() {
   const [collapsed, setCollapsed] = useState(false);

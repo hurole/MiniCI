@@ -1,23 +1,35 @@
-import { Typography, Tag, Switch, Button } from '@arco-design/web-react';
-import { IconDragArrow, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import { Button, Switch, Tag, Typography } from '@arco-design/web-react';
+import {
+  IconDelete,
+  IconDragArrow,
+  IconEdit,
+} from '@arco-design/web-react/icon';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// 流水线步骤类型定义
+// 流水线步骤类型定义（更新为与后端一致）
 interface PipelineStep {
-  id: string;
+  id: number;
   name: string;
-  script: string;
+  description?: string;
+  order: number;
+  script: string; // 执行的脚本命令
+  valid: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+  pipelineId: number;
   enabled: boolean;
 }
 
 interface PipelineStepItemProps {
   step: PipelineStep;
   index: number;
-  pipelineId: string;
-  onToggle: (pipelineId: string, stepId: string, enabled: boolean) => void;
-  onEdit: (pipelineId: string, step: PipelineStep) => void;
-  onDelete: (pipelineId: string, stepId: string) => void;
+  pipelineId: number;
+  onToggle: (pipelineId: number, stepId: number, enabled: boolean) => void;
+  onEdit: (pipelineId: number, step: PipelineStep) => void;
+  onDelete: (pipelineId: number, stepId: number) => void;
 }
 
 function PipelineStepItem({
@@ -79,6 +91,9 @@ function PipelineStepItem({
               </Tag>
             )}
           </div>
+          {step.description && (
+            <div className="text-gray-600 text-sm mb-2">{step.description}</div>
+          )}
           <div className="bg-gray-900 text-green-400 p-3 rounded font-mono text-sm">
             <pre className="whitespace-pre-wrap break-words">{step.script}</pre>
           </div>

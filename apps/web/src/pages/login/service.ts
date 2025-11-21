@@ -1,8 +1,8 @@
-import { net } from '@shared';
-import type { AuthURLResponse, AuthLoginResponse } from './types';
-import type { NavigateFunction } from 'react-router';
 import { Message, Notification } from '@arco-design/web-react';
+import { net } from '@shared';
+import type { NavigateFunction } from 'react-router';
 import { useGlobalStore } from '../../stores/global';
+import type { AuthLoginResponse, AuthURLResponse } from './types';
 
 class LoginService {
   async getAuthUrl() {

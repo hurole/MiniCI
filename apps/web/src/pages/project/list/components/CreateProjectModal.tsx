@@ -1,7 +1,7 @@
-import { Modal, Form, Input, Button, Message } from '@arco-design/web-react';
-import React, { useState } from 'react';
-import type { Project } from '../types';
+import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
+import { useState } from 'react';
 import { projectService } from '../service';
+import type { Project } from '../types';
 
 interface CreateProjectModalProps {
   visible: boolean;
@@ -9,7 +9,11 @@ interface CreateProjectModalProps {
   onSuccess: (newProject: Project) => void;
 }
 
-function CreateProjectModal({ visible, onCancel, onSuccess }: CreateProjectModalProps) {
+function CreateProjectModal({
+  visible,
+  onCancel,
+  onSuccess,
+}: CreateProjectModalProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -46,17 +50,18 @@ function CreateProjectModal({ visible, onCancel, onSuccess }: CreateProjectModal
         <Button key="cancel" onClick={handleCancel}>
           取消
         </Button>,
-        <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
+        <Button
+          key="submit"
+          type="primary"
+          loading={loading}
+          onClick={handleSubmit}
+        >
           创建
         </Button>,
       ]}
       style={{ width: 500 }}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        autoComplete="off"
-      >
+      <Form form={form} layout="vertical" autoComplete="off">
         <Form.Item
           label="项目名称"
           field="name"
@@ -71,9 +76,7 @@ function CreateProjectModal({ visible, onCancel, onSuccess }: CreateProjectModal
         <Form.Item
           label="项目描述"
           field="description"
-          rules={[
-            { maxLength: 200, message: '项目描述不能超过200个字符' },
-          ]}
+          rules={[{ maxLength: 200, message: '项目描述不能超过200个字符' }]}
         >
           <Input.TextArea
             placeholder="请输入项目描述（可选）"

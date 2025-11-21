@@ -1,10 +1,18 @@
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useCallback } from 'react';
 
 export function useAsyncEffect(
-  effect: () => Promise<void>,
+  effect: () => Promise<void | (() => void)>,
   deps: React.DependencyList,
 ) {
+  const callback = useCallback(effect, [...deps]);
+
   useEffect(() => {
-    effect();
-  }, [...deps]);
+    const cleanupPromise = callback();
+    return () => {
+      if (cleanupPromise instanceof Promise) {
+        cleanupPromise.then(cleanup => cleanup && cleanup());
+      }
+    };
+  }, [callback]);
 }

@@ -1,9 +1,9 @@
-import { Route, Routes, Navigate } from 'react-router';
+import Env from '@pages/env';
 import Home from '@pages/home';
 import Login from '@pages/login';
-import ProjectList from '@pages/project/list';
 import ProjectDetail from '@pages/project/detail';
-import Env from '@pages/env';
+import ProjectList from '@pages/project/list';
+import { Navigate, Route, Routes } from 'react-router';
 
 import '@styles/index.css';
 const App = () => {

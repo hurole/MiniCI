@@ -1,27 +1,27 @@
 import {
-  Card,
-  Tag,
   Avatar,
-  Space,
-  Typography,
   Button,
-  Tooltip,
+  Card,
   Dropdown,
   Menu,
   Modal,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
 } from '@arco-design/web-react';
 import {
   IconBranch,
   IconCalendar,
   IconCloud,
+  IconDelete,
   IconEdit,
   IconMore,
-  IconDelete,
 } from '@arco-design/web-react/icon';
-import type { Project } from '../../types';
 import IconGitea from '@assets/images/gitea.svg?react';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router';
+import type { Project } from '../../types';
 
 const { Text, Paragraph } = Typography;
 

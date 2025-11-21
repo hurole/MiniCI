@@ -1,50 +1,49 @@
 import {
-  Typography,
-  Tabs,
   Button,
-  List,
-  Tag,
-  Space,
-  Input,
   Card,
-  Switch,
-  Modal,
-  Form,
-  Message,
-  Collapse,
   Dropdown,
+  Empty,
+  Form,
+  Input,
+  List,
   Menu,
+  Message,
+  Modal,
+  Switch,
+  Tabs,
+  Tag,
+  Typography,
 } from '@arco-design/web-react';
-import type { Project } from '../types';
-import { useState } from 'react';
-import { useParams } from 'react-router';
-import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
-import { detailService } from './service';
 import {
+  IconCopy,
+  IconDelete,
+  IconEdit,
+  IconMore,
   IconPlayArrow,
   IconPlus,
-  IconEdit,
-  IconDelete,
-  IconMore,
-  IconCopy,
 } from '@arco-design/web-react/icon';
-import DeployRecordItem from './components/DeployRecordItem';
-import PipelineStepItem from './components/PipelineStepItem';
+import type { DragEndEvent } from '@dnd-kit/core';
 import {
-  DndContext,
   closestCenter,
+  DndContext,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import type { DragEndEvent } from '@dnd-kit/core';
 import {
+  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-  arrayMove,
 } from '@dnd-kit/sortable';
+import { useState } from 'react';
+import { useParams } from 'react-router';
+import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
+import type { Project } from '../types';
+import DeployRecordItem from './components/DeployRecordItem';
+import PipelineStepItem from './components/PipelineStepItem';
+import { detailService } from './service';
 
 // 部署记录类型定义
 interface DeployRecord {
@@ -56,23 +55,35 @@ interface DeployRecord {
   createdAt: string;
 }
 
-// 流水线步骤类型定义
+// 流水线步骤类型定义（更新为与后端一致）
 interface PipelineStep {
-  id: string;
+  id: number;
   name: string;
-  script: string;
+  description?: string;
+  order: number;
+  script: string; // 执行的脚本命令
+  valid: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+  pipelineId: number;
   enabled: boolean;
 }
 
 // 流水线类型定义
 interface Pipeline {
-  id: string;
+  id: number;
   name: string;
   description: string;
-  enabled: boolean;
-  steps: PipelineStep[];
+  valid: number;
   createdAt: string;
   updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+  projectId?: number;
+  steps?: PipelineStep[];
+  enabled: boolean;
 }
 
 function ProjectDetailPage() {
@@ -83,65 +94,21 @@ function ProjectDetailPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
   const [selectedRecordId, setSelectedRecordId] = useState<number>(1);
-  const [pipelines, setPipelines] = useState<Pipeline[]>([
-    {
-      id: 'pipeline1',
-      name: '前端部署流水线',
-      description: '用于前端项目的构建和部署',
-      enabled: true,
-      createdAt: '2024-09-07 10:00:00',
-      updatedAt: '2024-09-07 14:30:00',
-      steps: [
-        { id: 'step1', name: '安装依赖', script: 'npm install', enabled: true },
-        { id: 'step2', name: '运行测试', script: 'npm test', enabled: true },
-        {
-          id: 'step3',
-          name: '构建项目',
-          script: 'npm run build',
-          enabled: true,
-        },
-      ],
-    },
-    {
-      id: 'pipeline2',
-      name: 'Docker部署流水线',
-      description: '用于容器化部署的流水线',
-      enabled: true,
-      createdAt: '2024-09-06 16:20:00',
-      updatedAt: '2024-09-07 09:15:00',
-      steps: [
-        { id: 'step1', name: '安装依赖', script: 'npm install', enabled: true },
-        {
-          id: 'step2',
-          name: '构建镜像',
-          script: 'docker build -t $PROJECT_NAME:$BUILD_NUMBER .',
-          enabled: true,
-        },
-        {
-          id: 'step3',
-          name: 'K8s部署',
-          script: 'kubectl apply -f deployment.yaml',
-          enabled: true,
-        },
-      ],
-    },
-  ]);
+  const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [selectedPipelineId, setSelectedPipelineId] = useState<string>(
-    pipelines.length > 0 ? pipelines[0].id : '',
-  );
+  const [selectedPipelineId, setSelectedPipelineId] = useState<number>(0);
   const [editingStep, setEditingStep] = useState<PipelineStep | null>(null);
-  const [editingPipelineId, setEditingPipelineId] = useState<string | null>(
+  const [editingPipelineId, setEditingPipelineId] = useState<number | null>(
     null,
   );
   const [pipelineModalVisible, setPipelineModalVisible] = useState(false);
   const [editingPipeline, setEditingPipeline] = useState<Pipeline | null>(null);
   const [form] = Form.useForm();
   const [pipelineForm] = Form.useForm();
-  const [deployRecords, setDeployRecords] = useState<DeployRecord[]>([
+  const [deployRecords, _setDeployRecords] = useState<DeployRecord[]>([
     {
       id: 1,
       branch: 'main',
@@ -158,14 +125,7 @@ function ProjectDetailPage() {
       status: 'running',
       createdAt: '2024-09-07 13:45:12',
     },
-    {
-      id: 3,
-      branch: 'feature/user-auth',
-      env: 'development',
-      commit: '3a7d9f2b1',
-      status: 'failed',
-      createdAt: '2024-09-07 12:20:45',
-    },
+    // 移除了 ID 为 3 的部署记录，避免可能的冲突
     {
       id: 4,
       branch: 'main',
@@ -181,6 +141,29 @@ function ProjectDetailPage() {
     if (id) {
       const project = await detailService.getProject(id);
       setDetail(project);
+
+      // 获取项目的所有流水线
+      try {
+        const pipelineData = await detailService.getPipelines(Number(id));
+        // 转换数据结构，添加enabled字段
+        const transformedPipelines = pipelineData.map((pipeline) => ({
+          ...pipeline,
+          description: pipeline.description || '', // 确保description不为undefined
+          enabled: pipeline.valid === 1, // 根据valid字段设置enabled
+          steps:
+            pipeline.steps?.map((step) => ({
+              ...step,
+              enabled: step.valid === 1, // 根据valid字段设置enabled
+            })) || [],
+        }));
+        setPipelines(transformedPipelines);
+        if (transformedPipelines.length > 0) {
+          setSelectedPipelineId(transformedPipelines[0].id);
+        }
+      } catch (error) {
+        console.error('获取流水线数据失败:', error);
+        Message.error('获取流水线数据失败');
+      }
     }
   }, []);
 
@@ -211,16 +194,7 @@ function ProjectDetailPage() {
         '[2024-09-07 13:47:05] 构建镜像: docker build -t app:develop .',
         '[2024-09-07 13:48:20] 🔄 正在推送镜像...',
       ],
-      3: [
-        '[2024-09-07 12:20:45] 开始构建...',
-        '[2024-09-07 12:20:46] 拉取代码: git clone https://github.com/user/repo.git',
-        '[2024-09-07 12:20:48] 切换分支: git checkout feature/user-auth',
-        '[2024-09-07 12:20:49] 安装依赖: npm install',
-        '[2024-09-07 12:21:35] 运行测试: npm test',
-        '[2024-09-07 12:21:50] ❌ 测试失败',
-        '[2024-09-07 12:21:51] Error: Authentication test failed',
-        '[2024-09-07 12:21:51] ❌ 构建失败',
-      ],
+      // 移除了 ID 为 3 的模拟数据，避免可能的冲突
       4: [
         '[2024-09-07 10:15:30] 开始构建...',
         '[2024-09-07 10:15:31] 拉取代码: git clone https://github.com/user/repo.git',
@@ -256,46 +230,109 @@ function ProjectDetailPage() {
   };
 
   // 删除流水线
-  const handleDeletePipeline = (pipelineId: string) => {
+  const handleDeletePipeline = async (pipelineId: number) => {
     Modal.confirm({
       title: '确认删除',
       content:
         '确定要删除这个流水线吗？此操作不可撤销，将同时删除该流水线下的所有步骤。',
-      onOk: () => {
-        setPipelines((prev) => {
-          const newPipelines = prev.filter((pipeline) => pipeline.id !== pipelineId);
-          // 如果删除的是当前选中的流水线，选中第一个或清空选择
-          if (selectedPipelineId === pipelineId) {
-            setSelectedPipelineId(newPipelines.length > 0 ? newPipelines[0].id : '');
-          }
-          return newPipelines;
-        });
-        Message.success('流水线删除成功');
+      onOk: async () => {
+        try {
+          // 从数据库删除流水线
+          await detailService.deletePipeline(pipelineId);
+
+          // 更新本地状态
+          setPipelines((prev) => {
+            const newPipelines = prev.filter(
+              (pipeline) => pipeline.id !== pipelineId,
+            );
+            // 如果删除的是当前选中的流水线，选中第一个或清空选择
+            if (selectedPipelineId === pipelineId) {
+              setSelectedPipelineId(
+                newPipelines.length > 0 ? newPipelines[0].id : 0,
+              );
+            }
+            return newPipelines;
+          });
+          Message.success('流水线删除成功');
+        } catch (error) {
+          console.error('删除流水线失败:', error);
+          Message.error('删除流水线失败');
+        }
       },
     });
   };
 
   // 复制流水线
-  const handleCopyPipeline = (pipeline: Pipeline) => {
-    const newPipeline: Pipeline = {
-      ...pipeline,
-      id: `pipeline_${Date.now()}`,
-      name: `${pipeline.name} - 副本`,
-      createdAt: new Date().toLocaleString(),
-      updatedAt: new Date().toLocaleString(),
-      steps: pipeline.steps.map((step) => ({
-        ...step,
-        id: `step_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      })),
-    };
-    setPipelines((prev) => [...prev, newPipeline]);
-    // 自动选中新复制的流水线
-    setSelectedPipelineId(newPipeline.id);
-    Message.success('流水线复制成功');
+  const handleCopyPipeline = async (pipeline: Pipeline) => {
+    Modal.confirm({
+      title: '确认复制',
+      content: '确定要复制这个流水线吗？',
+      onOk: async () => {
+        try {
+          // 创建新的流水线
+          const newPipelineData = await detailService.createPipeline({
+            name: `${pipeline.name} - 副本`,
+            description: pipeline.description || '',
+            projectId: pipeline.projectId,
+          });
+
+          // 复制步骤
+          if (pipeline.steps && pipeline.steps.length > 0) {
+            for (const step of pipeline.steps) {
+              await detailService.createStep({
+                name: step.name,
+                description: step.description,
+                order: step.order,
+                script: step.script,
+                pipelineId: newPipelineData.id,
+              });
+            }
+
+            // 重新获取流水线数据以确保步骤已创建
+            if (pipeline.projectId) {
+              const pipelineData = await detailService.getPipelines(
+                pipeline.projectId,
+              );
+              // 转换数据结构，添加enabled字段
+              const transformedPipelines = pipelineData.map((p) => ({
+                ...p,
+                description: p.description || '', // 确保description不为undefined
+                enabled: p.valid === 1, // 根据valid字段设置enabled
+                steps:
+                  p.steps?.map((step) => ({
+                    ...step,
+                    enabled: step.valid === 1, // 根据valid字段设置enabled
+                  })) || [],
+              }));
+              setPipelines(transformedPipelines);
+              setSelectedPipelineId(newPipelineData.id);
+            }
+          } else {
+            // 如果没有步骤，直接更新状态
+            setPipelines((prev) => [
+              ...prev,
+              {
+                ...newPipelineData,
+                description: newPipelineData.description || '',
+                enabled: newPipelineData.valid === 1,
+                steps: [],
+              },
+            ]);
+            setSelectedPipelineId(newPipelineData.id);
+          }
+
+          Message.success('流水线复制成功');
+        } catch (error) {
+          console.error('复制流水线失败:', error);
+          Message.error('复制流水线失败');
+        }
+      },
+    });
   };
 
   // 切换流水线启用状态
-  const handleTogglePipeline = (pipelineId: string, enabled: boolean) => {
+  const handleTogglePipeline = async (pipelineId: number, enabled: boolean) => {
+    // 在数据库中更新流水线状态（这里简化处理，实际可能需要添加enabled字段到数据库）
     setPipelines((prev) =>
       prev.map((pipeline) =>
         pipeline.id === pipelineId ? { ...pipeline, enabled } : pipeline,
@@ -308,42 +345,58 @@ function ProjectDetailPage() {
     try {
       const values = await pipelineForm.validate();
       if (editingPipeline) {
-        setPipelines((prev) => [
-          ...prev.map((pipeline) =>
+        // 更新现有流水线
+        const updatedPipeline = await detailService.updatePipeline(
+          editingPipeline.id,
+          {
+            name: values.name,
+            description: values.description,
+          },
+        );
+
+        // 更新本地状态
+        setPipelines((prev) =>
+          prev.map((pipeline) =>
             pipeline.id === editingPipeline.id
               ? {
-                  ...pipeline,
-                  name: values.name,
-                  description: values.description,
-                  updatedAt: new Date().toLocaleString(),
+                  ...updatedPipeline,
+                  description: updatedPipeline.description || '',
+                  enabled: updatedPipeline.valid === 1,
+                  steps: pipeline.steps || [], // 保持步骤不变
                 }
               : pipeline,
           ),
-        ]);
+        );
         Message.success('流水线更新成功');
       } else {
-        const newPipeline: Pipeline = {
-          id: `pipeline_${Date.now()}`,
+        // 创建新流水线
+        const newPipeline = await detailService.createPipeline({
           name: values.name,
-          description: values.description,
-          enabled: true,
+          description: values.description || '',
+          projectId: Number(id),
+        });
+
+        // 更新本地状态
+        const pipelineWithDefaults = {
+          ...newPipeline,
+          description: newPipeline.description || '',
+          enabled: newPipeline.valid === 1,
           steps: [],
-          createdAt: new Date().toLocaleString(),
-          updatedAt: new Date().toLocaleString(),
         };
-        setPipelines((prev) => [...prev, newPipeline]);
+        setPipelines((prev) => [...prev, pipelineWithDefaults]);
         // 自动选中新创建的流水线
         setSelectedPipelineId(newPipeline.id);
         Message.success('流水线创建成功');
       }
       setPipelineModalVisible(false);
     } catch (error) {
-      console.error('表单验证失败:', error);
+      console.error('保存流水线失败:', error);
+      Message.error('保存流水线失败');
     }
   };
 
   // 添加新步骤
-  const handleAddStep = (pipelineId: string) => {
+  const handleAddStep = (pipelineId: number) => {
     setEditingStep(null);
     setEditingPipelineId(pipelineId);
     form.resetFields();
@@ -351,7 +404,7 @@ function ProjectDetailPage() {
   };
 
   // 编辑步骤
-  const handleEditStep = (pipelineId: string, step: PipelineStep) => {
+  const handleEditStep = (pipelineId: number, step: PipelineStep) => {
     setEditingStep(step);
     setEditingPipelineId(pipelineId);
     form.setFieldsValue({
@@ -362,40 +415,55 @@ function ProjectDetailPage() {
   };
 
   // 删除步骤
-  const handleDeleteStep = (pipelineId: string, stepId: string) => {
+  const handleDeleteStep = async (pipelineId: number, stepId: number) => {
     Modal.confirm({
       title: '确认删除',
       content: '确定要删除这个流水线步骤吗？此操作不可撤销。',
-      onOk: () => {
-        setPipelines((prev) =>
-          prev.map((pipeline) =>
-            pipeline.id === pipelineId
-              ? {
-                  ...pipeline,
-                  steps: pipeline.steps.filter((step) => step.id !== stepId),
-                }
-              : pipeline,
-          ),
-        );
-        Message.success('步骤删除成功');
+      onOk: async () => {
+        try {
+          // 从数据库删除步骤
+          await detailService.deleteStep(stepId);
+
+          // 更新本地状态
+          setPipelines((prev) =>
+            prev.map((pipeline) =>
+              pipeline.id === pipelineId
+                ? {
+                    ...pipeline,
+                    steps:
+                      pipeline.steps?.filter((step) => step.id !== stepId) ||
+                      [],
+                    updatedAt: new Date().toISOString(),
+                  }
+                : pipeline,
+            ),
+          );
+          Message.success('步骤删除成功');
+        } catch (error) {
+          console.error('删除步骤失败:', error);
+          Message.error('删除步骤失败');
+        }
       },
     });
   };
 
   // 切换步骤启用状态
-  const handleToggleStep = (
-    pipelineId: string,
-    stepId: string,
+  const handleToggleStep = async (
+    pipelineId: number,
+    stepId: number,
     enabled: boolean,
   ) => {
+    // 在数据库中更新步骤状态（这里简化处理，实际可能需要添加enabled字段到数据库）
     setPipelines((prev) =>
       prev.map((pipeline) =>
         pipeline.id === pipelineId
           ? {
               ...pipeline,
-              steps: pipeline.steps.map((step) =>
-                step.id === stepId ? { ...step, enabled } : step,
-              ),
+              steps:
+                pipeline.steps?.map((step) =>
+                  step.id === stepId ? { ...step, enabled } : step,
+                ) || [],
+              updatedAt: new Date().toISOString(),
             }
           : pipeline,
       ),
@@ -403,7 +471,7 @@ function ProjectDetailPage() {
   };
 
   // 拖拽结束处理
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
@@ -411,20 +479,25 @@ function ProjectDetailPage() {
     }
 
     if (selectedPipelineId) {
+      // 更新步骤顺序到数据库（简化处理，实际应该更新所有步骤的order字段）
       setPipelines((prev) =>
         prev.map((pipeline) => {
           if (pipeline.id === selectedPipelineId) {
-            const oldIndex = pipeline.steps.findIndex((step) => step.id === active.id);
-            const newIndex = pipeline.steps.findIndex((step) => step.id === over.id);
+            const oldIndex =
+              pipeline.steps?.findIndex((step) => step.id === active.id) || 0;
+            const newIndex =
+              pipeline.steps?.findIndex((step) => step.id === over.id) || 0;
 
             return {
               ...pipeline,
-              steps: arrayMove(pipeline.steps, oldIndex, newIndex),
-              updatedAt: new Date().toLocaleString(),
+              steps: pipeline.steps
+                ? arrayMove(pipeline.steps, oldIndex, newIndex)
+                : [],
+              updatedAt: new Date().toISOString(),
             };
           }
           return pipeline;
-        })
+        }),
       );
       Message.success('步骤顺序调整成功');
     }
@@ -435,36 +508,52 @@ function ProjectDetailPage() {
     try {
       const values = await form.validate();
       if (editingStep && editingPipelineId) {
+        // 更新现有步骤
+        const updatedStep = await detailService.updateStep(editingStep.id, {
+          name: values.name,
+          script: values.script,
+        });
+
+        // 更新本地状态
         setPipelines((prev) =>
           prev.map((pipeline) =>
             pipeline.id === editingPipelineId
               ? {
                   ...pipeline,
-                  steps: pipeline.steps.map((step) =>
-                    step.id === editingStep.id
-                      ? { ...step, name: values.name, script: values.script }
-                      : step,
-                  ),
-                  updatedAt: new Date().toLocaleString(),
+                  steps:
+                    pipeline.steps?.map((step) =>
+                      step.id === editingStep.id
+                        ? { ...updatedStep, enabled: step.enabled }
+                        : step,
+                    ) || [],
+                  updatedAt: new Date().toISOString(),
                 }
               : pipeline,
           ),
         );
         Message.success('步骤更新成功');
       } else if (editingPipelineId) {
-        const newStep: PipelineStep = {
-          id: `step_${Date.now()}`,
+        // 创建新步骤
+        const newStep = await detailService.createStep({
           name: values.name,
           script: values.script,
-          enabled: true,
-        };
+          order:
+            pipelines.find((p) => p.id === editingPipelineId)?.steps?.length ||
+            0,
+          pipelineId: editingPipelineId,
+        });
+
+        // 更新本地状态
         setPipelines((prev) =>
           prev.map((pipeline) =>
             pipeline.id === editingPipelineId
               ? {
                   ...pipeline,
-                  steps: [...pipeline.steps, newStep],
-                  updatedAt: new Date().toLocaleString(),
+                  steps: [
+                    ...(pipeline.steps || []),
+                    { ...newStep, enabled: true },
+                  ],
+                  updatedAt: new Date().toISOString(),
                 }
               : pipeline,
           ),
@@ -473,7 +562,8 @@ function ProjectDetailPage() {
       }
       setEditModalVisible(false);
     } catch (error) {
-      console.error('表单验证失败:', error);
+      console.error('保存步骤失败:', error);
+      Message.error('保存步骤失败');
     }
   };
 
@@ -498,7 +588,7 @@ function ProjectDetailPage() {
   };
 
   // 渲染部署记录项
-  const renderDeployRecordItem = (item: DeployRecord, index: number) => {
+  const renderDeployRecordItem = (item: DeployRecord, _index: number) => {
     const isSelected = item.id === selectedRecordId;
     return (
       <DeployRecordItem
@@ -538,12 +628,18 @@ function ProjectDetailPage() {
                   </Button>
                 </div>
                 <div className="h-full overflow-y-auto">
-                  <List
-                    className="bg-white rounded-lg border"
-                    dataSource={deployRecords}
-                    render={renderDeployRecordItem}
-                    split={true}
-                  />
+                  {deployRecords.length > 0 ? (
+                    <List
+                      className="bg-white rounded-lg border"
+                      dataSource={deployRecords}
+                      render={renderDeployRecordItem}
+                      split={true}
+                    />
+                  ) : (
+                    <div className="text-center py-12">
+                      <Empty description="暂无部署记录" />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -621,7 +717,9 @@ function ProjectDetailPage() {
                                 <Typography.Title
                                   heading={6}
                                   className={`!m-0 ${
-                                    isSelected ? 'text-blue-600' : 'text-gray-900'
+                                    isSelected
+                                      ? 'text-blue-600'
+                                      : 'text-gray-900'
                                   }`}
                                 >
                                   {pipeline.name}
@@ -647,14 +745,18 @@ function ProjectDetailPage() {
                                   <Menu>
                                     <Menu.Item
                                       key="edit"
-                                      onClick={() => handleEditPipeline(pipeline)}
+                                      onClick={() =>
+                                        handleEditPipeline(pipeline)
+                                      }
                                     >
                                       <IconEdit className="mr-2" />
                                       编辑流水线
                                     </Menu.Item>
                                     <Menu.Item
                                       key="copy"
-                                      onClick={() => handleCopyPipeline(pipeline)}
+                                      onClick={() =>
+                                        handleCopyPipeline(pipeline)
+                                      }
                                     >
                                       <IconCopy className="mr-2" />
                                       复制流水线
@@ -684,8 +786,14 @@ function ProjectDetailPage() {
                             <div className="text-sm text-gray-500">
                               <div>{pipeline.description}</div>
                               <div className="flex items-center justify-between mt-2">
-                                <span>共 {pipeline.steps.length} 个步骤</span>
-                                <span>{pipeline.updatedAt}</span>
+                                <span>
+                                  共 {pipeline.steps?.length || 0} 个步骤
+                                </span>
+                                <span>
+                                  {new Date(
+                                    pipeline.updatedAt,
+                                  ).toLocaleString()}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -695,8 +803,9 @@ function ProjectDetailPage() {
 
                     {pipelines.length === 0 && (
                       <div className="text-center py-12">
+                        <Empty description="暂无流水线" />
                         <Typography.Text type="secondary">
-                          暂无流水线，点击上方"新建流水线"按钮开始创建
+                          点击上方"新建流水线"按钮开始创建
                         </Typography.Text>
                       </div>
                     )}
@@ -706,9 +815,12 @@ function ProjectDetailPage() {
 
               {/* 右侧流水线步骤详情 */}
               <div className="col-span-3 bg-white rounded-lg border h-full overflow-hidden">
-                {selectedPipelineId && pipelines.find(p => p.id === selectedPipelineId) ? (
+                {selectedPipelineId &&
+                pipelines.find((p) => p.id === selectedPipelineId) ? (
                   (() => {
-                    const selectedPipeline = pipelines.find(p => p.id === selectedPipelineId)!;
+                    const selectedPipeline = pipelines.find(
+                      (p) => p.id === selectedPipelineId,
+                    );
                     return (
                       <>
                         <div className="p-4 border-b bg-gray-50">
@@ -717,8 +829,12 @@ function ProjectDetailPage() {
                               <Typography.Title heading={5} className="!m-0">
                                 {selectedPipeline.name} - 流水线步骤
                               </Typography.Title>
-                              <Typography.Text type="secondary" className="text-sm">
-                                {selectedPipeline.description} · 共 {selectedPipeline.steps.length} 个步骤
+                              <Typography.Text
+                                type="secondary"
+                                className="text-sm"
+                              >
+                                {selectedPipeline.description} · 共{' '}
+                                {selectedPipeline.steps?.length || 0} 个步骤
                               </Typography.Text>
                             </div>
                             <Button
@@ -738,11 +854,15 @@ function ProjectDetailPage() {
                             onDragEnd={handleDragEnd}
                           >
                             <SortableContext
-                              items={selectedPipeline.steps.map(step => step.id)}
+                              items={
+                                selectedPipeline.steps?.map(
+                                  (step) => step.id,
+                                ) || []
+                              }
                               strategy={verticalListSortingStrategy}
                             >
                               <div className="space-y-3">
-                                {selectedPipeline.steps.map((step, index) => (
+                                {selectedPipeline.steps?.map((step, index) => (
                                   <PipelineStepItem
                                     key={step.id}
                                     step={step}
@@ -754,10 +874,11 @@ function ProjectDetailPage() {
                                   />
                                 ))}
 
-                                {selectedPipeline.steps.length === 0 && (
+                                {selectedPipeline.steps?.length === 0 && (
                                   <div className="text-center py-12">
+                                    <Empty description="暂无步骤" />
                                     <Typography.Text type="secondary">
-                                      暂无步骤，点击上方"添加步骤"按钮开始配置
+                                      点击上方"添加步骤"按钮开始配置
                                     </Typography.Text>
                                   </div>
                                 )}
@@ -770,9 +891,7 @@ function ProjectDetailPage() {
                   })()
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <Typography.Text type="secondary">
-                      请选择左侧的流水线查看详细步骤
-                    </Typography.Text>
+                    <Empty description="请选择流水线" />
                   </div>
                 )}
               </div>

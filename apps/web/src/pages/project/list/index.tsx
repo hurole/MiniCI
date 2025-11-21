@@ -1,12 +1,12 @@
-import { Grid, Typography, Button, Message } from '@arco-design/web-react';
+import { Button, Grid, Message, Typography } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useState } from 'react';
-import type { Project } from '../types';
 import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
-import { projectService } from './service';
-import ProjectCard from './components/ProjectCard';
-import EditProjectModal from './components/EditProjectModal';
+import type { Project } from '../types';
 import CreateProjectModal from './components/CreateProjectModal';
+import EditProjectModal from './components/EditProjectModal';
+import ProjectCard from './components/ProjectCard';
+import { projectService } from './service';
 
 const { Text } = Typography;
 
@@ -27,8 +27,8 @@ function ProjectPage() {
   };
 
   const handleEditSuccess = (updatedProject: Project) => {
-    setProjects(prev =>
-      prev.map(p => p.id === updatedProject.id ? updatedProject : p)
+    setProjects((prev) =>
+      prev.map((p) => (p.id === updatedProject.id ? updatedProject : p)),
     );
   };
 
@@ -42,7 +42,7 @@ function ProjectPage() {
   };
 
   const handleCreateSuccess = (newProject: Project) => {
-    setProjects(prev => [newProject, ...prev]);
+    setProjects((prev) => [newProject, ...prev]);
   };
 
   const handleCreateCancel = () => {
@@ -52,7 +52,7 @@ function ProjectPage() {
   const handleDeleteProject = async (project: Project) => {
     try {
       await projectService.delete(project.id);
-      setProjects(prev => prev.filter(p => p.id !== project.id));
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
       Message.success('项目删除成功');
     } catch (error) {
       console.error('删除项目失败:', error);

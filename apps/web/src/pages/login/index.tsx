@@ -1,11 +1,11 @@
 import { Button } from '@arco-design/web-react';
 import Gitea from '@assets/images/gitea.svg?react';
-import { loginService } from './service';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
+import { loginService } from './service';
 
 function Login() {
-  const [ searchParams ] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const authCode = searchParams.get('code');
 

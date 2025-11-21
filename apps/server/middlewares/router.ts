@@ -7,7 +7,8 @@ import {
   UserController,
   AuthController,
   DeploymentController,
-  PipelineController
+  PipelineController,
+  StepController
 } from '../controllers/index.ts';
 import { log } from '../libs/logger.ts';
 
@@ -41,7 +42,8 @@ export class Router implements Middleware {
       UserController,
       AuthController,
       DeploymentController,
-      PipelineController
+      PipelineController,
+      StepController
     ]);
 
     // 输出注册的路由信息
