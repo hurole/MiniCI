@@ -1,6 +1,6 @@
 import { Controller, Get, Post } from '../../decorators/route.ts';
 import type { Prisma } from '../../generated/prisma/index.js';
-import prisma from '../../libs/db.ts';
+import { prisma } from '../../libs/prisma.ts';
 import type { Context } from 'koa';
 
 @Controller('/deployments')

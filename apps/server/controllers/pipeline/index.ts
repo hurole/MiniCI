@@ -1,13 +1,13 @@
 import type { Context } from 'koa';
 import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
-import prisma from '../../libs/db.ts';
+import { prisma } from '../../libs/prisma.ts';
 import { log } from '../../libs/logger.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
 import {
   createPipelineSchema,
   updatePipelineSchema,
   pipelineIdSchema,
-  listPipelinesQuerySchema
+  listPipelinesQuerySchema,
 } from './schema.ts';
 
 @Controller('/pipelines')

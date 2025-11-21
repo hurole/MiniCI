@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import prisma from '../../libs/db.ts';
+import {prisma} from '../../libs/prisma.ts';
 import { log } from '../../libs/logger.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
 import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
