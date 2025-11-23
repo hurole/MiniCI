@@ -32,3 +32,9 @@ export const pipelineIdSchema = z.object({
 export const listPipelinesQuerySchema = z.object({
   projectId: z.coerce.number().int().positive({ message: '项目ID必须是正整数' }).optional(),
 }).optional();
+
+// 类型
+export type CreatePipelineInput = z.infer<typeof createPipelineSchema>;
+export type UpdatePipelineInput = z.infer<typeof updatePipelineSchema>;
+export type PipelineIdParams = z.infer<typeof pipelineIdSchema>;
+export type ListPipelinesQuery = z.infer<typeof listPipelinesQuerySchema>;
