@@ -8,7 +8,7 @@ import {
   updatePipelineSchema,
   pipelineIdSchema,
   listPipelinesQuerySchema,
-} from './schema.ts';
+} from './dto.ts';
 
 @Controller('/pipelines')
 export class PipelineController {

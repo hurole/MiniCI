@@ -40,51 +40,22 @@ import {
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
-import type { Project } from '../types';
+import type { Deployment, Pipeline, Project, Step } from '../types';
+import DeployModal from './components/DeployModal';
 import DeployRecordItem from './components/DeployRecordItem';
 import PipelineStepItem from './components/PipelineStepItem';
 import { detailService } from './service';
 
-// 部署记录类型定义
-interface DeployRecord {
-  id: number;
-  branch: string;
-  env: string;
-  commit: string;
-  status: 'success' | 'running' | 'failed' | 'pending';
-  createdAt: string;
-}
-
-// 流水线步骤类型定义（更新为与后端一致）
-interface PipelineStep {
-  id: number;
-  name: string;
-  description?: string;
-  order: number;
-  script: string; // 执行的脚本命令
-  valid: number;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  updatedBy: string;
-  pipelineId: number;
+interface StepWithEnabled extends Step {
   enabled: boolean;
 }
 
-// 流水线类型定义
-interface Pipeline {
-  id: number;
-  name: string;
-  description: string;
-  valid: number;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  updatedBy: string;
-  projectId?: number;
-  steps?: PipelineStep[];
+interface PipelineWithEnabled extends Pipeline {
+  steps?: StepWithEnabled[];
   enabled: boolean;
 }
+
+
 
 function ProjectDetailPage() {
   const [detail, setDetail] = useState<Project | null>();
@@ -97,44 +68,19 @@ function ProjectDetailPage() {
     }),
   );
   const [selectedRecordId, setSelectedRecordId] = useState<number>(1);
-  const [pipelines, setPipelines] = useState<Pipeline[]>([]);
+  const [pipelines, setPipelines] = useState<PipelineWithEnabled[]>([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedPipelineId, setSelectedPipelineId] = useState<number>(0);
-  const [editingStep, setEditingStep] = useState<PipelineStep | null>(null);
+  const [editingStep, setEditingStep] = useState<StepWithEnabled | null>(null);
   const [editingPipelineId, setEditingPipelineId] = useState<number | null>(
     null,
   );
   const [pipelineModalVisible, setPipelineModalVisible] = useState(false);
-  const [editingPipeline, setEditingPipeline] = useState<Pipeline | null>(null);
+  const [editingPipeline, setEditingPipeline] = useState<PipelineWithEnabled | null>(null);
   const [form] = Form.useForm();
   const [pipelineForm] = Form.useForm();
-  const [deployRecords, _setDeployRecords] = useState<DeployRecord[]>([
-    {
-      id: 1,
-      branch: 'main',
-      env: 'development',
-      commit: '1d1224ae1',
-      status: 'success',
-      createdAt: '2024-09-07 14:30:25',
-    },
-    {
-      id: 2,
-      branch: 'develop',
-      env: 'staging',
-      commit: '2f4b5c8e9',
-      status: 'running',
-      createdAt: '2024-09-07 13:45:12',
-    },
-    // 移除了 ID 为 3 的部署记录，避免可能的冲突
-    {
-      id: 4,
-      branch: 'main',
-      env: 'production',
-      commit: '4e8b6a5c3',
-      status: 'success',
-      createdAt: '2024-09-07 10:15:30',
-    },
-  ]);
+  const [deployRecords, setDeployRecords] = useState<Deployment[]>([]);
+  const [deployModalVisible, setDeployModalVisible] = useState(false);
 
   const { id } = useParams();
   useAsyncEffect(async () => {
@@ -164,52 +110,33 @@ function ProjectDetailPage() {
         console.error('获取流水线数据失败:', error);
         Message.error('获取流水线数据失败');
       }
+
+      // 获取部署记录
+      try {
+        const records = await detailService.getDeployments(Number(id));
+        setDeployRecords(records);
+        if (records.length > 0) {
+          setSelectedRecordId(records[0].id);
+        }
+      } catch (error) {
+        console.error('获取部署记录失败:', error);
+        Message.error('获取部署记录失败');
+      }
     }
   }, []);
 
-  // 获取模拟的构建日志
+  // 获取构建日志
   const getBuildLogs = (recordId: number): string[] => {
-    const logs: Record<number, string[]> = {
-      1: [
-        '[2024-09-07 14:30:25] 开始构建...',
-        '[2024-09-07 14:30:26] 拉取代码: git clone https://github.com/user/repo.git',
-        '[2024-09-07 14:30:28] 切换分支: git checkout main',
-        '[2024-09-07 14:30:29] 安装依赖: npm install',
-        '[2024-09-07 14:31:15] 运行测试: npm test',
-        '[2024-09-07 14:31:30] ✅ 所有测试通过',
-        '[2024-09-07 14:31:31] 构建项目: npm run build',
-        '[2024-09-07 14:32:10] 构建镜像: docker build -t app:latest .',
-        '[2024-09-07 14:33:25] 推送镜像: docker push registry.com/app:latest',
-        '[2024-09-07 14:34:10] 部署到开发环境...',
-        '[2024-09-07 14:34:45] ✅ 部署成功',
-      ],
-      2: [
-        '[2024-09-07 13:45:12] 开始构建...',
-        '[2024-09-07 13:45:13] 拉取代码: git clone https://github.com/user/repo.git',
-        '[2024-09-07 13:45:15] 切换分支: git checkout develop',
-        '[2024-09-07 13:45:16] 安装依赖: npm install',
-        '[2024-09-07 13:46:02] 运行测试: npm test',
-        '[2024-09-07 13:46:18] ✅ 所有测试通过',
-        '[2024-09-07 13:46:19] 构建项目: npm run build',
-        '[2024-09-07 13:47:05] 构建镜像: docker build -t app:develop .',
-        '[2024-09-07 13:48:20] 🔄 正在推送镜像...',
-      ],
-      // 移除了 ID 为 3 的模拟数据，避免可能的冲突
-      4: [
-        '[2024-09-07 10:15:30] 开始构建...',
-        '[2024-09-07 10:15:31] 拉取代码: git clone https://github.com/user/repo.git',
-        '[2024-09-07 10:15:33] 切换分支: git checkout main',
-        '[2024-09-07 10:15:34] 安装依赖: npm install',
-        '[2024-09-07 10:16:20] 运行测试: npm test',
-        '[2024-09-07 10:16:35] ✅ 所有测试通过',
-        '[2024-09-07 10:16:36] 构建项目: npm run build',
-        '[2024-09-07 10:17:22] 构建镜像: docker build -t app:v1.0.0 .',
-        '[2024-09-07 10:18:45] 推送镜像: docker push registry.com/app:v1.0.0',
-        '[2024-09-07 10:19:30] 部署到生产环境...',
-        '[2024-09-07 10:20:15] ✅ 部署成功',
-      ],
-    };
-    return logs[recordId] || ['暂无日志记录'];
+    const record = deployRecords.find((r) => r.id === recordId);
+    if (!record || !record.buildLog) {
+      return ['暂无日志记录'];
+    }
+    return record.buildLog.split('\n');
+  };
+
+  // 触发部署
+  const handleDeploy = () => {
+    setDeployModalVisible(true);
   };
 
   // 添加新流水线
@@ -220,7 +147,7 @@ function ProjectDetailPage() {
   };
 
   // 编辑流水线
-  const handleEditPipeline = (pipeline: Pipeline) => {
+  const handleEditPipeline = (pipeline: PipelineWithEnabled) => {
     setEditingPipeline(pipeline);
     pipelineForm.setFieldsValue({
       name: pipeline.name,
@@ -263,7 +190,7 @@ function ProjectDetailPage() {
   };
 
   // 复制流水线
-  const handleCopyPipeline = async (pipeline: Pipeline) => {
+  const handleCopyPipeline = async (pipeline: PipelineWithEnabled) => {
     Modal.confirm({
       title: '确认复制',
       content: '确定要复制这个流水线吗？',
@@ -404,7 +331,7 @@ function ProjectDetailPage() {
   };
 
   // 编辑步骤
-  const handleEditStep = (pipelineId: number, step: PipelineStep) => {
+  const handleEditStep = (pipelineId: number, step: StepWithEnabled) => {
     setEditingStep(step);
     setEditingPipelineId(pipelineId);
     form.setFieldsValue({
@@ -573,11 +500,8 @@ function ProjectDetailPage() {
   const buildLogs = getBuildLogs(selectedRecordId);
 
   // 简单的状态标签渲染函数（仅用于构建日志区域）
-  const renderStatusTag = (status: DeployRecord['status']) => {
-    const statusMap: Record<
-      DeployRecord['status'],
-      { color: string; text: string }
-    > = {
+  const renderStatusTag = (status: Deployment['status']) => {
+    const statusMap: Record<string, { color: string; text: string }> = {
       success: { color: 'green', text: '成功' },
       running: { color: 'blue', text: '运行中' },
       failed: { color: 'red', text: '失败' },
@@ -588,7 +512,7 @@ function ProjectDetailPage() {
   };
 
   // 渲染部署记录项
-  const renderDeployRecordItem = (item: DeployRecord, _index: number) => {
+  const renderDeployRecordItem = (item: Deployment, _index: number) => {
     const isSelected = item.id === selectedRecordId;
     return (
       <DeployRecordItem
@@ -609,17 +533,21 @@ function ProjectDetailPage() {
           </Typography.Title>
           <Typography.Text type="secondary">自动化地部署项目</Typography.Text>
         </div>
-        <Button type="primary" icon={<IconPlayArrow />}>
+        <Button type="primary" icon={<IconPlayArrow />} onClick={handleDeploy}>
           部署
         </Button>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow-md flex-1">
-        <Tabs type="line" size="large">
+      <div className="bg-white p-6 rounded-lg shadow-md flex-1 flex flex-col overflow-hidden">
+        <Tabs
+          type="line"
+          size="large"
+          className="h-full flex flex-col [&>.arco-tabs-content]:flex-1 [&>.arco-tabs-content]:overflow-hidden [&>.arco-tabs-content_.arco-tabs-content-inner]:h-full [&>.arco-tabs-content_.arco-tabs-pane]:h-full"
+        >
           <Tabs.TabPane title="部署记录" key="deployRecords">
             <div className="grid grid-cols-5 gap-6 h-full">
               {/* 左侧部署记录列表 */}
-              <div className="col-span-2 space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="col-span-2 space-y-4 h-full flex flex-col">
+                <div className="flex items-center justify-between shrink-0">
                   <Typography.Text type="secondary">
                     共 {deployRecords.length} 条部署记录
                   </Typography.Text>
@@ -627,7 +555,7 @@ function ProjectDetailPage() {
                     刷新
                   </Button>
                 </div>
-                <div className="h-full overflow-y-auto">
+                <div className="flex-1 overflow-y-auto min-h-0">
                   {deployRecords.length > 0 ? (
                     <List
                       className="bg-white rounded-lg border"
@@ -644,8 +572,8 @@ function ProjectDetailPage() {
               </div>
 
               {/* 右侧构建日志 */}
-              <div className="col-span-3 bg-white rounded-lg border h-full overflow-hidden">
-                <div className="p-4 border-b bg-gray-50">
+              <div className="col-span-3 bg-white rounded-lg border h-full overflow-hidden flex flex-col">
+                <div className="p-4 border-b bg-gray-50 shrink-0">
                   <div className="flex items-center justify-between">
                     <div>
                       <Typography.Title heading={5} className="!m-0">
@@ -665,8 +593,8 @@ function ProjectDetailPage() {
                     )}
                   </div>
                 </div>
-                <div className="p-4 h-full overflow-y-auto">
-                  <div className="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm h-full overflow-y-auto">
+                <div className="p-4 flex-1 overflow-hidden flex flex-col">
+                  <div className="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm flex-1 overflow-y-auto">
                     {buildLogs.map((log: string, index: number) => (
                       <div
                         key={`${selectedRecordId}-${log.slice(0, 30)}-${index}`}
@@ -706,7 +634,7 @@ function ProjectDetailPage() {
                           key={pipeline.id}
                           className={`cursor-pointer transition-all duration-200 ${
                             isSelected
-                              ? 'bg-blue-50 border-l-4 border-blue-500 border-blue-300'
+                              ? 'bg-blue-50 border-l-4 border-blue-500'
                               : 'hover:bg-gray-50 border-gray-200'
                           }`}
                           onClick={() => setSelectedPipelineId(pipeline.id)}
@@ -821,6 +749,7 @@ function ProjectDetailPage() {
                     const selectedPipeline = pipelines.find(
                       (p) => p.id === selectedPipelineId,
                     );
+                    if (!selectedPipeline) return null;
                     return (
                       <>
                         <div className="p-4 border-b bg-gray-50">
@@ -966,6 +895,25 @@ function ProjectDetailPage() {
           </Tabs.TabPane>
         </Tabs>
       </div>
+
+      <DeployModal
+        visible={deployModalVisible}
+        onCancel={() => setDeployModalVisible(false)}
+        onOk={() => {
+          setDeployModalVisible(false);
+          // 刷新部署记录
+          if (id) {
+            detailService.getDeployments(Number(id)).then((records) => {
+              setDeployRecords(records);
+              if (records.length > 0) {
+                setSelectedRecordId(records[0].id);
+              }
+            });
+          }
+        }}
+        pipelines={pipelines}
+        projectId={Number(id)}
+      />
     </div>
   );
 }

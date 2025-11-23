@@ -1,6 +1,12 @@
 import type { Context } from 'koa';
 import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
+import {
+  userIdSchema,
+  createUserSchema,
+  updateUserSchema,
+  searchUserQuerySchema,
+} from './dto.ts';
 
 /**
  * 用户控制器
@@ -22,18 +28,18 @@ export class UserController {
 
   @Get('/detail/:id')
   async detail(ctx: Context) {
-    const { id } = ctx.params;
+    const { id } = userIdSchema.parse(ctx.params);
 
     // 模拟根据ID查找用户
     const user = {
-      id: Number(id),
+      id,
       name: 'User ' + id,
       email: `user${id}@example.com`,
       status: 'active',
       createdAt: new Date().toISOString()
     };
 
-    if (Number(id) > 100) {
+    if (id > 100) {
       throw new BusinessError('用户不存在', 2001, 404);
     }
 
@@ -42,14 +48,14 @@ export class UserController {
 
   @Post('')
   async create(ctx: Context) {
-    const body = (ctx.request as any).body;
+    const body = createUserSchema.parse(ctx.request.body);
 
     // 模拟创建用户
     const newUser = {
       id: Date.now(),
       ...body,
       createdAt: new Date().toISOString(),
-      status: 'active'
+      status: body.status
     };
 
     return newUser;
@@ -57,12 +63,12 @@ export class UserController {
 
   @Put('/:id')
   async update(ctx: Context) {
-    const { id } = ctx.params;
-    const body = (ctx.request as any).body;
+    const { id } = userIdSchema.parse(ctx.params);
+    const body = updateUserSchema.parse(ctx.request.body);
 
     // 模拟更新用户
     const updatedUser = {
-      id: Number(id),
+      id,
       ...body,
       updatedAt: new Date().toISOString()
     };
@@ -72,9 +78,9 @@ export class UserController {
 
   @Delete('/:id')
   async delete(ctx: Context) {
-    const { id } = ctx.params;
+    const { id } = userIdSchema.parse(ctx.params);
 
-    if (Number(id) === 1) {
+    if (id === 1) {
       throw new BusinessError('管理员账户不能删除', 2002, 403);
     }
 
@@ -88,7 +94,7 @@ export class UserController {
 
   @Get('/search')
   async search(ctx: Context) {
-    const { keyword, status } = ctx.query;
+    const { keyword, status } = searchUserQuerySchema.parse(ctx.query);
 
     // 模拟搜索逻辑
     let results = [
@@ -98,8 +104,8 @@ export class UserController {
 
     if (keyword) {
       results = results.filter(user =>
-        user.name.toLowerCase().includes(String(keyword).toLowerCase()) ||
-        user.email.toLowerCase().includes(String(keyword).toLowerCase())
+        user.name.toLowerCase().includes(keyword.toLowerCase()) ||
+        user.email.toLowerCase().includes(keyword.toLowerCase())
       );
     }
 

@@ -3,109 +3,12 @@ import { prisma } from '../../libs/prisma.ts';
 import { log } from '../../libs/logger.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
 import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
-import { z } from 'zod';
-
-// 定义验证架构
-const createStepSchema = z.object({
-  name: z
-    .string({
-      message: '步骤名称必须是字符串',
-    })
-    .min(1, { message: '步骤名称不能为空' })
-    .max(100, { message: '步骤名称不能超过100个字符' }),
-
-  description: z
-    .string({
-      message: '步骤描述必须是字符串',
-    })
-    .max(500, { message: '步骤描述不能超过500个字符' })
-    .optional(),
-
-  order: z
-    .number({
-      message: '步骤顺序必须是数字',
-    })
-    .int()
-    .min(0, { message: '步骤顺序必须是非负整数' }),
-
-  script: z
-    .string({
-      message: '脚本命令必须是字符串',
-    })
-    .min(1, { message: '脚本命令不能为空' }),
-
-  pipelineId: z
-    .number({
-      message: '流水线ID必须是数字',
-    })
-    .int()
-    .positive({ message: '流水线ID必须是正整数' }),
-});
-
-const updateStepSchema = z.object({
-  name: z
-    .string({
-      message: '步骤名称必须是字符串',
-    })
-    .min(1, { message: '步骤名称不能为空' })
-    .max(100, { message: '步骤名称不能超过100个字符' })
-    .optional(),
-
-  description: z
-    .string({
-      message: '步骤描述必须是字符串',
-    })
-    .max(500, { message: '步骤描述不能超过500个字符' })
-    .optional(),
-
-  order: z
-    .number({
-      message: '步骤顺序必须是数字',
-    })
-    .int()
-    .min(0, { message: '步骤顺序必须是非负整数' })
-    .optional(),
-
-  script: z
-    .string({
-      message: '脚本命令必须是字符串',
-    })
-    .min(1, { message: '脚本命令不能为空' })
-    .optional(),
-});
-
-const stepIdSchema = z.object({
-  id: z.coerce.number().int().positive({ message: '步骤 ID 必须是正整数' }),
-});
-
-const listStepsQuerySchema = z
-  .object({
-    pipelineId: z.coerce
-      .number()
-      .int()
-      .positive({ message: '流水线ID必须是正整数' })
-      .optional(),
-    page: z.coerce
-      .number()
-      .int()
-      .min(1, { message: '页码必须大于0' })
-      .optional()
-      .default(1),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, { message: '每页数量必须大于0' })
-      .max(100, { message: '每页数量不能超过100' })
-      .optional()
-      .default(10),
-  })
-  .optional();
-
-// TypeScript 类型
-type CreateStepInput = z.infer<typeof createStepSchema>;
-type UpdateStepInput = z.infer<typeof updateStepSchema>;
-type StepIdParams = z.infer<typeof stepIdSchema>;
-type ListStepsQuery = z.infer<typeof listStepsQuerySchema>;
+import {
+  createStepSchema,
+  updateStepSchema,
+  stepIdSchema,
+  listStepsQuerySchema,
+} from './dto.ts';
 
 @Controller('/steps')
 export class StepController {
@@ -185,7 +88,6 @@ export class StepController {
     const step = await prisma.step.create({
       data: {
         name: validatedData.name,
-        description: validatedData.description || '',
         order: validatedData.order,
         script: validatedData.script,
         pipelineId: validatedData.pipelineId,

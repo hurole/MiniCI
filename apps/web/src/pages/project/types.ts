@@ -45,3 +45,48 @@ export interface Pipeline {
   projectId?: number;
   steps?: Step[];
 }
+
+export interface Deployment {
+  id: number;
+  branch: string;
+  env?: string;
+  status: string;
+  commitHash?: string;
+  commitMessage?: string;
+  buildLog?: string;
+  startedAt: string;
+  finishedAt?: string;
+  valid: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+  projectId: number;
+}
+
+export interface Commit {
+  sha: string;
+  commit: {
+    message: string;
+    author: {
+      name: string;
+      email: string;
+      date: string;
+    };
+  };
+  html_url: string;
+}
+
+export interface Branch {
+  name: string;
+  commit: {
+    id: string;
+    message: string;
+    url: string;
+    author: {
+      name: string;
+      email: string;
+      date: string;
+    };
+  };
+}

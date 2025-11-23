@@ -80,6 +80,54 @@ class Gitea {
     return result;
   }
 
+  /**
+   * 获取仓库分支列表
+   * @param owner 仓库拥有者
+   * @param repo 仓库名称
+   * @param accessToken 访问令牌
+   */
+  async getBranches(owner: string, repo: string, accessToken: string) {
+    const response = await fetch(
+      `${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/branches`,
+      {
+        method: 'GET',
+        headers: this.getHeaders(accessToken),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`Fetch failed: ${response.status}`);
+    }
+    const result = await response.json();
+    return result;
+  }
+
+  /**
+   * 获取仓库提交记录
+   * @param owner 仓库拥有者
+   * @param repo 仓库名称
+   * @param accessToken 访问令牌
+   * @param sha 分支名称或提交SHA
+   */
+  async getCommits(owner: string, repo: string, accessToken: string, sha?: string) {
+    const url = new URL(`${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/commits`);
+    if (sha) {
+      url.searchParams.append('sha', sha);
+    }
+    
+    const response = await fetch(
+      url.toString(),
+      {
+        method: 'GET',
+        headers: this.getHeaders(accessToken),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`Fetch failed: ${response.status}`);
+    }
+    const result = await response.json();
+    return result;
+  }
+
   private getHeaders(accessToken?: string) {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

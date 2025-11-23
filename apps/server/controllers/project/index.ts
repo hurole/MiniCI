@@ -8,7 +8,7 @@ import {
   updateProjectSchema,
   listProjectQuerySchema,
   projectIdSchema,
-} from './schema.ts';
+} from './dto.ts';
 
 @Controller('/projects')
 export class ProjectController {

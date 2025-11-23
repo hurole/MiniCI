@@ -1,5 +1,5 @@
 import { type APIResponse, net } from '@shared';
-import type { Pipeline, Project, Step } from '../types';
+import type { Branch, Commit, Deployment, Pipeline, Project, Step } from '../types';
 
 class DetailService {
   async getProject(id: string) {
@@ -15,6 +15,14 @@ class DetailService {
       url: `/api/pipelines?projectId=${projectId}`,
     });
     return data;
+  }
+
+  // 获取项目的部署记录
+  async getDeployments(projectId: number) {
+    const { data } = await net.request<any>({
+      url: `/api/deployments?projectId=${projectId}`,
+    });
+    return data.data;
   }
 
   // 创建流水线
@@ -117,6 +125,39 @@ class DetailService {
     const { data } = await net.request<APIResponse<null>>({
       url: `/api/steps/${id}`,
       method: 'DELETE',
+    });
+    return data;
+  }
+
+  // 获取项目的提交记录
+  async getCommits(projectId: number, branch?: string) {
+    const { data } = await net.request<APIResponse<Commit[]>>({
+      url: `/api/git/commits?projectId=${projectId}${branch ? `&branch=${branch}` : ''}`,
+    });
+    return data;
+  }
+
+  // 获取项目的分支列表
+  async getBranches(projectId: number) {
+    const { data } = await net.request<APIResponse<Branch[]>>({
+      url: `/api/git/branches?projectId=${projectId}`,
+    });
+    return data;
+  }
+
+  // 创建部署
+  async createDeployment(deployment: {
+    projectId: number;
+    pipelineId: number;
+    branch: string;
+    commitHash: string;
+    commitMessage: string;
+    env?: string;
+  }) {
+    const { data } = await net.request<APIResponse<Deployment>>({
+      url: '/api/deployments',
+      method: 'POST',
+      data: deployment,
     });
     return data;
   }

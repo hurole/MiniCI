@@ -6,29 +6,18 @@ import {
 } from '@arco-design/web-react/icon';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import type { Step } from '../../types';
 
-// 流水线步骤类型定义（更新为与后端一致）
-interface PipelineStep {
-  id: number;
-  name: string;
-  description?: string;
-  order: number;
-  script: string; // 执行的脚本命令
-  valid: number;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  updatedBy: string;
-  pipelineId: number;
+interface StepWithEnabled extends Step {
   enabled: boolean;
 }
 
 interface PipelineStepItemProps {
-  step: PipelineStep;
+  step: StepWithEnabled;
   index: number;
   pipelineId: number;
   onToggle: (pipelineId: number, stepId: number, enabled: boolean) => void;
-  onEdit: (pipelineId: number, step: PipelineStep) => void;
+  onEdit: (pipelineId: number, step: StepWithEnabled) => void;
   onDelete: (pipelineId: number, stepId: number) => void;
 }
 

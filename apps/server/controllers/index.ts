@@ -5,3 +5,4 @@ export { AuthController } from './auth/index.ts';
 export { DeploymentController } from './deployment/index.ts';
 export { PipelineController } from './pipeline/index.ts';
 export { StepController } from './step/index.ts'
+export { GitController } from './git/index.ts';

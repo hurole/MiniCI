@@ -1,17 +1,8 @@
 import { List, Space, Tag } from '@arco-design/web-react';
-
-// 部署记录类型定义
-interface DeployRecord {
-  id: number;
-  branch: string;
-  env: string;
-  commit: string;
-  status: 'success' | 'running' | 'failed' | 'pending';
-  createdAt: string;
-}
+import type { Deployment } from '../../types';
 
 interface DeployRecordItemProps {
-  item: DeployRecord;
+  item: Deployment;
   isSelected: boolean;
   onSelect: (id: number) => void;
 }
@@ -22,11 +13,8 @@ function DeployRecordItem({
   onSelect,
 }: DeployRecordItemProps) {
   // 状态标签渲染函数
-  const getStatusTag = (status: DeployRecord['status']) => {
-    const statusMap: Record<
-      DeployRecord['status'],
-      { color: string; text: string }
-    > = {
+  const getStatusTag = (status: Deployment['status']) => {
+    const statusMap: Record<string, { color: string; text: string }> = {
       success: { color: 'green', text: '成功' },
       running: { color: 'blue', text: '运行中' },
       failed: { color: 'red', text: '失败' },
@@ -67,7 +55,7 @@ function DeployRecordItem({
               #{item.id}
             </span>
             <span className="text-gray-600 text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-              {item.commit}
+              {item.commitHash?.substring(0, 7)}
             </span>
           </div>
         }
@@ -79,7 +67,7 @@ function DeployRecordItem({
                 <span className="font-medium text-gray-700">{item.branch}</span>
               </span>
               <span className="text-sm text-gray-500">
-                环境: {getEnvTag(item.env)}
+                环境: {getEnvTag(item.env || 'unknown')}
               </span>
               <span className="text-sm text-gray-500">
                 状态: {getStatusTag(item.status)}

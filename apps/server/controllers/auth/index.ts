@@ -3,6 +3,7 @@ import { Controller, Get, Post } from '../../decorators/route.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { log } from '../../libs/logger.ts';
 import { gitea } from '../../libs/gitea.ts';
+import { loginSchema } from './dto.ts';
 
 @Controller('/auth')
 export class AuthController {
@@ -20,7 +21,7 @@ export class AuthController {
     if (ctx.session.user) {
       return ctx.session.user;
     }
-    const { code } = ctx.request.body as LoginRequestBody;
+    const { code } = loginSchema.parse(ctx.request.body);
     const { access_token, refresh_token, expires_in } =
       await gitea.getToken(code);
     const giteaAuth = {
@@ -80,8 +81,4 @@ export class AuthController {
   async info(ctx: Context) {
     return ctx.session?.user;
   }
-}
-
-interface LoginRequestBody {
-  code: string;
 }
