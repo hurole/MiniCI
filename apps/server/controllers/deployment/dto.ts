@@ -13,6 +13,7 @@ export const createDeploymentSchema = z.object({
   commitHash: z.string().min(1, { message: '提交哈希不能为空' }),
   commitMessage: z.string().min(1, { message: '提交信息不能为空' }),
   env: z.string().optional(),
+  sparseCheckoutPaths: z.string().optional(), // 添加稀疏检出路径字段
 });
 
 export type ListDeploymentsQuery = z.infer<typeof listDeploymentsQuerySchema>;

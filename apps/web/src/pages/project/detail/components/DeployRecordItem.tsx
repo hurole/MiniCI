@@ -34,6 +34,7 @@ function DeployRecordItem({
     const config = envMap[env] || { color: 'gray', text: env };
     return <Tag color={config.color}>{config.text}</Tag>;
   };
+
   return (
     <List.Item
       key={item.id}

@@ -108,6 +108,7 @@ function DeployModal({
         commitHash: selectedCommit.sha,
         commitMessage: selectedCommit.commit.message,
         env: env,
+        sparseCheckoutPaths: values.sparseCheckoutPaths,
       });
 
       Message.success('部署任务已创建');
@@ -194,6 +195,17 @@ function DeployModal({
               </Select.Option>
             ))}
           </Select>
+        </Form.Item>
+
+        <Form.Item
+          label="稀疏检出路径（用于monorepo项目，每行一个路径）"
+          field="sparseCheckoutPaths"
+          tooltip="在monorepo项目中，指定需要检出的目录路径，每行一个路径。留空则检出整个仓库。"
+        >
+          <Input.TextArea
+            placeholder={`例如：\n/packages/frontend\n/packages/backend`}
+            autoSize={{ minRows: 2, maxRows: 6 }}
+          />
         </Form.Item>
 
         <div className="mb-2 font-medium text-gray-700">环境变量</div>

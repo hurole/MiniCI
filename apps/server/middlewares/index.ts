@@ -5,7 +5,7 @@ import { Session } from './session.ts';
 import { CORS } from './cors.ts';
 import { HttpLogger } from './logger.ts';
 import type Koa from 'koa';
-import { Authorization } from './Authorization.ts';
+import { Authorization } from './authorization.ts';
 
 /**
  * 初始化中间件

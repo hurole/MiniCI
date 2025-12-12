@@ -3,6 +3,7 @@ import type { Prisma } from '../../generated/client.ts';
 import { prisma } from '../../libs/prisma.ts';
 import type { Context } from 'koa';
 import { listDeploymentsQuerySchema, createDeploymentSchema } from './dto.ts';
+import { ExecutionQueue } from '../../libs/execution-queue.ts';
 
 @Controller('/deployments')
 export class DeploymentController {
@@ -50,12 +51,69 @@ export class DeploymentController {
         },
         pipelineId: body.pipelineId,
         env: body.env || 'dev',
+        sparseCheckoutPaths: body.sparseCheckoutPaths || '', // 添加稀疏检出路径
         buildLog: '',
         createdBy: 'system', // TODO: get from user
         updatedBy: 'system',
         valid: 1,
       },
     });
+
+    // 将新创建的部署任务添加到执行队列
+    const executionQueue = ExecutionQueue.getInstance();
+    await executionQueue.addTask(result.id, result.pipelineId);
+
     return result;
+  }
+
+  // 添加重新执行部署的接口
+  @Post('/:id/retry')
+  async retry(ctx: Context) {
+    const { id } = ctx.params;
+
+    // 获取原始部署记录
+    const originalDeployment = await prisma.deployment.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!originalDeployment) {
+      ctx.status = 404;
+      ctx.body = {
+        code: 404,
+        message: '部署记录不存在',
+        data: null,
+        timestamp: Date.now()
+      };
+      return;
+    }
+
+    // 创建一个新的部署记录，复制原始记录的信息
+    const newDeployment = await prisma.deployment.create({
+      data: {
+        branch: originalDeployment.branch,
+        commitHash: originalDeployment.commitHash,
+        commitMessage: originalDeployment.commitMessage,
+        status: 'pending',
+        projectId: originalDeployment.projectId,
+        pipelineId: originalDeployment.pipelineId,
+        env: originalDeployment.env,
+        sparseCheckoutPaths: originalDeployment.sparseCheckoutPaths,
+        buildLog: '',
+        createdBy: 'system',
+        updatedBy: 'system',
+        valid: 1,
+      },
+    });
+
+    // 将新创建的部署任务添加到执行队列
+    const executionQueue = ExecutionQueue.getInstance();
+    await executionQueue.addTask(newDeployment.id, newDeployment.pipelineId);
+
+    ctx.body = {
+      code: 0,
+      message: '重新执行任务已创建',
+      data: newDeployment,
+      timestamp: Date.now()
+    };
   }
 }

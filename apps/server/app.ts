@@ -1,13 +1,32 @@
 import Koa from 'koa';
 import { initMiddlewares } from './middlewares/index.ts';
 import { log } from './libs/logger.ts';
+import { ExecutionQueue } from './libs/execution-queue.ts';
+import { initializePipelineTemplates } from './libs/pipeline-template.ts';
 
-const app = new Koa();
+// 初始化应用
+async function initializeApp() {
+  // 初始化流水线模板
+  await initializePipelineTemplates();
 
-initMiddlewares(app);
+  // 初始化执行队列
+  const executionQueue = ExecutionQueue.getInstance();
+  await executionQueue.initialize();
 
-const PORT = process.env.PORT || 3001;
+  const app = new Koa();
 
-app.listen(PORT, () => {
-  log.info('APP', 'Server started at port %d', PORT);
+  initMiddlewares(app);
+
+  const PORT = process.env.PORT || 3001;
+
+  app.listen(PORT, () => {
+    log.info('APP', 'Server started at port %d', PORT);
+    log.info('QUEUE', 'Execution queue initialized');
+  });
+}
+
+// 启动应用
+initializeApp().catch(error => {
+  console.error('Failed to start application:', error);
+  process.exit(1);
 });

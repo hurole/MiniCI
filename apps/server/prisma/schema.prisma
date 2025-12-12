@@ -79,6 +79,7 @@ model Deployment {
   commitHash    String?
   commitMessage String?
   buildLog      String?
+  sparseCheckoutPaths String? // 稀疏检出路径，用于monorepo项目
   startedAt     DateTime  @default(now())
   finishedAt    DateTime?
   valid         Int       @default(1)

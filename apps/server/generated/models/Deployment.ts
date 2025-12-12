@@ -48,6 +48,7 @@ export type DeploymentMinAggregateOutputType = {
   commitHash: string | null
   commitMessage: string | null
   buildLog: string | null
+  sparseCheckoutPaths: string | null
   startedAt: Date | null
   finishedAt: Date | null
   valid: number | null
@@ -67,6 +68,7 @@ export type DeploymentMaxAggregateOutputType = {
   commitHash: string | null
   commitMessage: string | null
   buildLog: string | null
+  sparseCheckoutPaths: string | null
   startedAt: Date | null
   finishedAt: Date | null
   valid: number | null
@@ -86,6 +88,7 @@ export type DeploymentCountAggregateOutputType = {
   commitHash: number
   commitMessage: number
   buildLog: number
+  sparseCheckoutPaths: number
   startedAt: number
   finishedAt: number
   valid: number
@@ -121,6 +124,7 @@ export type DeploymentMinAggregateInputType = {
   commitHash?: true
   commitMessage?: true
   buildLog?: true
+  sparseCheckoutPaths?: true
   startedAt?: true
   finishedAt?: true
   valid?: true
@@ -140,6 +144,7 @@ export type DeploymentMaxAggregateInputType = {
   commitHash?: true
   commitMessage?: true
   buildLog?: true
+  sparseCheckoutPaths?: true
   startedAt?: true
   finishedAt?: true
   valid?: true
@@ -159,6 +164,7 @@ export type DeploymentCountAggregateInputType = {
   commitHash?: true
   commitMessage?: true
   buildLog?: true
+  sparseCheckoutPaths?: true
   startedAt?: true
   finishedAt?: true
   valid?: true
@@ -265,6 +271,7 @@ export type DeploymentGroupByOutputType = {
   commitHash: string | null
   commitMessage: string | null
   buildLog: string | null
+  sparseCheckoutPaths: string | null
   startedAt: Date
   finishedAt: Date | null
   valid: number
@@ -307,6 +314,7 @@ export type DeploymentWhereInput = {
   commitHash?: Prisma.StringNullableFilter<"Deployment"> | string | null
   commitMessage?: Prisma.StringNullableFilter<"Deployment"> | string | null
   buildLog?: Prisma.StringNullableFilter<"Deployment"> | string | null
+  sparseCheckoutPaths?: Prisma.StringNullableFilter<"Deployment"> | string | null
   startedAt?: Prisma.DateTimeFilter<"Deployment"> | Date | string
   finishedAt?: Prisma.DateTimeNullableFilter<"Deployment"> | Date | string | null
   valid?: Prisma.IntFilter<"Deployment"> | number
@@ -327,6 +335,7 @@ export type DeploymentOrderByWithRelationInput = {
   commitHash?: Prisma.SortOrderInput | Prisma.SortOrder
   commitMessage?: Prisma.SortOrderInput | Prisma.SortOrder
   buildLog?: Prisma.SortOrderInput | Prisma.SortOrder
+  sparseCheckoutPaths?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   valid?: Prisma.SortOrder
@@ -350,6 +359,7 @@ export type DeploymentWhereUniqueInput = Prisma.AtLeast<{
   commitHash?: Prisma.StringNullableFilter<"Deployment"> | string | null
   commitMessage?: Prisma.StringNullableFilter<"Deployment"> | string | null
   buildLog?: Prisma.StringNullableFilter<"Deployment"> | string | null
+  sparseCheckoutPaths?: Prisma.StringNullableFilter<"Deployment"> | string | null
   startedAt?: Prisma.DateTimeFilter<"Deployment"> | Date | string
   finishedAt?: Prisma.DateTimeNullableFilter<"Deployment"> | Date | string | null
   valid?: Prisma.IntFilter<"Deployment"> | number
@@ -370,6 +380,7 @@ export type DeploymentOrderByWithAggregationInput = {
   commitHash?: Prisma.SortOrderInput | Prisma.SortOrder
   commitMessage?: Prisma.SortOrderInput | Prisma.SortOrder
   buildLog?: Prisma.SortOrderInput | Prisma.SortOrder
+  sparseCheckoutPaths?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   valid?: Prisma.SortOrder
@@ -397,6 +408,7 @@ export type DeploymentScalarWhereWithAggregatesInput = {
   commitHash?: Prisma.StringNullableWithAggregatesFilter<"Deployment"> | string | null
   commitMessage?: Prisma.StringNullableWithAggregatesFilter<"Deployment"> | string | null
   buildLog?: Prisma.StringNullableWithAggregatesFilter<"Deployment"> | string | null
+  sparseCheckoutPaths?: Prisma.StringNullableWithAggregatesFilter<"Deployment"> | string | null
   startedAt?: Prisma.DateTimeWithAggregatesFilter<"Deployment"> | Date | string
   finishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Deployment"> | Date | string | null
   valid?: Prisma.IntWithAggregatesFilter<"Deployment"> | number
@@ -415,6 +427,7 @@ export type DeploymentCreateInput = {
   commitHash?: string | null
   commitMessage?: string | null
   buildLog?: string | null
+  sparseCheckoutPaths?: string | null
   startedAt?: Date | string
   finishedAt?: Date | string | null
   valid?: number
@@ -434,6 +447,7 @@ export type DeploymentUncheckedCreateInput = {
   commitHash?: string | null
   commitMessage?: string | null
   buildLog?: string | null
+  sparseCheckoutPaths?: string | null
   startedAt?: Date | string
   finishedAt?: Date | string | null
   valid?: number
@@ -452,6 +466,7 @@ export type DeploymentUpdateInput = {
   commitHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   buildLog?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sparseCheckoutPaths?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
@@ -471,6 +486,7 @@ export type DeploymentUncheckedUpdateInput = {
   commitHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   buildLog?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sparseCheckoutPaths?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
@@ -490,6 +506,7 @@ export type DeploymentCreateManyInput = {
   commitHash?: string | null
   commitMessage?: string | null
   buildLog?: string | null
+  sparseCheckoutPaths?: string | null
   startedAt?: Date | string
   finishedAt?: Date | string | null
   valid?: number
@@ -508,6 +525,7 @@ export type DeploymentUpdateManyMutationInput = {
   commitHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   buildLog?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sparseCheckoutPaths?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
@@ -526,6 +544,7 @@ export type DeploymentUncheckedUpdateManyInput = {
   commitHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   buildLog?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sparseCheckoutPaths?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
@@ -555,6 +574,7 @@ export type DeploymentCountOrderByAggregateInput = {
   commitHash?: Prisma.SortOrder
   commitMessage?: Prisma.SortOrder
   buildLog?: Prisma.SortOrder
+  sparseCheckoutPaths?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrder
   valid?: Prisma.SortOrder
@@ -581,6 +601,7 @@ export type DeploymentMaxOrderByAggregateInput = {
   commitHash?: Prisma.SortOrder
   commitMessage?: Prisma.SortOrder
   buildLog?: Prisma.SortOrder
+  sparseCheckoutPaths?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrder
   valid?: Prisma.SortOrder
@@ -600,6 +621,7 @@ export type DeploymentMinOrderByAggregateInput = {
   commitHash?: Prisma.SortOrder
   commitMessage?: Prisma.SortOrder
   buildLog?: Prisma.SortOrder
+  sparseCheckoutPaths?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrder
   valid?: Prisma.SortOrder
@@ -671,6 +693,7 @@ export type DeploymentCreateWithoutProjectInput = {
   commitHash?: string | null
   commitMessage?: string | null
   buildLog?: string | null
+  sparseCheckoutPaths?: string | null
   startedAt?: Date | string
   finishedAt?: Date | string | null
   valid?: number
@@ -689,6 +712,7 @@ export type DeploymentUncheckedCreateWithoutProjectInput = {
   commitHash?: string | null
   commitMessage?: string | null
   buildLog?: string | null
+  sparseCheckoutPaths?: string | null
   startedAt?: Date | string
   finishedAt?: Date | string | null
   valid?: number
@@ -735,6 +759,7 @@ export type DeploymentScalarWhereInput = {
   commitHash?: Prisma.StringNullableFilter<"Deployment"> | string | null
   commitMessage?: Prisma.StringNullableFilter<"Deployment"> | string | null
   buildLog?: Prisma.StringNullableFilter<"Deployment"> | string | null
+  sparseCheckoutPaths?: Prisma.StringNullableFilter<"Deployment"> | string | null
   startedAt?: Prisma.DateTimeFilter<"Deployment"> | Date | string
   finishedAt?: Prisma.DateTimeNullableFilter<"Deployment"> | Date | string | null
   valid?: Prisma.IntFilter<"Deployment"> | number
@@ -754,6 +779,7 @@ export type DeploymentCreateManyProjectInput = {
   commitHash?: string | null
   commitMessage?: string | null
   buildLog?: string | null
+  sparseCheckoutPaths?: string | null
   startedAt?: Date | string
   finishedAt?: Date | string | null
   valid?: number
@@ -771,6 +797,7 @@ export type DeploymentUpdateWithoutProjectInput = {
   commitHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   buildLog?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sparseCheckoutPaths?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
@@ -789,6 +816,7 @@ export type DeploymentUncheckedUpdateWithoutProjectInput = {
   commitHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   buildLog?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sparseCheckoutPaths?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
@@ -807,6 +835,7 @@ export type DeploymentUncheckedUpdateManyWithoutProjectInput = {
   commitHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commitMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   buildLog?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sparseCheckoutPaths?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
@@ -827,6 +856,7 @@ export type DeploymentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   commitHash?: boolean
   commitMessage?: boolean
   buildLog?: boolean
+  sparseCheckoutPaths?: boolean
   startedAt?: boolean
   finishedAt?: boolean
   valid?: boolean
@@ -847,6 +877,7 @@ export type DeploymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   commitHash?: boolean
   commitMessage?: boolean
   buildLog?: boolean
+  sparseCheckoutPaths?: boolean
   startedAt?: boolean
   finishedAt?: boolean
   valid?: boolean
@@ -867,6 +898,7 @@ export type DeploymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   commitHash?: boolean
   commitMessage?: boolean
   buildLog?: boolean
+  sparseCheckoutPaths?: boolean
   startedAt?: boolean
   finishedAt?: boolean
   valid?: boolean
@@ -887,6 +919,7 @@ export type DeploymentSelectScalar = {
   commitHash?: boolean
   commitMessage?: boolean
   buildLog?: boolean
+  sparseCheckoutPaths?: boolean
   startedAt?: boolean
   finishedAt?: boolean
   valid?: boolean
@@ -898,7 +931,7 @@ export type DeploymentSelectScalar = {
   pipelineId?: boolean
 }
 
-export type DeploymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "branch" | "env" | "status" | "commitHash" | "commitMessage" | "buildLog" | "startedAt" | "finishedAt" | "valid" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy" | "projectId" | "pipelineId", ExtArgs["result"]["deployment"]>
+export type DeploymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "branch" | "env" | "status" | "commitHash" | "commitMessage" | "buildLog" | "sparseCheckoutPaths" | "startedAt" | "finishedAt" | "valid" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy" | "projectId" | "pipelineId", ExtArgs["result"]["deployment"]>
 export type DeploymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   Project?: boolean | Prisma.Deployment$ProjectArgs<ExtArgs>
 }
@@ -922,6 +955,7 @@ export type $DeploymentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     commitHash: string | null
     commitMessage: string | null
     buildLog: string | null
+    sparseCheckoutPaths: string | null
     startedAt: Date
     finishedAt: Date | null
     valid: number
@@ -1362,6 +1396,7 @@ export interface DeploymentFieldRefs {
   readonly commitHash: Prisma.FieldRef<"Deployment", 'String'>
   readonly commitMessage: Prisma.FieldRef<"Deployment", 'String'>
   readonly buildLog: Prisma.FieldRef<"Deployment", 'String'>
+  readonly sparseCheckoutPaths: Prisma.FieldRef<"Deployment", 'String'>
   readonly startedAt: Prisma.FieldRef<"Deployment", 'DateTime'>
   readonly finishedAt: Prisma.FieldRef<"Deployment", 'DateTime'>
   readonly valid: Prisma.FieldRef<"Deployment", 'Int'>

@@ -54,6 +54,7 @@ export interface Deployment {
   commitHash?: string;
   commitMessage?: string;
   buildLog?: string;
+  sparseCheckoutPaths?: string; // 稀疏检出路径，用于monorepo项目
   startedAt: string;
   finishedAt?: string;
   valid: number;
@@ -89,4 +90,15 @@ export interface Branch {
       date: string;
     };
   };
+}
+
+// 创建部署请求的类型定义
+export interface CreateDeploymentRequest {
+  projectId: number;
+  pipelineId: number;
+  branch: string;
+  commitHash: string;
+  commitMessage: string;
+  env?: string;
+  sparseCheckoutPaths?: string; // 稀疏检出路径，用于monorepo项目
 }

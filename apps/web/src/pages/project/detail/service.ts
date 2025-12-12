@@ -1,5 +1,5 @@
 import { type APIResponse, net } from '@shared';
-import type { Branch, Commit, Deployment, Pipeline, Project, Step } from '../types';
+import type { Branch, Commit, Deployment, Pipeline, Project, Step, CreateDeploymentRequest } from '../types';
 
 class DetailService {
   async getProject(id: string) {
@@ -13,6 +13,14 @@ class DetailService {
   async getPipelines(projectId: number) {
     const { data } = await net.request<APIResponse<Pipeline[]>>({
       url: `/api/pipelines?projectId=${projectId}`,
+    });
+    return data;
+  }
+
+  // 获取可用的流水线模板
+  async getPipelineTemplates() {
+    const { data } = await net.request<APIResponse<{id: number, name: string, description: string}[]>>({
+      url: '/api/pipelines/templates',
     });
     return data;
   }
@@ -42,6 +50,26 @@ class DetailService {
       url: '/api/pipelines',
       method: 'POST',
       data: pipeline,
+    });
+    return data;
+  }
+
+  // 基于模板创建流水线
+  async createPipelineFromTemplate(
+    templateId: number,
+    projectId: number,
+    name: string,
+    description?: string
+  ) {
+    const { data } = await net.request<APIResponse<Pipeline>>({
+      url: '/api/pipelines/from-template',
+      method: 'POST',
+      data: {
+        templateId,
+        projectId,
+        name,
+        description
+      },
     });
     return data;
   }
@@ -122,6 +150,7 @@ class DetailService {
 
   // 删除步骤
   async deleteStep(id: number) {
+    // DELETE请求返回204状态码，通过拦截器处理为成功响应
     const { data } = await net.request<APIResponse<null>>({
       url: `/api/steps/${id}`,
       method: 'DELETE',
@@ -146,18 +175,20 @@ class DetailService {
   }
 
   // 创建部署
-  async createDeployment(deployment: {
-    projectId: number;
-    pipelineId: number;
-    branch: string;
-    commitHash: string;
-    commitMessage: string;
-    env?: string;
-  }) {
+  async createDeployment(deployment: CreateDeploymentRequest) {
     const { data } = await net.request<APIResponse<Deployment>>({
       url: '/api/deployments',
       method: 'POST',
       data: deployment,
+    });
+    return data;
+  }
+
+  // 重新执行部署
+  async retryDeployment(deploymentId: number) {
+    const { data } = await net.request<APIResponse<Deployment>>({
+      url: `/api/deployments/${deploymentId}/retry`,
+      method: 'POST',
     });
     return data;
   }

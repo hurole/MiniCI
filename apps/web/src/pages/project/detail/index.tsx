@@ -9,6 +9,7 @@ import {
   Menu,
   Message,
   Modal,
+  Select,
   Switch,
   Tabs,
   Tag,
@@ -21,6 +22,7 @@ import {
   IconMore,
   IconPlayArrow,
   IconPlus,
+  IconRefresh,
 } from '@arco-design/web-react/icon';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -37,7 +39,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
 import type { Deployment, Pipeline, Project, Step } from '../types';
@@ -54,8 +56,6 @@ interface PipelineWithEnabled extends Pipeline {
   steps?: StepWithEnabled[];
   enabled: boolean;
 }
-
-
 
 function ProjectDetailPage() {
   const [detail, setDetail] = useState<Project | null>();
@@ -82,7 +82,24 @@ function ProjectDetailPage() {
   const [deployRecords, setDeployRecords] = useState<Deployment[]>([]);
   const [deployModalVisible, setDeployModalVisible] = useState(false);
 
+  // 流水线模板相关状态
+  const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [templates, setTemplates] = useState<Array<{id: number, name: string, description: string}>>([]);
+
   const { id } = useParams();
+
+  // 获取可用的流水线模板
+  useAsyncEffect(async () => {
+    try {
+      const templateData = await detailService.getPipelineTemplates();
+      setTemplates(templateData);
+    } catch (error) {
+      console.error('获取流水线模板失败:', error);
+      Message.error('获取流水线模板失败');
+    }
+  }, []);
+
   useAsyncEffect(async () => {
     if (id) {
       const project = await detailService.getProject(id);
@@ -134,6 +151,28 @@ function ProjectDetailPage() {
     return record.buildLog.split('\n');
   };
 
+  // 定期轮询部署记录以更新状态和日志
+  useAsyncEffect(async () => {
+    const interval = setInterval(async () => {
+      if (id) {
+        try {
+          const records = await detailService.getDeployments(Number(id));
+          setDeployRecords(records);
+
+          // 如果当前选中的记录正在运行，则更新选中记录
+          const selectedRecord = records.find((r: Deployment) => r.id === selectedRecordId);
+          if (selectedRecord && (selectedRecord.status === 'running' || selectedRecord.status === 'pending')) {
+            // 保持当前选中状态，但更新数据
+          }
+        } catch (error) {
+          console.error('轮询部署记录失败:', error);
+        }
+      }
+    }, 3000); // 每3秒轮询一次
+
+    return () => clearInterval(interval);
+  }, [id, selectedRecordId]);
+
   // 触发部署
   const handleDeploy = () => {
     setDeployModalVisible(true);
@@ -144,6 +183,8 @@ function ProjectDetailPage() {
     setEditingPipeline(null);
     pipelineForm.resetFields();
     setPipelineModalVisible(true);
+    setIsCreatingFromTemplate(false); // 默认不是从模板创建
+    setSelectedTemplateId(null);
   };
 
   // 编辑流水线
@@ -295,6 +336,32 @@ function ProjectDetailPage() {
           ),
         );
         Message.success('流水线更新成功');
+      } else if (isCreatingFromTemplate && selectedTemplateId) {
+        // 基于模板创建新流水线
+        const newPipeline = await detailService.createPipelineFromTemplate(
+          selectedTemplateId,
+          Number(id),
+          values.name,
+          values.description || ''
+        );
+
+        // 更新本地状态 - 需要转换步骤数据结构
+        const transformedSteps = newPipeline.steps?.map(step => ({
+          ...step,
+          enabled: step.valid === 1
+        })) || [];
+
+        const pipelineWithDefaults = {
+          ...newPipeline,
+          description: newPipeline.description || '',
+          enabled: newPipeline.valid === 1,
+          steps: transformedSteps,
+        };
+
+        setPipelines((prev) => [...prev, pipelineWithDefaults]);
+        // 自动选中新创建的流水线
+        setSelectedPipelineId(newPipeline.id);
+        Message.success('基于模板创建流水线成功');
       } else {
         // 创建新流水线
         const newPipeline = await detailService.createPipeline({
@@ -316,6 +383,8 @@ function ProjectDetailPage() {
         Message.success('流水线创建成功');
       }
       setPipelineModalVisible(false);
+      setIsCreatingFromTemplate(false);
+      setSelectedTemplateId(null);
     } catch (error) {
       console.error('保存流水线失败:', error);
       Message.error('保存流水线失败');
@@ -494,6 +563,23 @@ function ProjectDetailPage() {
     }
   };
 
+  // 添加重新执行部署的函数
+  const handleRetryDeployment = async (deploymentId: number) => {
+    try {
+      await detailService.retryDeployment(deploymentId);
+      Message.success('重新执行任务已创建');
+
+      // 刷新部署记录
+      if (id) {
+        const records = await detailService.getDeployments(Number(id));
+        setDeployRecords(records);
+      }
+    } catch (error) {
+      console.error('重新执行部署失败:', error);
+      Message.error('重新执行部署失败');
+    }
+  };
+
   const selectedRecord = deployRecords.find(
     (record) => record.id === selectedRecordId,
   );
@@ -512,17 +598,20 @@ function ProjectDetailPage() {
   };
 
   // 渲染部署记录项
-  const renderDeployRecordItem = (item: Deployment, _index: number) => {
-    const isSelected = item.id === selectedRecordId;
-    return (
-      <DeployRecordItem
-        key={item.id}
-        item={item}
-        isSelected={isSelected}
-        onSelect={setSelectedRecordId}
-      />
-    );
-  };
+  const renderDeployRecordItem = (item: Deployment) => (
+    <DeployRecordItem
+      key={item.id}
+      item={item}
+      isSelected={selectedRecordId === item.id}
+      onSelect={setSelectedRecordId}
+      onRetry={handleRetryDeployment} // 传递重新执行函数
+    />
+  );
+
+  // 获取选中的流水线
+  const selectedPipeline = pipelines.find(
+    (pipeline) => pipeline.id === selectedPipelineId,
+  );
 
   return (
     <div className="p-6 flex flex-col h-full">
@@ -541,7 +630,7 @@ function ProjectDetailPage() {
         <Tabs
           type="line"
           size="large"
-          className="h-full flex flex-col [&>.arco-tabs-content]:flex-1 [&>.arco-tabs-content]:overflow-hidden [&>.arco-tabs-content_.arco-tabs-content-inner]:h-full [&>.arco-tabs-content_.arco-tabs-pane]:h-full"
+          className="h-full flex flex-col [&>.arco-tabs-content]:flex-1 [&>.arco-tabs-content]:overflow-hidden [&>.arco-tabs-content_.arco-tabs-content-inner]:h-full [&>.arco-tabs-pane]:h-full"
         >
           <Tabs.TabPane title="部署记录" key="deployRecords">
             <div className="grid grid-cols-5 gap-6 h-full">
@@ -588,6 +677,16 @@ function ProjectDetailPage() {
                     </div>
                     {selectedRecord && (
                       <div className="flex items-center gap-2">
+                        {selectedRecord.status === 'failed' && (
+                          <Button
+                            type="primary"
+                            icon={<IconRefresh />}
+                            size="small"
+                            onClick={() => handleRetryDeployment(selectedRecord.id)}
+                          >
+                            重新执行
+                          </Button>
+                        )}
                         {renderStatusTag(selectedRecord.status)}
                       </div>
                     )}
@@ -700,43 +799,36 @@ function ProjectDetailPage() {
                                     </Menu.Item>
                                   </Menu>
                                 }
-                                position="bottom"
+                                position="br"
+                                trigger="click"
                               >
-                                <Button
-                                  type="text"
-                                  size="small"
-                                  icon={<IconMore />}
-                                  className="text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md p-1 transition-all duration-200"
+                                <button
+                                  className="p-1 hover:bg-gray-100 rounded cursor-pointer"
                                   onClick={(e) => e.stopPropagation()}
-                                />
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.stopPropagation();
+                                    }
+                                  }}
+                                  type="button"
+                                >
+                                  <IconMore />
+                                </button>
                               </Dropdown>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              <div>{pipeline.description}</div>
-                              <div className="flex items-center justify-between mt-2">
-                                <span>
-                                  共 {pipeline.steps?.length || 0} 个步骤
-                                </span>
-                                <span>
-                                  {new Date(
-                                    pipeline.updatedAt,
-                                  ).toLocaleString()}
-                                </span>
-                              </div>
+                            <Typography.Text type="secondary">
+                              {pipeline.description}
+                            </Typography.Text>
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span>
+                                {pipeline.steps?.length || 0} 个步骤
+                              </span>
+                              <span>{pipeline.updatedAt}</span>
                             </div>
                           </div>
                         </Card>
                       );
                     })}
-
-                    {pipelines.length === 0 && (
-                      <div className="text-center py-12">
-                        <Empty description="暂无流水线" />
-                        <Typography.Text type="secondary">
-                          点击上方"新建流水线"按钮开始创建
-                        </Typography.Text>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -768,7 +860,6 @@ function ProjectDetailPage() {
                             </div>
                             <Button
                               type="primary"
-                              icon={<IconPlus />}
                               size="small"
                               onClick={() => handleAddStep(selectedPipelineId)}
                             >
@@ -776,21 +867,17 @@ function ProjectDetailPage() {
                             </Button>
                           </div>
                         </div>
-                        <div className="p-4 h-full overflow-y-auto">
+                        <div className="p-4 flex-1 overflow-hidden">
                           <DndContext
                             sensors={sensors}
                             collisionDetection={closestCenter}
                             onDragEnd={handleDragEnd}
                           >
                             <SortableContext
-                              items={
-                                selectedPipeline.steps?.map(
-                                  (step) => step.id,
-                                ) || []
-                              }
+                              items={selectedPipeline.steps?.map(step => step.id) || []}
                               strategy={verticalListSortingStrategy}
                             >
-                              <div className="space-y-3">
+                              <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
                                 {selectedPipeline.steps?.map((step, index) => (
                                   <PipelineStepItem
                                     key={step.id}
@@ -825,76 +912,146 @@ function ProjectDetailPage() {
                 )}
               </div>
             </div>
-
-            {/* 新建/编辑流水线模态框 */}
-            <Modal
-              title={editingPipeline ? '编辑流水线' : '新建流水线'}
-              visible={pipelineModalVisible}
-              onOk={handleSavePipeline}
-              onCancel={() => setPipelineModalVisible(false)}
-              style={{ width: 500 }}
-            >
-              <Form form={pipelineForm} layout="vertical">
-                <Form.Item
-                  field="name"
-                  label="流水线名称"
-                  rules={[{ required: true, message: '请输入流水线名称' }]}
-                >
-                  <Input placeholder="例如：前端部署流水线、Docker部署流水线..." />
-                </Form.Item>
-                <Form.Item
-                  field="description"
-                  label="流水线描述"
-                  rules={[{ required: true, message: '请输入流水线描述' }]}
-                >
-                  <Input.TextArea
-                    placeholder="描述这个流水线的用途和特点..."
-                    rows={3}
-                  />
-                </Form.Item>
-              </Form>
-            </Modal>
-
-            {/* 编辑步骤模态框 */}
-            <Modal
-              title={editingStep ? '编辑流水线步骤' : '添加流水线步骤'}
-              visible={editModalVisible}
-              onOk={handleSaveStep}
-              onCancel={() => setEditModalVisible(false)}
-              style={{ width: 600 }}
-            >
-              <Form form={form} layout="vertical">
-                <Form.Item
-                  field="name"
-                  label="步骤名称"
-                  rules={[{ required: true, message: '请输入步骤名称' }]}
-                >
-                  <Input placeholder="例如：安装依赖、运行测试、构建项目..." />
-                </Form.Item>
-                <Form.Item
-                  field="script"
-                  label="Shell 脚本"
-                  rules={[{ required: true, message: '请输入脚本内容' }]}
-                >
-                  <Input.TextArea
-                    placeholder="例如：npm install&#10;npm test&#10;npm run build"
-                    rows={8}
-                    style={{ fontFamily: 'Monaco, Consolas, monospace' }}
-                  />
-                </Form.Item>
-                <div className="bg-blue-50 p-3 rounded text-sm">
-                  <Typography.Text type="secondary">
-                    <strong>可用环境变量：</strong>
-                    <br />• $PROJECT_NAME - 项目名称
-                    <br />• $BUILD_NUMBER - 构建编号
-                    <br />• $REGISTRY - 镜像仓库地址
-                  </Typography.Text>
-                </div>
-              </Form>
-            </Modal>
           </Tabs.TabPane>
         </Tabs>
       </div>
+
+      {/* 新建/编辑流水线模态框 */}
+      <Modal
+        title={editingPipeline ? '编辑流水线' : '新建流水线'}
+        visible={pipelineModalVisible}
+        onOk={handleSavePipeline}
+        onCancel={() => {
+          setPipelineModalVisible(false);
+          setIsCreatingFromTemplate(false);
+          setSelectedTemplateId(null);
+        }}
+        style={{ width: 500 }}
+      >
+        <Form form={pipelineForm} layout="vertical">
+          {!editingPipeline && templates.length > 0 && (
+            <Form.Item label="创建方式">
+              <div className="flex gap-2">
+                <Button
+                  type={isCreatingFromTemplate ? 'default' : 'primary'}
+                  onClick={() => setIsCreatingFromTemplate(false)}
+                >
+                  自定义创建
+                </Button>
+                <Button
+                  type={isCreatingFromTemplate ? 'primary' : 'default'}
+                  onClick={() => setIsCreatingFromTemplate(true)}
+                >
+                  使用模板创建
+                </Button>
+              </div>
+            </Form.Item>
+          )}
+
+          {isCreatingFromTemplate && templates.length > 0 ? (
+            <>
+              <Form.Item
+                field="templateId"
+                label="选择模板"
+                rules={[{ required: true, message: '请选择模板' }]}
+              >
+                <Select
+                  placeholder="请选择流水线模板"
+                  onChange={(value) => setSelectedTemplateId(value)}
+                  value={selectedTemplateId ?? undefined}
+                >
+                  {templates.map((template) => (
+                    <Select.Option key={template.id} value={template.id}>
+                      <div>
+                        <div>{template.name}</div>
+                        <div className="text-xs text-gray-500">{template.description}</div>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              {selectedTemplateId && (
+                <>
+                  <Form.Item
+                    field="name"
+                    label="流水线名称"
+                    rules={[{ required: true, message: '请输入流水线名称' }]}
+                  >
+                    <Input placeholder="例如：前端部署流水线、Docker部署流水线..." />
+                  </Form.Item>
+                  <Form.Item
+                    field="description"
+                    label="流水线描述"
+                  >
+                    <Input.TextArea
+                      placeholder="描述这个流水线的用途和特点..."
+                      rows={3}
+                    />
+                  </Form.Item>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Form.Item
+                field="name"
+                label="流水线名称"
+                rules={[{ required: true, message: '请输入流水线名称' }]}
+              >
+                <Input placeholder="例如：前端部署流水线、Docker部署流水线..." />
+              </Form.Item>
+              <Form.Item
+                field="description"
+                label="流水线描述"
+              >
+                <Input.TextArea
+                  placeholder="描述这个流水线的用途和特点..."
+                  rows={3}
+                />
+              </Form.Item>
+            </>
+          )}
+        </Form>
+      </Modal>
+
+      {/* 编辑步骤模态框 */}
+      <Modal
+        title={editingStep ? '编辑流水线步骤' : '添加流水线步骤'}
+        visible={editModalVisible}
+        onOk={handleSaveStep}
+        onCancel={() => setEditModalVisible(false)}
+        style={{ width: 600 }}
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            field="name"
+            label="步骤名称"
+            rules={[{ required: true, message: '请输入步骤名称' }]}
+          >
+            <Input placeholder="例如：安装依赖、运行测试、构建项目..." />
+          </Form.Item>
+          <Form.Item
+            field="script"
+            label="Shell 脚本"
+            rules={[{ required: true, message: '请输入脚本内容' }]}
+          >
+            <Input.TextArea
+              placeholder="例如：npm install&#10;npm test&#10;npm run build"
+              rows={8}
+              style={{ fontFamily: 'Monaco, Consolas, monospace' }}
+            />
+          </Form.Item>
+          <div className="bg-blue-50 p-3 rounded text-sm">
+            <Typography.Text type="secondary">
+              <strong>可用环境变量：</strong>
+              <br />• $PROJECT_NAME - 项目名称
+              <br />• $BUILD_NUMBER - 构建编号
+              <br />• $REGISTRY - 镜像仓库地址
+            </Typography.Text>
+          </div>
+        </Form>
+      </Modal>
 
       <DeployModal
         visible={deployModalVisible}

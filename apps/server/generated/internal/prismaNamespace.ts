@@ -885,6 +885,7 @@ export const DeploymentScalarFieldEnum = {
   commitHash: 'commitHash',
   commitMessage: 'commitMessage',
   buildLog: 'buildLog',
+  sparseCheckoutPaths: 'sparseCheckoutPaths',
   startedAt: 'startedAt',
   finishedAt: 'finishedAt',
   valid: 'valid',

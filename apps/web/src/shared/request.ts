@@ -19,6 +19,16 @@ class Net {
       },
       (error) => {
         console.log('error', error);
+        // 对于DELETE请求返回204状态码的情况，视为成功
+        if (error.response && error.response.status === 204 && error.config.method === 'delete') {
+          // 创建一个模拟的成功响应
+          return Promise.resolve({
+            ...error.response,
+            data: error.response.data || null,
+            status: 200, // 将204转换为200，避免被当作错误处理
+          });
+        }
+
         if (error.status === 401 && error.config.url !== '/api/auth/info') {
           window.location.href = '/login';
           return;
