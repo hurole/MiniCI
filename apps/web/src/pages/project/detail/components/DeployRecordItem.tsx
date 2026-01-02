@@ -1,4 +1,5 @@
 import { List, Space, Tag } from '@arco-design/web-react';
+import { formatDateTime } from '../../../../utils/time';
 import type { Deployment } from '../../types';
 
 interface DeployRecordItemProps {
@@ -76,7 +77,7 @@ function DeployRecordItem({
               <span className="text-sm text-gray-500">
                 执行时间:{' '}
                 <span className="font-medium text-gray-700">
-                  {item.createdAt}
+                  {formatDateTime(item.createdAt)}
                 </span>
               </span>
             </Space>

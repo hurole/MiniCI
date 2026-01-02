@@ -1,17 +1,27 @@
 import { $ } from 'zx';
 import { prisma } from '../libs/prisma.ts';
 import type { Step } from '../generated/client.ts';
-import fs from 'node:fs';
-import path from 'node:path';
+import { GitManager, WorkspaceDirStatus } from '../libs/git-manager.ts';
+import { log } from '../libs/logger.ts';
 
 export class PipelineRunner {
+  private readonly TAG = 'PipelineRunner';
   private deploymentId: number;
-  private workspace: string;
+  private projectDir: string;
 
-  constructor(deploymentId: number) {
+  constructor(deploymentId: number, projectDir: string) {
     this.deploymentId = deploymentId;
-    // 从环境变量获取工作空间路径，默认为/tmp/foka-ci/workspace
-    this.workspace = process.env.PIPELINE_WORKSPACE || '/tmp/foka-ci/workspace';
+
+    if (!projectDir) {
+      throw new Error('项目工作目录未配置，无法执行流水线');
+    }
+
+    this.projectDir = projectDir;
+    log.info(
+      this.TAG,
+      'PipelineRunner initialized with projectDir: %s',
+      this.projectDir,
+    );
   }
 
   /**
@@ -24,8 +34,8 @@ export class PipelineRunner {
       where: { id: pipelineId },
       include: {
         steps: { where: { valid: 1 }, orderBy: { order: 'asc' } },
-        Project: true // 同时获取关联的项目信息
-      }
+        Project: true, // 同时获取关联的项目信息
+      },
     });
 
     if (!pipeline) {
@@ -34,47 +44,43 @@ export class PipelineRunner {
 
     // 获取部署信息
     const deployment = await prisma.deployment.findUnique({
-      where: { id: this.deploymentId }
+      where: { id: this.deploymentId },
     });
 
     if (!deployment) {
       throw new Error(`Deployment with id ${this.deploymentId} not found`);
     }
 
-    // 确保工作空间目录存在
-    await this.ensureWorkspace();
-
-    // 创建项目目录（在工作空间内）
-    const projectDir = path.join(this.workspace, `project-${pipelineId}`);
-    await this.ensureProjectDirectory(projectDir);
-
-    // 更新部署状态为running
-    await prisma.deployment.update({
-      where: { id: this.deploymentId },
-      data: { status: 'running' }
-    });
-
     let logs = '';
     let hasError = false;
 
     try {
+      // 准备工作目录（检查、克隆或更新）
+      logs += await this.prepareWorkspace(pipeline.Project, deployment.branch);
+
+      // 更新部署状态为running
+      await prisma.deployment.update({
+        where: { id: this.deploymentId },
+        data: { status: 'running', buildLog: logs },
+      });
+
       // 依次执行每个步骤
       for (const [index, step] of pipeline.steps.entries()) {
         // 准备环境变量
-        const envVars = this.prepareEnvironmentVariables(pipeline, deployment, projectDir);
+        const envVars = this.prepareEnvironmentVariables(pipeline, deployment);
 
-        // 记录开始执行步骤的日志，包含脚本内容（合并为一行，并用括号括起脚本内容）
+        // 记录开始执行步骤的日志
         const startLog = `[${new Date().toISOString()}] 开始执行步骤 ${index + 1}/${pipeline.steps.length}: ${step.name}\n`;
         logs += startLog;
 
         // 实时更新日志
         await prisma.deployment.update({
           where: { id: this.deploymentId },
-          data: { buildLog: logs }
+          data: { buildLog: logs },
         });
 
-        // 执行步骤（传递环境变量和项目目录）
-        const stepLog = await this.executeStep(step, envVars, projectDir);
+        // 执行步骤
+        const stepLog = await this.executeStep(step, envVars);
         logs += stepLog + '\n';
 
         // 记录步骤执行完成的日志
@@ -84,35 +90,107 @@ export class PipelineRunner {
         // 实时更新日志
         await prisma.deployment.update({
           where: { id: this.deploymentId },
-          data: { buildLog: logs }
+          data: { buildLog: logs },
         });
       }
     } catch (error) {
       hasError = true;
-      logs += `[${new Date().toISOString()}] Error: ${(error as Error).message}\n`;
+      const errorMsg = `[${new Date().toISOString()}] Error: ${(error as Error).message}\n`;
+      logs += errorMsg;
+
+      log.error(
+        this.TAG,
+        'Pipeline execution failed: %s',
+        (error as Error).message,
+      );
 
       // 记录错误日志
       await prisma.deployment.update({
         where: { id: this.deploymentId },
         data: {
           buildLog: logs,
-          status: 'failed'
-        }
+          status: 'failed',
+          finishedAt: new Date(),
+        },
       });
 
       throw error;
-    } finally {
-      // 更新最终状态
-      if (!hasError) {
-        await prisma.deployment.update({
-          where: { id: this.deploymentId },
-          data: {
-            buildLog: logs,
-            status: 'success',
-            finishedAt: new Date()
-          }
-        });
+    }
+
+    // 更新最终状态
+    if (!hasError) {
+      await prisma.deployment.update({
+        where: { id: this.deploymentId },
+        data: {
+          buildLog: logs,
+          status: 'success',
+          finishedAt: new Date(),
+        },
+      });
+    }
+  }
+
+  /**
+   * 准备工作目录：检查状态、克隆或更新代码
+   * @param project 项目信息
+   * @param branch 目标分支
+   * @returns 准备过程的日志
+   */
+  private async prepareWorkspace(
+    project: any,
+    branch: string,
+  ): Promise<string> {
+    let logs = '';
+    const timestamp = new Date().toISOString();
+
+    try {
+      logs += `[${timestamp}] 检查工作目录状态: ${this.projectDir}\n`;
+
+      // 检查工作目录状态
+      const status = await GitManager.checkWorkspaceStatus(this.projectDir);
+      logs += `[${new Date().toISOString()}] 工作目录状态: ${status.status}\n`;
+
+      if (
+        status.status === WorkspaceDirStatus.NOT_CREATED ||
+        status.status === WorkspaceDirStatus.EMPTY
+      ) {
+        // 目录不存在或为空，需要克隆
+        logs += `[${new Date().toISOString()}] 工作目录不存在或为空，开始克隆仓库\n`;
+
+        // 确保父目录存在
+        await GitManager.ensureDirectory(this.projectDir);
+
+        // 克隆仓库（注意：如果需要认证，token 应该从环境变量或配置中获取）
+        await GitManager.cloneRepository(
+          project.repository,
+          this.projectDir,
+          branch,
+          // TODO: 添加 token 支持
+        );
+
+        logs += `[${new Date().toISOString()}] 仓库克隆成功\n`;
+      } else if (status.status === WorkspaceDirStatus.NO_GIT) {
+        // 目录存在但不是 Git 仓库
+        throw new Error(
+          `工作目录 ${this.projectDir} 已存在但不是 Git 仓库，请检查配置`,
+        );
+      } else if (status.status === WorkspaceDirStatus.READY) {
+        // 已存在 Git 仓库，更新代码
+        logs += `[${new Date().toISOString()}] 工作目录已存在 Git 仓库，开始更新代码\n`;
+        await GitManager.updateRepository(this.projectDir, branch);
+        logs += `[${new Date().toISOString()}] 代码更新成功\n`;
       }
+
+      return logs;
+    } catch (error) {
+      const errorLog = `[${new Date().toISOString()}] 准备工作目录失败: ${(error as Error).message}\n`;
+      logs += errorLog;
+      log.error(
+        this.TAG,
+        'Failed to prepare workspace: %s',
+        (error as Error).message,
+      );
+      throw new Error(`准备工作目录失败: ${(error as Error).message}`);
     }
   }
 
@@ -120,9 +198,11 @@ export class PipelineRunner {
    * 准备环境变量
    * @param pipeline 流水线信息
    * @param deployment 部署信息
-   * @param projectDir 项目目录路径
    */
-  private prepareEnvironmentVariables(pipeline: any, deployment: any, projectDir: string): Record<string, string> {
+  private prepareEnvironmentVariables(
+    pipeline: any,
+    deployment: any,
+  ): Record<string, string> {
     const envVars: Record<string, string> = {};
 
     // 项目相关信息
@@ -138,9 +218,9 @@ export class PipelineRunner {
     // 稀疏检出路径（如果有配置的话）
     envVars.SPARSE_CHECKOUT_PATHS = deployment.sparseCheckoutPaths || '';
 
-    // 工作空间路径和项目路径
-    envVars.WORKSPACE = this.workspace;
-    envVars.PROJECT_DIR = projectDir;
+    // 工作空间路径（使用配置的项目目录）
+    envVars.WORKSPACE = this.projectDir;
+    envVars.PROJECT_DIR = this.projectDir;
 
     return envVars;
   }
@@ -168,68 +248,37 @@ export class PipelineRunner {
   private addTimestampToLines(content: string, isError = false): string {
     if (!content) return '';
 
-    return content.split('\n')
-      .filter(line => line.trim() !== '')
-      .map(line => this.addTimestamp(line, isError))
-      .join('\n') + '\n';
-  }
-
-  /**
-   * 确保工作空间目录存在
-   */
-  private async ensureWorkspace(): Promise<void> {
-    try {
-      // 检查目录是否存在，如果不存在则创建
-      if (!fs.existsSync(this.workspace)) {
-        // 创建目录包括所有必要的父目录
-        fs.mkdirSync(this.workspace, { recursive: true });
-      }
-
-      // 检查目录是否可写
-      fs.accessSync(this.workspace, fs.constants.W_OK);
-    } catch (error) {
-      throw new Error(`无法访问或创建工作空间目录 "${this.workspace}": ${(error as Error).message}`);
-    }
-  }
-
-  /**
-   * 确保项目目录存在
-   * @param projectDir 项目目录路径
-   */
-  private async ensureProjectDirectory(projectDir: string): Promise<void> {
-    try {
-      // 检查目录是否存在，如果不存在则创建
-      if (!fs.existsSync(projectDir)) {
-        fs.mkdirSync(projectDir, { recursive: true });
-      }
-
-      // 检查目录是否可写
-      fs.accessSync(projectDir, fs.constants.W_OK);
-    } catch (error) {
-      throw new Error(`无法访问或创建项目目录 "${projectDir}": ${(error as Error).message}`);
-    }
+    return (
+      content
+        .split('\n')
+        .filter((line) => line.trim() !== '')
+        .map((line) => this.addTimestamp(line, isError))
+        .join('\n') + '\n'
+    );
   }
 
   /**
    * 执行单个步骤
    * @param step 步骤对象
    * @param envVars 环境变量
-   * @param projectDir 项目目录路径
    */
-  private async executeStep(step: Step, envVars: Record<string, string>, projectDir: string): Promise<string> {
+  private async executeStep(
+    step: Step,
+    envVars: Record<string, string>,
+  ): Promise<string> {
     let logs = '';
 
     try {
       // 添加步骤开始执行的时间戳
-      logs += this.addTimestamp(`开始执行步骤 "${step.name}"`) + '\n';
+      logs += this.addTimestamp(`执行脚本: ${step.script}`) + '\n';
 
       // 使用zx执行脚本，设置项目目录为工作目录和环境变量
       const script = step.script;
 
       // 通过bash -c执行脚本，确保环境变量能被正确解析
       const result = await $({
-        cwd: projectDir,
-        env: { ...process.env, ...envVars }
+        cwd: this.projectDir,
+        env: { ...process.env, ...envVars },
       })`bash -c ${script}`;
 
       if (result.stdout) {
@@ -242,10 +291,11 @@ export class PipelineRunner {
         logs += this.addTimestampToLines(result.stderr, true);
       }
 
-      // 添加步骤执行完成的时间戳
-      logs += this.addTimestamp(`步骤 "${step.name}" 执行完成`) + '\n';
+      logs += this.addTimestamp(`步骤执行完成`) + '\n';
     } catch (error) {
-      logs += this.addTimestamp(`Error executing step "${step.name}": ${(error as Error).message}`) + '\n';
+      const errorMsg = `Error executing step "${step.name}": ${(error as Error).message}`;
+      logs += this.addTimestamp(errorMsg, true) + '\n';
+      log.error(this.TAG, errorMsg);
       throw error;
     }
 

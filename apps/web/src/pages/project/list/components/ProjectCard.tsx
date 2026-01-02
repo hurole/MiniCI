@@ -1,22 +1,14 @@
 import {
   Avatar,
-  Button,
   Card,
-  Dropdown,
-  Menu,
-  Modal,
   Space,
   Tag,
-  Tooltip,
   Typography,
 } from '@arco-design/web-react';
 import {
   IconBranch,
   IconCalendar,
   IconCloud,
-  IconDelete,
-  IconEdit,
-  IconMore,
 } from '@arco-design/web-react/icon';
 import IconGitea from '@assets/images/gitea.svg?react';
 import { useCallback } from 'react';
@@ -27,27 +19,10 @@ const { Text, Paragraph } = Typography;
 
 interface ProjectCardProps {
   project: Project;
-  onEdit?: (project: Project) => void;
-  onDelete?: (project: Project) => void;
 }
 
-function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
+function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate();
-  // 处理删除操作
-  const handleDelete = () => {
-    Modal.confirm({
-      title: '确认删除项目',
-      content: `确定要删除项目 "${project.name}" 吗？此操作不可恢复。`,
-      okText: '删除',
-      cancelText: '取消',
-      okButtonProps: {
-        status: 'danger',
-      },
-      onOk: () => {
-        onDelete?.(project);
-      },
-    });
-  };
   // 获取环境信息
   const environments = [
     { name: 'staging', color: 'orange', icon: '🚧' },
@@ -109,37 +84,9 @@ function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
             </Text>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Tag color="blue" size="small" className="font-medium">
-            活跃
-          </Tag>
-          <Dropdown
-            droplist={
-              <Menu>
-                <Menu.Item key="edit" onClick={() => onEdit?.(project)}>
-                  <IconEdit className="mr-2" />
-                  编辑
-                </Menu.Item>
-                <Menu.Item
-                  key="delete"
-                  onClick={() => handleDelete()}
-                  className="text-red-500"
-                >
-                  <IconDelete className="mr-2" />
-                  删除
-                </Menu.Item>
-              </Menu>
-            }
-            position="br"
-          >
-            <Button
-              type="text"
-              size="small"
-              icon={<IconMore />}
-              className="text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 p-1 rounded-md"
-            />
-          </Dropdown>
-        </div>
+        <Tag color="blue" size="small" className="font-medium">
+          活跃
+        </Tag>
       </div>
 
       {/* 项目描述 */}

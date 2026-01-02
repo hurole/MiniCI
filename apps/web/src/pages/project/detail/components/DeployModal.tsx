@@ -6,6 +6,7 @@ import {
   Modal,
   Select,
 } from '@arco-design/web-react';
+import { formatDateTime } from '../../../../utils/time';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { useCallback, useEffect, useState } from 'react';
 import type { Branch, Commit, Pipeline } from '../../types';
@@ -182,7 +183,7 @@ function DeployModal({
                       {commit.sha.substring(0, 7)}
                     </span>
                     <span className="text-gray-500 text-xs">
-                      {new Date(commit.commit.author.date).toLocaleString()}
+                      {formatDateTime(commit.commit.author.date)}
                     </span>
                   </div>
                   <div className="text-gray-600 text-sm truncate">

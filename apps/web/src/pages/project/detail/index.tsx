@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  Descriptions,
   Dropdown,
   Empty,
   Form,
@@ -10,19 +11,24 @@ import {
   Message,
   Modal,
   Select,
+  Space,
   Switch,
   Tabs,
   Tag,
   Typography,
 } from '@arco-design/web-react';
 import {
+  IconCode,
   IconCopy,
   IconDelete,
   IconEdit,
+  IconFolder,
+  IconHistory,
   IconMore,
   IconPlayArrow,
   IconPlus,
   IconRefresh,
+  IconSettings,
 } from '@arco-design/web-react/icon';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -40,9 +46,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
-import type { Deployment, Pipeline, Project, Step } from '../types';
+import { formatDateTime } from '../../../utils/time';
+import type { Deployment, Pipeline, Project, Step, WorkspaceDirStatus, WorkspaceStatus } from '../types';
 import DeployModal from './components/DeployModal';
 import DeployRecordItem from './components/DeployRecordItem';
 import PipelineStepItem from './components/PipelineStepItem';
@@ -59,6 +66,7 @@ interface PipelineWithEnabled extends Pipeline {
 
 function ProjectDetailPage() {
   const [detail, setDetail] = useState<Project | null>();
+  const navigate = useNavigate();
 
   // 拖拽传感器配置
   const sensors = useSensors(
@@ -86,6 +94,10 @@ function ProjectDetailPage() {
   const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [templates, setTemplates] = useState<Array<{id: number, name: string, description: string}>>([]);
+
+  // 项目设置相关状态
+  const [projectEditModalVisible, setProjectEditModalVisible] = useState(false);
+  const [projectForm] = Form.useForm();
 
   const { id } = useParams();
 
@@ -580,6 +592,56 @@ function ProjectDetailPage() {
     }
   };
 
+  // 项目设置相关函数
+  const handleEditProject = () => {
+    if (detail) {
+      projectForm.setFieldsValue({
+        name: detail.name,
+        description: detail.description,
+        repository: detail.repository,
+      });
+      setProjectEditModalVisible(true);
+    }
+  };
+
+  const handleProjectEditSuccess = async () => {
+    try {
+      const values = await projectForm.validate();
+      await detailService.updateProject(Number(id), values);
+      Message.success('项目更新成功');
+      setProjectEditModalVisible(false);
+
+      // 刷新项目详情
+      if (id) {
+        const projectDetail = await detailService.getProjectDetail(Number(id));
+        setDetail(projectDetail);
+      }
+    } catch (error) {
+      console.error('更新项目失败:', error);
+      Message.error('更新项目失败');
+    }
+  };
+
+  const handleDeleteProject = () => {
+    Modal.confirm({
+      title: '删除项目',
+      content: `确定要删除项目 "${detail?.name}" 吗？删除后将无法恢复。`,
+      okButtonProps: {
+        status: 'danger',
+      },
+      onOk: async () => {
+        try {
+          await detailService.deleteProject(Number(id));
+          Message.success('项目删除成功');
+          navigate('/project');
+        } catch (error) {
+          console.error('删除项目失败:', error);
+          Message.error('删除项目失败');
+        }
+      },
+    });
+  };
+
   const selectedRecord = deployRecords.find(
     (record) => record.id === selectedRecordId,
   );
@@ -613,6 +675,74 @@ function ProjectDetailPage() {
     (pipeline) => pipeline.id === selectedPipelineId,
   );
 
+  // 格式化文件大小
+  const formatSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  };
+
+  // 获取工作目录状态标签
+  const getWorkspaceStatusTag = (status: string): { text: string; color: string } => {
+    const statusMap: Record<string, { text: string; color: string }> = {
+      not_created: { text: '未创建', color: 'gray' },
+      empty: { text: '空目录', color: 'orange' },
+      no_git: { text: '无Git仓库', color: 'orange' },
+      ready: { text: '就绪', color: 'green' },
+    };
+    return statusMap[status] || { text: '未知', color: 'gray' };
+  };
+
+  // 渲染工作目录状态卡片
+  const renderWorkspaceStatus = () => {
+    if (!detail?.workspaceStatus) return null;
+
+    const { workspaceStatus } = detail;
+    const statusInfo = getWorkspaceStatusTag(workspaceStatus.status as string);
+
+    return (
+      <Card className="mb-6" title={<Space><IconFolder />工作目录状态</Space>}>
+        <Descriptions
+          column={2}
+          data={[
+            {
+              label: '目录路径',
+              value: detail.projectDir,
+            },
+            {
+              label: '状态',
+              value: <Tag color={statusInfo.color}>{statusInfo.text}</Tag>,
+            },
+            {
+              label: '目录大小',
+              value: workspaceStatus.size ? formatSize(workspaceStatus.size) : '-',
+            },
+            {
+              label: '当前分支',
+              value: workspaceStatus.gitInfo?.branch || '-',
+            },
+            {
+              label: '最后提交',
+              value: workspaceStatus.gitInfo?.lastCommit ? (
+                <Space direction="vertical" size="mini">
+                  <Typography.Text code>{workspaceStatus.gitInfo.lastCommit}</Typography.Text>
+                  <Typography.Text type="secondary">{workspaceStatus.gitInfo.lastCommitMessage}</Typography.Text>
+                </Space>
+              ) : '-',
+            },
+          ]}
+        />
+        {workspaceStatus.error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+            <Typography.Text type="danger">{workspaceStatus.error}</Typography.Text>
+          </div>
+        )}
+      </Card>
+    );
+  };
+
   return (
     <div className="p-6 flex flex-col h-full">
       <div className="mb-6 flex items-center justify-between">
@@ -626,13 +756,14 @@ function ProjectDetailPage() {
           部署
         </Button>
       </div>
+
       <div className="bg-white p-6 rounded-lg shadow-md flex-1 flex flex-col overflow-hidden">
         <Tabs
           type="line"
           size="large"
           className="h-full flex flex-col [&>.arco-tabs-content]:flex-1 [&>.arco-tabs-content]:overflow-hidden [&>.arco-tabs-content_.arco-tabs-content-inner]:h-full [&>.arco-tabs-pane]:h-full"
         >
-          <Tabs.TabPane title="部署记录" key="deployRecords">
+          <Tabs.TabPane title={<Space><IconHistory />部署记录</Space>} key="deployRecords">
             <div className="grid grid-cols-5 gap-6 h-full">
               {/* 左侧部署记录列表 */}
               <div className="col-span-2 space-y-4 h-full flex flex-col">
@@ -671,7 +802,7 @@ function ProjectDetailPage() {
                       {selectedRecord && (
                         <Typography.Text type="secondary" className="text-sm">
                           {selectedRecord.branch} · {selectedRecord.env} ·{' '}
-                          {selectedRecord.createdAt}
+                          {formatDateTime(selectedRecord.createdAt)}
                         </Typography.Text>
                       )}
                     </div>
@@ -707,7 +838,7 @@ function ProjectDetailPage() {
               </div>
             </div>
           </Tabs.TabPane>
-          <Tabs.TabPane title="流水线" key="pipeline">
+          <Tabs.TabPane title={<Space><IconCode />流水线</Space>} key="pipeline">
             <div className="grid grid-cols-5 gap-6 h-full">
               {/* 左侧流水线列表 */}
               <div className="col-span-2 space-y-4">
@@ -823,7 +954,7 @@ function ProjectDetailPage() {
                               <span>
                                 {pipeline.steps?.length || 0} 个步骤
                               </span>
-                              <span>{pipeline.updatedAt}</span>
+                              <span>{formatDateTime(pipeline.updatedAt)}</span>
                             </div>
                           </div>
                         </Card>
@@ -911,6 +1042,50 @@ function ProjectDetailPage() {
                   </div>
                 )}
               </div>
+            </div>
+          </Tabs.TabPane>
+
+          {/* 项目设置标签页 */}
+          <Tabs.TabPane key="settings" title={<Space><IconSettings />项目设置</Space>}>
+            <div className="p-6">
+              <Card title="项目信息" className="mb-4">
+                <Descriptions
+                  column={1}
+                  data={[
+                    {
+                      label: '项目名称',
+                      value: detail?.name,
+                    },
+                    {
+                      label: '项目描述',
+                      value: detail?.description || '-',
+                    },
+                    {
+                      label: 'Git 仓库',
+                      value: detail?.repository,
+                    },
+                    {
+                      label: '工作目录',
+                      value: detail?.projectDir || '-',
+                    },
+                    {
+                      label: '创建时间',
+                      value: formatDateTime(detail?.createdAt),
+                    },
+                  ]}
+                />
+                <div className="mt-4 flex gap-2">
+                  <Button type="primary" onClick={handleEditProject}>
+                    编辑项目
+                  </Button>
+                  <Button status="danger" onClick={handleDeleteProject}>
+                    删除项目
+                  </Button>
+                </div>
+              </Card>
+
+              {/* 工作目录状态 */}
+              {renderWorkspaceStatus()}
             </div>
           </Tabs.TabPane>
         </Tabs>
@@ -1050,6 +1225,47 @@ function ProjectDetailPage() {
               <br />• $REGISTRY - 镜像仓库地址
             </Typography.Text>
           </div>
+        </Form>
+      </Modal>
+
+      {/* 编辑项目模态框 */}
+      <Modal
+        title="编辑项目"
+        visible={projectEditModalVisible}
+        onOk={handleProjectEditSuccess}
+        onCancel={() => setProjectEditModalVisible(false)}
+        style={{ width: 500 }}
+      >
+        <Form form={projectForm} layout="vertical">
+          <Form.Item
+            field="name"
+            label="项目名称"
+            rules={[
+              { required: true, message: '请输入项目名称' },
+              { minLength: 2, message: '项目名称至少2个字符' },
+            ]}
+          >
+            <Input placeholder="例如：我的应用" />
+          </Form.Item>
+          <Form.Item
+            field="description"
+            label="项目描述"
+            rules={[{ maxLength: 200, message: '描述不能超过200个字符' }]}
+          >
+            <Input.TextArea
+              placeholder="请输入项目描述"
+              rows={3}
+              maxLength={200}
+              showWordLimit
+            />
+          </Form.Item>
+          <Form.Item
+            field="repository"
+            label="Git 仓库地址"
+            rules={[{ required: true, message: '请输入仓库地址' }]}
+          >
+            <Input placeholder="例如：https://github.com/user/repo.git" />
+          </Form.Item>
         </Form>
       </Modal>
 

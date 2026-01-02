@@ -76,6 +76,7 @@ export const ProjectScalarFieldEnum = {
   name: 'name',
   description: 'description',
   repository: 'repository',
+  projectDir: 'projectDir',
   valid: 'valid',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

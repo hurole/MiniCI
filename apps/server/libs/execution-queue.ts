@@ -61,12 +61,12 @@ export class ExecutionQueue {
       const pendingDeployments = await prisma.deployment.findMany({
         where: {
           status: 'pending',
-          valid: 1
+          valid: 1,
         },
         select: {
           id: true,
-          pipelineId: true
-        }
+          pipelineId: true,
+        },
       });
 
       console.log(`Found ${pendingDeployments.length} pending deployments`);
@@ -126,21 +126,25 @@ export class ExecutionQueue {
       const pendingDeployments = await prisma.deployment.findMany({
         where: {
           status: 'pending',
-          valid: 1
+          valid: 1,
         },
         select: {
           id: true,
-          pipelineId: true
-        }
+          pipelineId: true,
+        },
       });
 
-      console.log(`Found ${pendingDeployments.length} pending deployments in polling`);
+      console.log(
+        `Found ${pendingDeployments.length} pending deployments in polling`,
+      );
 
       // 检查这些任务是否已经在队列中，如果没有则添加
       for (const deployment of pendingDeployments) {
         // 检查是否已经在运行队列中
         if (!runningDeployments.has(deployment.id)) {
-          console.log(`Adding deployment ${deployment.id} to queue from polling`);
+          console.log(
+            `Adding deployment ${deployment.id} to queue from polling`,
+          );
           await this.addTask(deployment.id, deployment.pipelineId);
         }
       }
@@ -154,7 +158,10 @@ export class ExecutionQueue {
    * @param deploymentId 部署ID
    * @param pipelineId 流水线ID
    */
-  public async addTask(deploymentId: number, pipelineId: number): Promise<void> {
+  public async addTask(
+    deploymentId: number,
+    pipelineId: number,
+  ): Promise<void> {
     // 检查是否已经在运行队列中
     if (runningDeployments.has(deploymentId)) {
       console.log(`Deployment ${deploymentId} is already queued or running`);
@@ -196,7 +203,7 @@ export class ExecutionQueue {
       }
 
       // 添加一个小延迟以避免过度占用资源
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     this.isProcessing = false;
@@ -207,9 +214,35 @@ export class ExecutionQueue {
    * @param deploymentId 部署ID
    * @param pipelineId 流水线ID
    */
-  private async executePipeline(deploymentId: number, pipelineId: number): Promise<void> {
+  private async executePipeline(
+    deploymentId: number,
+    pipelineId: number,
+  ): Promise<void> {
     try {
-      const runner = new PipelineRunner(deploymentId);
+      // 获取部署信息以获取项目和 projectDir
+      const deployment = await prisma.deployment.findUnique({
+        where: { id: deploymentId },
+        include: {
+          Project: true,
+        },
+      });
+
+      if (!deployment || !deployment.Project) {
+        throw new Error(
+          `Deployment ${deploymentId} or associated project not found`,
+        );
+      }
+
+      if (!deployment.Project.projectDir) {
+        throw new Error(
+          `项目 "${deployment.Project.name}" 未配置工作目录，无法执行流水线`,
+        );
+      }
+
+      const runner = new PipelineRunner(
+        deploymentId,
+        deployment.Project.projectDir,
+      );
       await runner.run(pipelineId);
     } catch (error) {
       console.error('执行流水线失败:', error);
@@ -227,7 +260,7 @@ export class ExecutionQueue {
   } {
     return {
       pendingCount: pendingQueue.length,
-      runningCount: runningDeployments.size
+      runningCount: runningDeployments.size,
     };
   }
 }

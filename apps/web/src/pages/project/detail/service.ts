@@ -192,6 +192,35 @@ class DetailService {
     });
     return data;
   }
+
+  // 获取项目详情（包含工作目录状态）
+  async getProjectDetail(id: number) {
+    const { data } = await net.request<APIResponse<Project>>({
+      url: `/api/projects/${id}`,
+    });
+    return data;
+  }
+
+  // 更新项目
+  async updateProject(
+    id: number,
+    project: Partial<{ name: string; description: string; repository: string }>,
+  ) {
+    const { data } = await net.request<APIResponse<Project>>({
+      url: `/api/projects/${id}`,
+      method: 'PUT',
+      data: project,
+    });
+    return data;
+  }
+
+  // 删除项目
+  async deleteProject(id: number) {
+    await net.request({
+      url: `/api/projects/${id}`,
+      method: 'DELETE',
+    });
+  }
 }
 
 export const detailService = new DetailService();

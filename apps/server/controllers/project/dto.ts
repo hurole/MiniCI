@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { projectDirSchema } from '../../libs/path-validator.js';
 
 /**
  * 创建项目验证架构
@@ -15,6 +16,8 @@ export const createProjectSchema = z.object({
   repository: z.string({
     message: '仓库地址必须是字符串',
   }).url({ message: '请输入有效的仓库地址' }).min(1, { message: '仓库地址不能为空' }),
+
+  projectDir: projectDirSchema,
 });
 
 /**

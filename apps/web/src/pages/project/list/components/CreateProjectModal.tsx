@@ -1,7 +1,7 @@
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { useState } from 'react';
 import { projectService } from '../service';
-import type { Project } from '../types';
+import type { Project } from '../../types';
 
 interface CreateProjectModalProps {
   visible: boolean;
@@ -96,6 +96,33 @@ function CreateProjectModal({
           ]}
         >
           <Input placeholder="请输入仓库地址，如: https://github.com/user/repo" />
+        </Form.Item>
+
+        <Form.Item
+          label="工作目录路径"
+          field="projectDir"
+          rules={[
+            { required: true, message: '请输入工作目录路径' },
+            {
+              validator: (value, cb) => {
+                if (!value) {
+                  return cb('工作目录路径不能为空');
+                }
+                if (!value.startsWith('/')) {
+                  return cb('工作目录路径必须是绝对路径（以 / 开头）');
+                }
+                if (value.includes('..') || value.includes('~')) {
+                  return cb('不能包含路径遍历字符（.. 或 ~）');
+                }
+                if (/[<>:"|?*\x00-\x1f]/.test(value)) {
+                  return cb('路径包含非法字符');
+                }
+                cb();
+              },
+            },
+          ]}
+        >
+          <Input placeholder="请输入绝对路径，如: /data/projects/my-app" />
         </Form.Item>
       </Form>
     </Modal>
