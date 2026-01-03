@@ -1,7 +1,15 @@
-import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
+import {
+  Button,
+  Collapse,
+  Form,
+  Input,
+  Message,
+  Modal,
+} from '@arco-design/web-react';
 import { useState } from 'react';
-import { projectService } from '../service';
+import EnvPresetsEditor from '../../detail/components/EnvPresetsEditor';
 import type { Project } from '../../types';
+import { projectService } from '../service';
 
 interface CreateProjectModalProps {
   visible: boolean;
@@ -22,7 +30,15 @@ function CreateProjectModal({
       const values = await form.validate();
       setLoading(true);
 
-      const newProject = await projectService.create(values);
+      // 序列化环境预设
+      const submitData = {
+        ...values,
+        envPresets: values.envPresets
+          ? JSON.stringify(values.envPresets)
+          : undefined,
+      };
+
+      const newProject = await projectService.create(submitData);
 
       Message.success('项目创建成功');
       onSuccess(newProject);
@@ -114,7 +130,9 @@ function CreateProjectModal({
                 if (value.includes('..') || value.includes('~')) {
                   return cb('不能包含路径遍历字符（.. 或 ~）');
                 }
-                if (/[<>:"|?*\x00-\x1f]/.test(value)) {
+                // 检查非法字符（控制字符 0x00-0x1F）
+                // biome-ignore lint/suspicious/noControlCharactersInRegex: 需要检测路径中的控制字符
+                if (/[<>:"|?*\u0000-\u001f]/.test(value)) {
                   return cb('路径包含非法字符');
                 }
                 cb();
@@ -124,6 +142,14 @@ function CreateProjectModal({
         >
           <Input placeholder="请输入绝对路径，如: /data/projects/my-app" />
         </Form.Item>
+
+        <Collapse defaultActiveKey={[]} style={{ marginTop: 16 }}>
+          <Collapse.Item header="环境变量预设配置（可选）" name="envPresets">
+            <Form.Item field="envPresets" noStyle>
+              <EnvPresetsEditor />
+            </Form.Item>
+          </Collapse.Item>
+        </Collapse>
       </Form>
     </Modal>
   );

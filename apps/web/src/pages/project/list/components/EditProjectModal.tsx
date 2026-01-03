@@ -1,7 +1,17 @@
-import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
+import {
+  Button,
+  Collapse,
+  Form,
+  Input,
+  Message,
+  Modal,
+} from '@arco-design/web-react';
 import React, { useState } from 'react';
+import EnvPresetsEditor, {
+  type EnvPreset,
+} from '../../detail/components/EnvPresetsEditor';
+import type { Project } from '../../types';
 import { projectService } from '../service';
-import type { Project } from '../types';
 
 interface EditProjectModalProps {
   visible: boolean;
@@ -22,10 +32,20 @@ function EditProjectModal({
   // 当项目信息变化时，更新表单数据
   React.useEffect(() => {
     if (project && visible) {
+      let envPresets: EnvPreset[] = [];
+      try {
+        if (project.envPresets) {
+          envPresets = JSON.parse(project.envPresets);
+        }
+      } catch (error) {
+        console.error('解析环境预设失败:', error);
+      }
+
       form.setFieldsValue({
         name: project.name,
         description: project.description,
         repository: project.repository,
+        envPresets,
       });
     }
   }, [project, visible, form]);
@@ -37,7 +57,18 @@ function EditProjectModal({
 
       if (!project) return;
 
-      const updatedProject = await projectService.update(project.id, values);
+      // 序列化环境预设
+      const submitData = {
+        ...values,
+        envPresets: values.envPresets
+          ? JSON.stringify(values.envPresets)
+          : undefined,
+      };
+
+      const updatedProject = await projectService.update(
+        project.id,
+        submitData,
+      );
 
       Message.success('项目更新成功');
       onSuccess(updatedProject);
@@ -111,6 +142,14 @@ function EditProjectModal({
         >
           <Input placeholder="请输入仓库地址，如: https://github.com/user/repo" />
         </Form.Item>
+
+        <Collapse defaultActiveKey={[]} style={{ marginTop: 16 }}>
+          <Collapse.Item header="环境变量预设配置" name="envPresets">
+            <Form.Item field="envPresets" noStyle>
+              <EnvPresetsEditor />
+            </Form.Item>
+          </Collapse.Item>
+        </Collapse>
       </Form>
     </Modal>
   );

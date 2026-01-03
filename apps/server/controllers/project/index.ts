@@ -1,14 +1,14 @@
 import type { Context } from 'koa';
-import { prisma } from '../../libs/prisma.ts';
-import { log } from '../../libs/logger.ts';
-import { BusinessError } from '../../middlewares/exception.ts';
-import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
+import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
 import { GitManager } from '../../libs/git-manager.ts';
+import { log } from '../../libs/logger.ts';
+import { prisma } from '../../libs/prisma.ts';
+import { BusinessError } from '../../middlewares/exception.ts';
 import {
   createProjectSchema,
-  updateProjectSchema,
   listProjectQuerySchema,
   projectIdSchema,
+  updateProjectSchema,
 } from './dto.ts';
 
 @Controller('/projects')
@@ -135,6 +135,7 @@ export class ProjectController {
         description: validatedData.description || '',
         repository: validatedData.repository,
         projectDir: validatedData.projectDir,
+        envPresets: validatedData.envPresets,
         createdBy: 'system',
         updatedBy: 'system',
         valid: 1,
@@ -181,6 +182,9 @@ export class ProjectController {
     }
     if (validatedData.repository !== undefined) {
       updateData.repository = validatedData.repository;
+    }
+    if (validatedData.envPresets !== undefined) {
+      updateData.envPresets = validatedData.envPresets;
     }
 
     const project = await prisma.project.update({

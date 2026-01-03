@@ -1,6 +1,10 @@
-import type Koa from 'koa';
 import KoaRouter from '@koa/router';
-import { getRouteMetadata, getControllerPrefix, type RouteMetadata } from '../decorators/route.ts';
+import type Koa from 'koa';
+import {
+  getControllerPrefix,
+  getRouteMetadata,
+  type RouteMetadata,
+} from '../decorators/route.ts';
 import { createSuccessResponse } from '../middlewares/exception.ts';
 
 /**
@@ -33,7 +37,7 @@ export class RouteScanner {
    * 注册多个控制器类
    */
   registerControllers(controllers: ControllerClass[]): void {
-    controllers.forEach(controller => this.registerController(controller));
+    controllers.forEach((controller) => this.registerController(controller));
   }
 
   /**
@@ -50,9 +54,12 @@ export class RouteScanner {
     const routes: RouteMetadata[] = getRouteMetadata(ControllerClass);
 
     // 注册每个路由
-    routes.forEach(route => {
+    routes.forEach((route) => {
       const fullPath = this.buildFullPath(controllerPrefix, route.path);
-      const handler = this.wrapControllerMethod(controllerInstance, route.propertyKey);
+      const handler = this.wrapControllerMethod(
+        controllerInstance,
+        route.propertyKey,
+      );
 
       // 根据HTTP方法注册路由
       switch (route.method) {
@@ -87,10 +94,10 @@ export class RouteScanner {
 
     let fullPath = '';
     if (cleanControllerPrefix) {
-      fullPath += '/' + cleanControllerPrefix;
+      fullPath += `/${cleanControllerPrefix}`;
     }
     if (cleanRoutePath) {
-      fullPath += '/' + cleanRoutePath;
+      fullPath += `/${cleanRoutePath}`;
     }
 
     // 如果路径为空，返回根路径
@@ -105,11 +112,11 @@ export class RouteScanner {
       // 调用控制器方法
       const method = instance[methodName];
       if (typeof method !== 'function') {
-        ctx.throw(401, 'Not Found')
+        ctx.throw(401, 'Not Found');
       }
 
       // 绑定this并调用方法
-      const result = await method.call(instance, ctx, next) ?? null;
+      const result = (await method.call(instance, ctx, next)) ?? null;
 
       ctx.body = createSuccessResponse(result);
     };
@@ -133,19 +140,29 @@ export class RouteScanner {
   /**
    * 获取已注册的路由信息（用于调试）
    */
-  getRegisteredRoutes(): Array<{ method: string; path: string; controller: string; action: string }> {
-    const routes: Array<{ method: string; path: string; controller: string; action: string }> = [];
+  getRegisteredRoutes(): Array<{
+    method: string;
+    path: string;
+    controller: string;
+    action: string;
+  }> {
+    const routes: Array<{
+      method: string;
+      path: string;
+      controller: string;
+      action: string;
+    }> = [];
 
-    this.controllers.forEach(ControllerClass => {
+    this.controllers.forEach((ControllerClass) => {
       const controllerPrefix = getControllerPrefix(ControllerClass);
       const routeMetadata = getRouteMetadata(ControllerClass);
 
-      routeMetadata.forEach(route => {
+      routeMetadata.forEach((route) => {
         routes.push({
           method: route.method,
           path: this.buildFullPath(controllerPrefix, route.path),
           controller: ControllerClass.name,
-          action: route.propertyKey
+          action: route.propertyKey,
         });
       });
     });

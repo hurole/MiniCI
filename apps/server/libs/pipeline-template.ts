@@ -18,11 +18,6 @@ export const DEFAULT_PIPELINE_TEMPLATES: PipelineTemplate[] = [
     description: '默认的Git克隆流水线，用于从仓库克隆代码',
     steps: [
       {
-        name: 'Clone Repository',
-        order: 0,
-        script: '# 克隆指定commit的代码\ngit init\ngit remote add origin $REPOSITORY_URL\ngit fetch --depth 1 origin $COMMIT_HASH\ngit checkout -q FETCH_HEAD\n\n# 显示当前提交信息\ngit log --oneline -1',
-      },
-      {
         name: 'Install Dependencies',
         order: 1,
         script: '# 安装项目依赖\nnpm install',
@@ -36,51 +31,21 @@ export const DEFAULT_PIPELINE_TEMPLATES: PipelineTemplate[] = [
         name: 'Build Project',
         order: 3,
         script: '# 构建项目\nnpm run build',
-      }
-    ]
-  },
-  {
-    name: 'Sparse Checkout Pipeline',
-    description: '稀疏检出流水线，适用于monorepo项目，只获取指定目录的代码',
-    steps: [
-      {
-        name: 'Sparse Checkout Repository',
-        order: 0,
-        script: '# 进行稀疏检出指定目录的代码\ngit init\ngit remote add origin $REPOSITORY_URL\ngit config core.sparseCheckout true\necho "$SPARSE_CHECKOUT_PATHS" > .git/info/sparse-checkout\ngit fetch --depth 1 origin $COMMIT_HASH\ngit checkout -q FETCH_HEAD\n\n# 显示当前提交信息\ngit log --oneline -1',
       },
-      {
-        name: 'Install Dependencies',
-        order: 1,
-        script: '# 安装项目依赖\nnpm install',
-      },
-      {
-        name: 'Run Tests',
-        order: 2,
-        script: '# 运行测试\nnpm test',
-      },
-      {
-        name: 'Build Project',
-        order: 3,
-        script: '# 构建项目\nnpm run build',
-      }
-    ]
+    ],
   },
   {
     name: 'Simple Deploy Pipeline',
     description: '简单的部署流水线，包含基本的构建和部署步骤',
     steps: [
       {
-        name: 'Clone Repository',
-        order: 0,
-        script: '# 克隆指定commit的代码\ngit init\ngit remote add origin $REPOSITORY_URL\ngit fetch --depth 1 origin $COMMIT_HASH\ngit checkout -q FETCH_HEAD',
-      },
-      {
         name: 'Build and Deploy',
         order: 1,
-        script: '# 构建并部署项目\nnpm run build\n\n# 部署到目标服务器\n# 这里可以添加具体的部署命令',
-      }
-    ]
-  }
+        script:
+          '# 构建并部署项目\nnpm run build\n\n# 部署到目标服务器\n# 这里可以添加具体的部署命令',
+      },
+    ],
+  },
 ];
 
 /**
@@ -94,10 +59,10 @@ export async function initializePipelineTemplates(): Promise<void> {
     const existingTemplates = await prisma.pipeline.findMany({
       where: {
         name: {
-          in: DEFAULT_PIPELINE_TEMPLATES.map(template => template.name)
+          in: DEFAULT_PIPELINE_TEMPLATES.map((template) => template.name),
         },
-        valid: 1
-      }
+        valid: 1,
+      },
     });
 
     // 如果没有现有的模板，则创建默认模板
@@ -113,8 +78,8 @@ export async function initializePipelineTemplates(): Promise<void> {
             createdBy: 'system',
             updatedBy: 'system',
             valid: 1,
-            projectId: null // 模板不属于任何特定项目
-          }
+            projectId: null, // 模板不属于任何特定项目
+          },
         });
 
         // 创建模板步骤
@@ -127,8 +92,8 @@ export async function initializePipelineTemplates(): Promise<void> {
               pipelineId: pipeline.id,
               createdBy: 'system',
               updatedBy: 'system',
-              valid: 1
-            }
+              valid: 1,
+            },
           });
         }
 
@@ -148,25 +113,27 @@ export async function initializePipelineTemplates(): Promise<void> {
 /**
  * 获取所有可用的流水线模板
  */
-export async function getAvailableTemplates(): Promise<Array<{id: number, name: string, description: string}>> {
+export async function getAvailableTemplates(): Promise<
+  Array<{ id: number; name: string; description: string }>
+> {
   try {
     const templates = await prisma.pipeline.findMany({
       where: {
         projectId: null, // 模板流水线没有关联的项目
-        valid: 1
+        valid: 1,
       },
       select: {
         id: true,
         name: true,
-        description: true
-      }
+        description: true,
+      },
     });
 
     // 处理可能为null的description字段
-    return templates.map(template => ({
+    return templates.map((template) => ({
       id: template.id,
       name: template.name,
-      description: template.description || ''
+      description: template.description || '',
     }));
   } catch (error) {
     console.error('Failed to get pipeline templates:', error);
@@ -185,7 +152,7 @@ export async function createPipelineFromTemplate(
   templateId: number,
   projectId: number,
   pipelineName: string,
-  pipelineDescription: string
+  pipelineDescription: string,
 ): Promise<number> {
   try {
     // 获取模板流水线及其步骤
@@ -193,18 +160,18 @@ export async function createPipelineFromTemplate(
       where: {
         id: templateId,
         projectId: null, // 确保是模板流水线
-        valid: 1
+        valid: 1,
       },
       include: {
         steps: {
           where: {
-            valid: 1
+            valid: 1,
           },
           orderBy: {
-            order: 'asc'
-          }
-        }
-      }
+            order: 'asc',
+          },
+        },
+      },
     });
 
     if (!templatePipeline) {
@@ -219,8 +186,8 @@ export async function createPipelineFromTemplate(
         projectId: projectId,
         createdBy: 'system',
         updatedBy: 'system',
-        valid: 1
-      }
+        valid: 1,
+      },
     });
 
     // 复制模板步骤到新流水线
@@ -233,12 +200,14 @@ export async function createPipelineFromTemplate(
           pipelineId: newPipeline.id,
           createdBy: 'system',
           updatedBy: 'system',
-          valid: 1
-        }
+          valid: 1,
+        },
       });
     }
 
-    console.log(`Created pipeline from template ${templateId}: ${newPipeline.name}`);
+    console.log(
+      `Created pipeline from template ${templateId}: ${newPipeline.name}`,
+    );
     return newPipeline.id;
   } catch (error) {
     console.error('Failed to create pipeline from template:', error);

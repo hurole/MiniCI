@@ -1,15 +1,17 @@
+import type { Context } from 'koa';
 import { Controller, Get, Post } from '../../decorators/route.ts';
 import type { Prisma } from '../../generated/client.ts';
-import { prisma } from '../../libs/prisma.ts';
-import type { Context } from 'koa';
-import { listDeploymentsQuerySchema, createDeploymentSchema } from './dto.ts';
 import { ExecutionQueue } from '../../libs/execution-queue.ts';
+import { prisma } from '../../libs/prisma.ts';
+import { createDeploymentSchema, listDeploymentsQuerySchema } from './dto.ts';
 
 @Controller('/deployments')
 export class DeploymentController {
   @Get('')
   async list(ctx: Context) {
-    const { page, pageSize, projectId } = listDeploymentsQuerySchema.parse(ctx.query);
+    const { page, pageSize, projectId } = listDeploymentsQuerySchema.parse(
+      ctx.query,
+    );
     const where: Prisma.DeploymentWhereInput = {
       valid: 1,
     };
@@ -50,8 +52,7 @@ export class DeploymentController {
           connect: { id: body.projectId },
         },
         pipelineId: body.pipelineId,
-        env: body.env || 'dev',
-        sparseCheckoutPaths: body.sparseCheckoutPaths || '', // 添加稀疏检出路径
+        envVars: body.envVars ? JSON.stringify(body.envVars) : null,
         buildLog: '',
         createdBy: 'system', // TODO: get from user
         updatedBy: 'system',
@@ -73,7 +74,7 @@ export class DeploymentController {
 
     // 获取原始部署记录
     const originalDeployment = await prisma.deployment.findUnique({
-      where: { id: Number(id) }
+      where: { id: Number(id) },
     });
 
     if (!originalDeployment) {
@@ -82,7 +83,7 @@ export class DeploymentController {
         code: 404,
         message: '部署记录不存在',
         data: null,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       return;
     }
@@ -96,8 +97,7 @@ export class DeploymentController {
         status: 'pending',
         projectId: originalDeployment.projectId,
         pipelineId: originalDeployment.pipelineId,
-        env: originalDeployment.env,
-        sparseCheckoutPaths: originalDeployment.sparseCheckoutPaths,
+        envVars: originalDeployment.envVars,
         buildLog: '',
         createdBy: 'system',
         updatedBy: 'system',
@@ -113,7 +113,7 @@ export class DeploymentController {
       code: 0,
       message: '重新执行任务已创建',
       data: newDeployment,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 }

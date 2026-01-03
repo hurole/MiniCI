@@ -36,6 +36,7 @@ export interface Project {
   description: string;
   repository: string;
   projectDir: string; // 项目工作目录路径（必填）
+  envPresets?: string; // 环境预设配置（JSON格式）
   valid: number;
   createdAt: string;
   updatedAt: string;
@@ -77,12 +78,11 @@ export interface Pipeline {
 export interface Deployment {
   id: number;
   branch: string;
-  env?: string;
+  envVars?: string; // JSON 字符串
   status: string;
   commitHash?: string;
   commitMessage?: string;
   buildLog?: string;
-  sparseCheckoutPaths?: string; // 稀疏检出路径，用于monorepo项目
   startedAt: string;
   finishedAt?: string;
   valid: number;
@@ -127,6 +127,5 @@ export interface CreateDeploymentRequest {
   branch: string;
   commitHash: string;
   commitMessage: string;
-  env?: string;
-  sparseCheckoutPaths?: string; // 稀疏检出路径，用于monorepo项目
+  envVars?: Record<string, string>; // 环境变量 key-value 对象
 }

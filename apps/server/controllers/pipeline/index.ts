@@ -1,14 +1,17 @@
 import type { Context } from 'koa';
-import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
-import { prisma } from '../../libs/prisma.ts';
+import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
 import { log } from '../../libs/logger.ts';
+import {
+  createPipelineFromTemplate,
+  getAvailableTemplates,
+} from '../../libs/pipeline-template.ts';
+import { prisma } from '../../libs/prisma.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
-import { getAvailableTemplates, createPipelineFromTemplate } from '../../libs/pipeline-template.ts';
 import {
   createPipelineSchema,
-  updatePipelineSchema,
-  pipelineIdSchema,
   listPipelinesQuerySchema,
+  pipelineIdSchema,
+  updatePipelineSchema,
 } from './dto.ts';
 
 @Controller('/pipelines')
@@ -46,7 +49,7 @@ export class PipelineController {
 
   // GET /api/pipelines/templates - 获取可用的流水线模板
   @Get('/templates')
-  async getTemplates(ctx: Context) {
+  async getTemplates(_ctx: Context) {
     try {
       const templates = await getAvailableTemplates();
       return templates;
@@ -126,7 +129,7 @@ export class PipelineController {
         templateId,
         projectId,
         name,
-        description || ''
+        description || '',
       );
 
       // 返回新创建的流水线

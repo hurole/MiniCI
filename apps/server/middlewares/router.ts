@@ -1,17 +1,17 @@
 import KoaRouter from '@koa/router';
 import type Koa from 'koa';
-import type { Middleware } from './types.ts';
-import { RouteScanner } from '../libs/route-scanner.ts';
 import {
-  ProjectController,
-  UserController,
   AuthController,
   DeploymentController,
+  GitController,
   PipelineController,
+  ProjectController,
   StepController,
-  GitController
+  UserController,
 } from '../controllers/index.ts';
 import { log } from '../libs/logger.ts';
+import { RouteScanner } from '../libs/route-scanner.ts';
+import type { Middleware } from './types.ts';
 
 export class Router implements Middleware {
   private router: KoaRouter;
@@ -45,7 +45,7 @@ export class Router implements Middleware {
       DeploymentController,
       PipelineController,
       StepController,
-      GitController
+      GitController,
     ]);
 
     // 输出注册的路由信息

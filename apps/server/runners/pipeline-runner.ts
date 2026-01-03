@@ -1,8 +1,8 @@
 import { $ } from 'zx';
-import { prisma } from '../libs/prisma.ts';
 import type { Step } from '../generated/client.ts';
 import { GitManager, WorkspaceDirStatus } from '../libs/git-manager.ts';
 import { log } from '../libs/logger.ts';
+import { prisma } from '../libs/prisma.ts';
 
 export class PipelineRunner {
   private readonly TAG = 'PipelineRunner';
@@ -81,7 +81,7 @@ export class PipelineRunner {
 
         // 执行步骤
         const stepLog = await this.executeStep(step, envVars);
-        logs += stepLog + '\n';
+        logs += `${stepLog}\n`;
 
         // 记录步骤执行完成的日志
         const endLog = `[${new Date().toISOString()}] 步骤 "${step.name}" 执行完成\n`;
@@ -215,12 +215,18 @@ export class PipelineRunner {
     envVars.BRANCH_NAME = deployment.branch || '';
     envVars.COMMIT_HASH = deployment.commitHash || '';
 
-    // 稀疏检出路径（如果有配置的话）
-    envVars.SPARSE_CHECKOUT_PATHS = deployment.sparseCheckoutPaths || '';
+    // 注入用户配置的环境变量
+    if (deployment.envVars) {
+      try {
+        const userEnvVars = JSON.parse(deployment.envVars);
+        Object.assign(envVars, userEnvVars);
+      } catch (error) {
+        console.error('解析环境变量失败:', error);
+      }
+    }
 
     // 工作空间路径（使用配置的项目目录）
     envVars.WORKSPACE = this.projectDir;
-    envVars.PROJECT_DIR = this.projectDir;
 
     return envVars;
   }
@@ -248,13 +254,11 @@ export class PipelineRunner {
   private addTimestampToLines(content: string, isError = false): string {
     if (!content) return '';
 
-    return (
-      content
-        .split('\n')
-        .filter((line) => line.trim() !== '')
-        .map((line) => this.addTimestamp(line, isError))
-        .join('\n') + '\n'
-    );
+    return `${content
+      .split('\n')
+      .filter((line) => line.trim() !== '')
+      .map((line) => this.addTimestamp(line, isError))
+      .join('\n')}\n`;
   }
 
   /**
@@ -270,7 +274,7 @@ export class PipelineRunner {
 
     try {
       // 添加步骤开始执行的时间戳
-      logs += this.addTimestamp(`执行脚本: ${step.script}`) + '\n';
+      logs += `${this.addTimestamp(`执行脚本: ${step.script}`)}\n`;
 
       // 使用zx执行脚本，设置项目目录为工作目录和环境变量
       const script = step.script;
@@ -291,10 +295,10 @@ export class PipelineRunner {
         logs += this.addTimestampToLines(result.stderr, true);
       }
 
-      logs += this.addTimestamp(`步骤执行完成`) + '\n';
+      logs += `${this.addTimestamp(`步骤执行完成`)}\n`;
     } catch (error) {
       const errorMsg = `Error executing step "${step.name}": ${(error as Error).message}`;
-      logs += this.addTimestamp(errorMsg, true) + '\n';
+      logs += `${this.addTimestamp(errorMsg, true)}\n`;
       log.error(this.TAG, errorMsg);
       throw error;
     }

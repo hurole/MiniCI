@@ -19,6 +19,7 @@ import {
 } from '@arco-design/web-react';
 import {
   IconCode,
+  IconCommand,
   IconCopy,
   IconDelete,
   IconEdit,
@@ -49,9 +50,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
 import { formatDateTime } from '../../../utils/time';
-import type { Deployment, Pipeline, Project, Step, WorkspaceDirStatus, WorkspaceStatus } from '../types';
+import type { Deployment, Pipeline, Project, Step } from '../types';
 import DeployModal from './components/DeployModal';
 import DeployRecordItem from './components/DeployRecordItem';
+import EnvPresetsEditor, {
+  type EnvPreset,
+} from './components/EnvPresetsEditor';
 import PipelineStepItem from './components/PipelineStepItem';
 import { detailService } from './service';
 
@@ -84,7 +88,8 @@ function ProjectDetailPage() {
     null,
   );
   const [pipelineModalVisible, setPipelineModalVisible] = useState(false);
-  const [editingPipeline, setEditingPipeline] = useState<PipelineWithEnabled | null>(null);
+  const [editingPipeline, setEditingPipeline] =
+    useState<PipelineWithEnabled | null>(null);
   const [form] = Form.useForm();
   const [pipelineForm] = Form.useForm();
   const [deployRecords, setDeployRecords] = useState<Deployment[]>([]);
@@ -92,12 +97,18 @@ function ProjectDetailPage() {
 
   // 流水线模板相关状态
   const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
-  const [templates, setTemplates] = useState<Array<{id: number, name: string, description: string}>>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
+    null,
+  );
+  const [templates, setTemplates] = useState<
+    Array<{ id: number; name: string; description: string }>
+  >([]);
 
   // 项目设置相关状态
-  const [projectEditModalVisible, setProjectEditModalVisible] = useState(false);
+  const [isEditingProject, setIsEditingProject] = useState(false);
   const [projectForm] = Form.useForm();
+  const [envPresets, setEnvPresets] = useState<EnvPreset[]>([]);
+  const [envPresetsLoading, setEnvPresetsLoading] = useState(false);
 
   const { id } = useParams();
 
@@ -172,8 +183,14 @@ function ProjectDetailPage() {
           setDeployRecords(records);
 
           // 如果当前选中的记录正在运行，则更新选中记录
-          const selectedRecord = records.find((r: Deployment) => r.id === selectedRecordId);
-          if (selectedRecord && (selectedRecord.status === 'running' || selectedRecord.status === 'pending')) {
+          const selectedRecord = records.find(
+            (r: Deployment) => r.id === selectedRecordId,
+          );
+          if (
+            selectedRecord &&
+            (selectedRecord.status === 'running' ||
+              selectedRecord.status === 'pending')
+          ) {
             // 保持当前选中状态，但更新数据
           }
         } catch (error) {
@@ -354,14 +371,15 @@ function ProjectDetailPage() {
           selectedTemplateId,
           Number(id),
           values.name,
-          values.description || ''
+          values.description || '',
         );
 
         // 更新本地状态 - 需要转换步骤数据结构
-        const transformedSteps = newPipeline.steps?.map(step => ({
-          ...step,
-          enabled: step.valid === 1
-        })) || [];
+        const transformedSteps =
+          newPipeline.steps?.map((step) => ({
+            ...step,
+            enabled: step.valid === 1,
+          })) || [];
 
         const pipelineWithDefaults = {
           ...newPipeline,
@@ -592,6 +610,21 @@ function ProjectDetailPage() {
     }
   };
 
+  // 解析环境变量预设
+  useEffect(() => {
+    if (detail?.envPresets) {
+      try {
+        const presets = JSON.parse(detail.envPresets);
+        setEnvPresets(presets);
+      } catch (error) {
+        console.error('解析环境变量预设失败:', error);
+        setEnvPresets([]);
+      }
+    } else {
+      setEnvPresets([]);
+    }
+  }, [detail]);
+
   // 项目设置相关函数
   const handleEditProject = () => {
     if (detail) {
@@ -600,16 +633,21 @@ function ProjectDetailPage() {
         description: detail.description,
         repository: detail.repository,
       });
-      setProjectEditModalVisible(true);
+      setIsEditingProject(true);
     }
   };
 
-  const handleProjectEditSuccess = async () => {
+  const handleCancelEditProject = () => {
+    setIsEditingProject(false);
+    projectForm.resetFields();
+  };
+
+  const handleSaveProject = async () => {
     try {
       const values = await projectForm.validate();
       await detailService.updateProject(Number(id), values);
       Message.success('项目更新成功');
-      setProjectEditModalVisible(false);
+      setIsEditingProject(false);
 
       // 刷新项目详情
       if (id) {
@@ -619,6 +657,27 @@ function ProjectDetailPage() {
     } catch (error) {
       console.error('更新项目失败:', error);
       Message.error('更新项目失败');
+    }
+  };
+
+  const handleSaveEnvPresets = async () => {
+    try {
+      setEnvPresetsLoading(true);
+      await detailService.updateProject(Number(id), {
+        envPresets: JSON.stringify(envPresets),
+      });
+      Message.success('环境变量预设保存成功');
+
+      // 刷新项目详情
+      if (id) {
+        const projectDetail = await detailService.getProjectDetail(Number(id));
+        setDetail(projectDetail);
+      }
+    } catch (error) {
+      console.error('保存环境变量预设失败:', error);
+      Message.error('保存环境变量预设失败');
+    } finally {
+      setEnvPresetsLoading(false);
     }
   };
 
@@ -671,7 +730,7 @@ function ProjectDetailPage() {
   );
 
   // 获取选中的流水线
-  const selectedPipeline = pipelines.find(
+  const _selectedPipeline = pipelines.find(
     (pipeline) => pipeline.id === selectedPipelineId,
   );
 
@@ -681,11 +740,13 @@ function ProjectDetailPage() {
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+    return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
   };
 
   // 获取工作目录状态标签
-  const getWorkspaceStatusTag = (status: string): { text: string; color: string } => {
+  const getWorkspaceStatusTag = (
+    status: string,
+  ): { text: string; color: string } => {
     const statusMap: Record<string, { text: string; color: string }> = {
       not_created: { text: '未创建', color: 'gray' },
       empty: { text: '空目录', color: 'orange' },
@@ -703,7 +764,15 @@ function ProjectDetailPage() {
     const statusInfo = getWorkspaceStatusTag(workspaceStatus.status as string);
 
     return (
-      <Card className="mb-6" title={<Space><IconFolder />工作目录状态</Space>}>
+      <Card
+        className="mb-6"
+        title={
+          <Space>
+            <IconFolder />
+            工作目录状态
+          </Space>
+        }
+      >
         <Descriptions
           column={2}
           data={[
@@ -717,7 +786,9 @@ function ProjectDetailPage() {
             },
             {
               label: '目录大小',
-              value: workspaceStatus.size ? formatSize(workspaceStatus.size) : '-',
+              value: workspaceStatus.size
+                ? formatSize(workspaceStatus.size)
+                : '-',
             },
             {
               label: '当前分支',
@@ -727,16 +798,24 @@ function ProjectDetailPage() {
               label: '最后提交',
               value: workspaceStatus.gitInfo?.lastCommit ? (
                 <Space direction="vertical" size="mini">
-                  <Typography.Text code>{workspaceStatus.gitInfo.lastCommit}</Typography.Text>
-                  <Typography.Text type="secondary">{workspaceStatus.gitInfo.lastCommitMessage}</Typography.Text>
+                  <Typography.Text code>
+                    {workspaceStatus.gitInfo.lastCommit}
+                  </Typography.Text>
+                  <Typography.Text type="secondary">
+                    {workspaceStatus.gitInfo.lastCommitMessage}
+                  </Typography.Text>
                 </Space>
-              ) : '-',
+              ) : (
+                '-'
+              ),
             },
           ]}
         />
         {workspaceStatus.error && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
-            <Typography.Text type="danger">{workspaceStatus.error}</Typography.Text>
+            <Typography.Text type="danger">
+              {workspaceStatus.error}
+            </Typography.Text>
           </div>
         )}
       </Card>
@@ -763,7 +842,15 @@ function ProjectDetailPage() {
           size="large"
           className="h-full flex flex-col [&>.arco-tabs-content]:flex-1 [&>.arco-tabs-content]:overflow-hidden [&>.arco-tabs-content_.arco-tabs-content-inner]:h-full [&>.arco-tabs-pane]:h-full"
         >
-          <Tabs.TabPane title={<Space><IconHistory />部署记录</Space>} key="deployRecords">
+          <Tabs.TabPane
+            title={
+              <Space>
+                <IconHistory />
+                部署记录
+              </Space>
+            }
+            key="deployRecords"
+          >
             <div className="grid grid-cols-5 gap-6 h-full">
               {/* 左侧部署记录列表 */}
               <div className="col-span-2 space-y-4 h-full flex flex-col">
@@ -813,7 +900,9 @@ function ProjectDetailPage() {
                             type="primary"
                             icon={<IconRefresh />}
                             size="small"
-                            onClick={() => handleRetryDeployment(selectedRecord.id)}
+                            onClick={() =>
+                              handleRetryDeployment(selectedRecord.id)
+                            }
                           >
                             重新执行
                           </Button>
@@ -838,7 +927,15 @@ function ProjectDetailPage() {
               </div>
             </div>
           </Tabs.TabPane>
-          <Tabs.TabPane title={<Space><IconCode />流水线</Space>} key="pipeline">
+          <Tabs.TabPane
+            title={
+              <Space>
+                <IconCode />
+                流水线
+              </Space>
+            }
+            key="pipeline"
+          >
             <div className="grid grid-cols-5 gap-6 h-full">
               {/* 左侧流水线列表 */}
               <div className="col-span-2 space-y-4">
@@ -951,9 +1048,7 @@ function ProjectDetailPage() {
                               {pipeline.description}
                             </Typography.Text>
                             <div className="flex items-center justify-between text-xs text-gray-500">
-                              <span>
-                                {pipeline.steps?.length || 0} 个步骤
-                              </span>
+                              <span>{pipeline.steps?.length || 0} 个步骤</span>
                               <span>{formatDateTime(pipeline.updatedAt)}</span>
                             </div>
                           </div>
@@ -1005,7 +1100,11 @@ function ProjectDetailPage() {
                             onDragEnd={handleDragEnd}
                           >
                             <SortableContext
-                              items={selectedPipeline.steps?.map(step => step.id) || []}
+                              items={
+                                selectedPipeline.steps?.map(
+                                  (step) => step.id,
+                                ) || []
+                              }
                               strategy={verticalListSortingStrategy}
                             >
                               <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
@@ -1046,46 +1145,138 @@ function ProjectDetailPage() {
           </Tabs.TabPane>
 
           {/* 项目设置标签页 */}
-          <Tabs.TabPane key="settings" title={<Space><IconSettings />项目设置</Space>}>
+          <Tabs.TabPane
+            key="settings"
+            title={
+              <Space>
+                <IconSettings />
+                项目设置
+              </Space>
+            }
+          >
             <div className="p-6">
               <Card title="项目信息" className="mb-4">
-                <Descriptions
-                  column={1}
-                  data={[
-                    {
-                      label: '项目名称',
-                      value: detail?.name,
-                    },
-                    {
-                      label: '项目描述',
-                      value: detail?.description || '-',
-                    },
-                    {
-                      label: 'Git 仓库',
-                      value: detail?.repository,
-                    },
-                    {
-                      label: '工作目录',
-                      value: detail?.projectDir || '-',
-                    },
-                    {
-                      label: '创建时间',
-                      value: formatDateTime(detail?.createdAt),
-                    },
-                  ]}
-                />
-                <div className="mt-4 flex gap-2">
-                  <Button type="primary" onClick={handleEditProject}>
-                    编辑项目
-                  </Button>
-                  <Button status="danger" onClick={handleDeleteProject}>
-                    删除项目
-                  </Button>
-                </div>
+                {!isEditingProject ? (
+                  <>
+                    <Descriptions
+                      column={1}
+                      data={[
+                        {
+                          label: '项目名称',
+                          value: detail?.name,
+                        },
+                        {
+                          label: '项目描述',
+                          value: detail?.description || '-',
+                        },
+                        {
+                          label: 'Git 仓库',
+                          value: detail?.repository,
+                        },
+                        {
+                          label: '工作目录',
+                          value: detail?.projectDir || '-',
+                        },
+                        {
+                          label: '创建时间',
+                          value: formatDateTime(detail?.createdAt),
+                        },
+                      ]}
+                    />
+                    <div className="mt-4 flex gap-2">
+                      <Button type="primary" onClick={handleEditProject}>
+                        编辑项目
+                      </Button>
+                      <Button status="danger" onClick={handleDeleteProject}>
+                        删除项目
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Form form={projectForm} layout="vertical">
+                      <Form.Item
+                        field="name"
+                        label="项目名称"
+                        rules={[
+                          { required: true, message: '请输入项目名称' },
+                          { minLength: 2, message: '项目名称至少2个字符' },
+                        ]}
+                      >
+                        <Input placeholder="例如：我的应用" />
+                      </Form.Item>
+                      <Form.Item
+                        field="description"
+                        label="项目描述"
+                        rules={[
+                          { maxLength: 200, message: '描述不能超过200个字符' },
+                        ]}
+                      >
+                        <Input.TextArea
+                          placeholder="请输入项目描述"
+                          rows={3}
+                          maxLength={200}
+                          showWordLimit
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        field="repository"
+                        label="Git 仓库地址"
+                        rules={[{ required: true, message: '请输入仓库地址' }]}
+                      >
+                        <Input placeholder="例如：https://github.com/user/repo.git" />
+                      </Form.Item>
+                      <div className="text-sm text-gray-500 mb-4">
+                        <strong>工作目录：</strong> {detail?.projectDir || '-'}
+                      </div>
+                      <div className="text-sm text-gray-500 mb-4">
+                        <strong>创建时间：</strong>{' '}
+                        {formatDateTime(detail?.createdAt)}
+                      </div>
+                    </Form>
+                    <div className="mt-4 flex gap-2">
+                      <Button type="primary" onClick={handleSaveProject}>
+                        保存
+                      </Button>
+                      <Button onClick={handleCancelEditProject}>取消</Button>
+                    </div>
+                  </>
+                )}
               </Card>
 
               {/* 工作目录状态 */}
               {renderWorkspaceStatus()}
+            </div>
+          </Tabs.TabPane>
+
+          {/* 环境变量预设标签页 */}
+          <Tabs.TabPane
+            key="envPresets"
+            title={
+              <Space>
+                <IconCommand />
+                环境变量
+              </Space>
+            }
+          >
+            <div className="p-6">
+              <Card
+                title="环境变量预设"
+                extra={
+                  <Button
+                    type="primary"
+                    onClick={handleSaveEnvPresets}
+                    loading={envPresetsLoading}
+                  >
+                    保存预设
+                  </Button>
+                }
+              >
+                <div className="text-sm text-gray-600 mb-4">
+                  配置项目的环境变量预设，在部署时可以选择这些预设值。支持单选、多选和输入框类型。
+                </div>
+                <EnvPresetsEditor value={envPresets} onChange={setEnvPresets} />
+              </Card>
             </div>
           </Tabs.TabPane>
         </Tabs>
@@ -1139,7 +1330,9 @@ function ProjectDetailPage() {
                     <Select.Option key={template.id} value={template.id}>
                       <div>
                         <div>{template.name}</div>
-                        <div className="text-xs text-gray-500">{template.description}</div>
+                        <div className="text-xs text-gray-500">
+                          {template.description}
+                        </div>
                       </div>
                     </Select.Option>
                   ))}
@@ -1155,10 +1348,7 @@ function ProjectDetailPage() {
                   >
                     <Input placeholder="例如：前端部署流水线、Docker部署流水线..." />
                   </Form.Item>
-                  <Form.Item
-                    field="description"
-                    label="流水线描述"
-                  >
+                  <Form.Item field="description" label="流水线描述">
                     <Input.TextArea
                       placeholder="描述这个流水线的用途和特点..."
                       rows={3}
@@ -1176,10 +1366,7 @@ function ProjectDetailPage() {
               >
                 <Input placeholder="例如：前端部署流水线、Docker部署流水线..." />
               </Form.Item>
-              <Form.Item
-                field="description"
-                label="流水线描述"
-              >
+              <Form.Item field="description" label="流水线描述">
                 <Input.TextArea
                   placeholder="描述这个流水线的用途和特点..."
                   rows={3}
@@ -1228,47 +1415,6 @@ function ProjectDetailPage() {
         </Form>
       </Modal>
 
-      {/* 编辑项目模态框 */}
-      <Modal
-        title="编辑项目"
-        visible={projectEditModalVisible}
-        onOk={handleProjectEditSuccess}
-        onCancel={() => setProjectEditModalVisible(false)}
-        style={{ width: 500 }}
-      >
-        <Form form={projectForm} layout="vertical">
-          <Form.Item
-            field="name"
-            label="项目名称"
-            rules={[
-              { required: true, message: '请输入项目名称' },
-              { minLength: 2, message: '项目名称至少2个字符' },
-            ]}
-          >
-            <Input placeholder="例如：我的应用" />
-          </Form.Item>
-          <Form.Item
-            field="description"
-            label="项目描述"
-            rules={[{ maxLength: 200, message: '描述不能超过200个字符' }]}
-          >
-            <Input.TextArea
-              placeholder="请输入项目描述"
-              rows={3}
-              maxLength={200}
-              showWordLimit
-            />
-          </Form.Item>
-          <Form.Item
-            field="repository"
-            label="Git 仓库地址"
-            rules={[{ required: true, message: '请输入仓库地址' }]}
-          >
-            <Input placeholder="例如：https://github.com/user/repo.git" />
-          </Form.Item>
-        </Form>
-      </Modal>
-
       <DeployModal
         visible={deployModalVisible}
         onCancel={() => setDeployModalVisible(false)}
@@ -1286,6 +1432,7 @@ function ProjectDetailPage() {
         }}
         pipelines={pipelines}
         projectId={Number(id)}
+        project={detail}
       />
     </div>
   );

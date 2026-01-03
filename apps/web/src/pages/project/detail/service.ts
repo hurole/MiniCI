@@ -1,5 +1,13 @@
 import { type APIResponse, net } from '@shared';
-import type { Branch, Commit, Deployment, Pipeline, Project, Step, CreateDeploymentRequest } from '../types';
+import type {
+  Branch,
+  Commit,
+  CreateDeploymentRequest,
+  Deployment,
+  Pipeline,
+  Project,
+  Step,
+} from '../types';
 
 class DetailService {
   async getProject(id: string) {
@@ -19,7 +27,9 @@ class DetailService {
 
   // 获取可用的流水线模板
   async getPipelineTemplates() {
-    const { data } = await net.request<APIResponse<{id: number, name: string, description: string}[]>>({
+    const { data } = await net.request<
+      APIResponse<{ id: number; name: string; description: string }[]>
+    >({
       url: '/api/pipelines/templates',
     });
     return data;
@@ -59,7 +69,7 @@ class DetailService {
     templateId: number,
     projectId: number,
     name: string,
-    description?: string
+    description?: string,
   ) {
     const { data } = await net.request<APIResponse<Pipeline>>({
       url: '/api/pipelines/from-template',
@@ -68,7 +78,7 @@ class DetailService {
         templateId,
         projectId,
         name,
-        description
+        description,
       },
     });
     return data;

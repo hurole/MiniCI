@@ -1,5 +1,5 @@
-import bodyParser from 'koa-bodyparser';
 import type Koa from 'koa';
+import bodyParser from 'koa-bodyparser';
 import type { Middleware } from './types.ts';
 
 /**

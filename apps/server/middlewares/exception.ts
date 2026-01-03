@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import { z } from 'zod';
-import type { Middleware } from './types.ts';
 import { log } from '../libs/logger.ts';
+import type { Middleware } from './types.ts';
 
 /**
  * 统一响应体结构
@@ -58,15 +58,26 @@ export class Exception implements Middleware {
       const errorMessage = firstError?.message || '参数验证失败';
       const fieldPath = firstError?.path?.join('.') || 'unknown';
 
-      log.info('Exception', 'Zod validation failed: %s at %s', errorMessage, fieldPath);
-      this.sendResponse(ctx, 1003, errorMessage, {
-        field: fieldPath,
-        validationErrors: error.issues.map(issue => ({
-          field: issue.path.join('.'),
-          message: issue.message,
-          code: issue.code,
-        }))
-      }, 400);
+      log.info(
+        'Exception',
+        'Zod validation failed: %s at %s',
+        errorMessage,
+        fieldPath,
+      );
+      this.sendResponse(
+        ctx,
+        1003,
+        errorMessage,
+        {
+          field: fieldPath,
+          validationErrors: error.issues.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+            code: issue.code,
+          })),
+        },
+        400,
+      );
     } else if (error instanceof BusinessError) {
       // 业务异常
       this.sendResponse(ctx, error.code, error.message, null, error.httpStatus);

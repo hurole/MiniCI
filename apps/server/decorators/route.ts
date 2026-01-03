@@ -25,17 +25,24 @@ const metadataStore = new WeakMap<any, Map<string | symbol, any>>();
 /**
  * 设置元数据（降级方案）
  */
-function setMetadata<T = any>(key: string | symbol, value: T, target: any): void {
+function setMetadata<T = any>(
+  key: string | symbol,
+  value: T,
+  target: any,
+): void {
   if (!metadataStore.has(target)) {
     metadataStore.set(target, new Map());
   }
-  metadataStore.get(target)!.set(key, value);
+  metadataStore.get(target)?.set(key, value);
 }
 
 /**
  * 获取元数据（降级方案）
  */
-function getMetadata<T = any>(key: string | symbol, target: any): T | undefined {
+function getMetadata<T = any>(
+  key: string | symbol,
+  target: any,
+): T | undefined {
   return metadataStore.get(target)?.get(key);
 }
 
@@ -43,24 +50,28 @@ function getMetadata<T = any>(key: string | symbol, target: any): T | undefined 
  * 创建HTTP方法装饰器的工厂函数（TC39标准）
  */
 function createMethodDecorator(method: HttpMethod) {
-  return function (path: string = '') {
-    return function <This, Args extends any[], Return>(
+  return (path: string = '') =>
+    <This, Args extends any[], Return>(
       target: (this: This, ...args: Args) => Return,
-      context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>
-    ) {
+      context: ClassMethodDecoratorContext<
+        This,
+        (this: This, ...args: Args) => Return
+      >,
+    ) => {
       // 在类初始化时执行
       context.addInitializer(function () {
         // 使用 this.constructor 时需要类型断言
         const ctor = (this as any).constructor;
 
         // 获取现有的路由元数据
-        const existingRoutes: RouteMetadata[] = getMetadata(ROUTE_METADATA_KEY, ctor) || [];
+        const existingRoutes: RouteMetadata[] =
+          getMetadata(ROUTE_METADATA_KEY, ctor) || [];
 
         // 添加新的路由元数据
         const newRoute: RouteMetadata = {
           method,
           path,
-          propertyKey: String(context.name)
+          propertyKey: String(context.name),
         };
 
         existingRoutes.push(newRoute);
@@ -71,7 +82,6 @@ function createMethodDecorator(method: HttpMethod) {
 
       return target;
     };
-  };
 }
 
 /**
@@ -109,10 +119,10 @@ export const Patch = createMethodDecorator('PATCH');
  * @param prefix 路由前缀
  */
 export function Controller(prefix: string = '') {
-  return function <T extends abstract new (...args: any) => any>(
+  return <T extends abstract new (...args: any) => any>(
     target: T,
-    context: ClassDecoratorContext<T>
-  ) {
+    context: ClassDecoratorContext<T>,
+  ) => {
     // 在类初始化时保存控制器前缀
     context.addInitializer(function () {
       setMetadata('prefix', prefix, this);

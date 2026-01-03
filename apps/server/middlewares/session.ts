@@ -1,5 +1,5 @@
-import session from 'koa-session';
 import type Koa from 'koa';
+import session from 'koa-session';
 import type { Middleware } from './types.ts';
 
 export class Session implements Middleware {

@@ -1,11 +1,11 @@
-import { Router } from './router.ts';
-import { Exception } from './exception.ts';
-import { BodyParser } from './body-parser.ts';
-import { Session } from './session.ts';
-import { CORS } from './cors.ts';
-import { HttpLogger } from './logger.ts';
 import type Koa from 'koa';
 import { Authorization } from './authorization.ts';
+import { BodyParser } from './body-parser.ts';
+import { CORS } from './cors.ts';
+import { Exception } from './exception.ts';
+import { HttpLogger } from './logger.ts';
+import { Router } from './router.ts';
+import { Session } from './session.ts';
 
 /**
  * 初始化中间件

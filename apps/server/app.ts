@@ -1,8 +1,8 @@
 import Koa from 'koa';
-import { initMiddlewares } from './middlewares/index.ts';
-import { log } from './libs/logger.ts';
 import { ExecutionQueue } from './libs/execution-queue.ts';
+import { log } from './libs/logger.ts';
 import { initializePipelineTemplates } from './libs/pipeline-template.ts';
+import { initMiddlewares } from './middlewares/index.ts';
 
 // 初始化应用
 async function initializeApp() {
@@ -26,7 +26,7 @@ async function initializeApp() {
 }
 
 // 启动应用
-initializeApp().catch(error => {
+initializeApp().catch((error) => {
   console.error('Failed to start application:', error);
   process.exit(1);
 });

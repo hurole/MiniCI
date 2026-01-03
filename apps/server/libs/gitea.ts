@@ -38,26 +38,23 @@ class Gitea {
       clientId: process.env.GITEA_CLIENT_ID!,
       clientSecret: process.env.GITEA_CLIENT_SECRET!,
       redirectUri: process.env.GITEA_REDIRECT_URI!,
-    }
+    };
   }
 
   async getToken(code: string) {
     const { giteaUrl, clientId, clientSecret, redirectUri } = this.config;
     console.log('this.config', this.config);
-    const response = await fetch(
-      `${giteaUrl}/login/oauth/access_token`,
-      {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({
-          client_id: clientId,
-          client_secret: clientSecret,
-          code,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUri,
-        }),
-      },
-    );
+    const response = await fetch(`${giteaUrl}/login/oauth/access_token`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+      }),
+    });
     if (!response.ok) {
       console.log(await response.json());
       throw new Error(`Fetch failed: ${response.status}`);
@@ -108,19 +105,23 @@ class Gitea {
    * @param accessToken 访问令牌
    * @param sha 分支名称或提交SHA
    */
-  async getCommits(owner: string, repo: string, accessToken: string, sha?: string) {
-    const url = new URL(`${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/commits`);
+  async getCommits(
+    owner: string,
+    repo: string,
+    accessToken: string,
+    sha?: string,
+  ) {
+    const url = new URL(
+      `${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/commits`,
+    );
     if (sha) {
       url.searchParams.append('sha', sha);
     }
-    
-    const response = await fetch(
-      url.toString(),
-      {
-        method: 'GET',
-        headers: this.getHeaders(accessToken),
-      },
-    );
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: this.getHeaders(accessToken),
+    });
     if (!response.ok) {
       throw new Error(`Fetch failed: ${response.status}`);
     }
@@ -133,7 +134,7 @@ class Gitea {
       'Content-Type': 'application/json',
     };
     if (accessToken) {
-      headers['Authorization'] = `token ${accessToken}`;
+      headers.Authorization = `token ${accessToken}`;
     }
     return headers;
   }

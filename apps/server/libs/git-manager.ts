@@ -3,9 +3,9 @@
  * 封装 Git 操作：克隆、更新、分支切换等
  */
 
-import { $ } from 'zx';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { $ } from 'zx';
 import { log } from './logger';
 
 /**

@@ -1,11 +1,11 @@
 import type { Context } from 'koa';
-import { Controller, Get, Post, Put, Delete } from '../../decorators/route.ts';
+import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
 import {
-  userIdSchema,
   createUserSchema,
-  updateUserSchema,
   searchUserQuerySchema,
+  updateUserSchema,
+  userIdSchema,
 } from './dto.ts';
 
 /**
@@ -13,14 +13,18 @@ import {
  */
 @Controller('/user')
 export class UserController {
-
   @Get('/list')
-  async list(ctx: Context) {
+  async list(_ctx: Context) {
     // 模拟用户列表数据
     const users = [
       { id: 1, name: 'Alice', email: 'alice@example.com', status: 'active' },
       { id: 2, name: 'Bob', email: 'bob@example.com', status: 'inactive' },
-      { id: 3, name: 'Charlie', email: 'charlie@example.com', status: 'active' }
+      {
+        id: 3,
+        name: 'Charlie',
+        email: 'charlie@example.com',
+        status: 'active',
+      },
     ];
 
     return users;
@@ -33,10 +37,10 @@ export class UserController {
     // 模拟根据ID查找用户
     const user = {
       id,
-      name: 'User ' + id,
+      name: `User ${id}`,
       email: `user${id}@example.com`,
       status: 'active',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     if (id > 100) {
@@ -55,7 +59,7 @@ export class UserController {
       id: Date.now(),
       ...body,
       createdAt: new Date().toISOString(),
-      status: body.status
+      status: body.status,
     };
 
     return newUser;
@@ -70,7 +74,7 @@ export class UserController {
     const updatedUser = {
       id,
       ...body,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     return updatedUser;
@@ -88,7 +92,7 @@ export class UserController {
     return {
       success: true,
       message: `用户 ${id} 已删除`,
-      deletedAt: new Date().toISOString()
+      deletedAt: new Date().toISOString(),
     };
   }
 
@@ -99,25 +103,26 @@ export class UserController {
     // 模拟搜索逻辑
     let results = [
       { id: 1, name: 'Alice', email: 'alice@example.com', status: 'active' },
-      { id: 2, name: 'Bob', email: 'bob@example.com', status: 'inactive' }
+      { id: 2, name: 'Bob', email: 'bob@example.com', status: 'inactive' },
     ];
 
     if (keyword) {
-      results = results.filter(user =>
-        user.name.toLowerCase().includes(keyword.toLowerCase()) ||
-        user.email.toLowerCase().includes(keyword.toLowerCase())
+      results = results.filter(
+        (user) =>
+          user.name.toLowerCase().includes(keyword.toLowerCase()) ||
+          user.email.toLowerCase().includes(keyword.toLowerCase()),
       );
     }
 
     if (status) {
-      results = results.filter(user => user.status === status);
+      results = results.filter((user) => user.status === status);
     }
 
     return {
       keyword,
       status,
       total: results.length,
-      results
+      results,
     };
   }
 }
