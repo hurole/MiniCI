@@ -813,7 +813,7 @@ function ProjectDetailPage() {
         />
         {workspaceStatus.error && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
-            <Typography.Text type="danger">
+            <Typography.Text type="error">
               {workspaceStatus.error}
             </Typography.Text>
           </div>
@@ -888,7 +888,7 @@ function ProjectDetailPage() {
                       </Typography.Title>
                       {selectedRecord && (
                         <Typography.Text type="secondary" className="text-sm">
-                          {selectedRecord.branch} · {selectedRecord.env} ·{' '}
+                          {selectedRecord.branch}
                           {formatDateTime(selectedRecord.createdAt)}
                         </Typography.Text>
                       )}

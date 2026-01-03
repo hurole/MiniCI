@@ -25,17 +25,6 @@ function DeployRecordItem({
     return <Tag color={config.color}>{config.text}</Tag>;
   };
 
-  // 环境标签渲染函数
-  const getEnvTag = (env: string) => {
-    const envMap: Record<string, { color: string; text: string }> = {
-      production: { color: 'red', text: '生产环境' },
-      staging: { color: 'orange', text: '预发布环境' },
-      development: { color: 'blue', text: '开发环境' },
-    };
-    const config = envMap[env] || { color: 'gray', text: env };
-    return <Tag color={config.color}>{config.text}</Tag>;
-  };
-
   return (
     <List.Item
       key={item.id}
@@ -67,9 +56,6 @@ function DeployRecordItem({
               <span className="text-sm text-gray-500">
                 分支:{' '}
                 <span className="font-medium text-gray-700">{item.branch}</span>
-              </span>
-              <span className="text-sm text-gray-500">
-                环境: {getEnvTag(item.env || 'unknown')}
               </span>
               <span className="text-sm text-gray-500">
                 状态: {getStatusTag(item.status)}

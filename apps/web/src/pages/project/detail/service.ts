@@ -214,7 +214,7 @@ class DetailService {
   // 更新项目
   async updateProject(
     id: number,
-    project: Partial<{ name: string; description: string; repository: string }>,
+    project: Partial<Project>,
   ) {
     const { data } = await net.request<APIResponse<Project>>({
       url: `/api/projects/${id}`,
