@@ -1,9 +1,12 @@
 import type { Context } from 'koa';
 import { Controller, Get } from '../../decorators/route.ts';
 import { gitea } from '../../libs/gitea.ts';
+import { log } from '../../libs/logger.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
 import { getBranchesQuerySchema, getCommitsQuerySchema } from './dto.ts';
+
+const TAG = 'Git';
 
 @Controller('/git')
 export class GitController {
@@ -30,7 +33,7 @@ export class GitController {
 
     // Get access token from session
     const accessToken = ctx.session?.gitea?.access_token;
-    console.log('Access token present:', !!accessToken);
+    log.debug(TAG, 'Access token present: %s', !!accessToken);
 
     if (!accessToken) {
       throw new BusinessError(
@@ -44,7 +47,7 @@ export class GitController {
       const commits = await gitea.getCommits(owner, repo, accessToken, branch);
       return commits;
     } catch (error) {
-      console.error('Failed to fetch commits:', error);
+      log.error(TAG, 'Failed to fetch commits:', error);
       throw new BusinessError('Failed to fetch commits from Gitea', 1005, 500);
     }
   }
@@ -80,7 +83,7 @@ export class GitController {
       const branches = await gitea.getBranches(owner, repo, accessToken);
       return branches;
     } catch (error) {
-      console.error('Failed to fetch branches:', error);
+      log.error(TAG, 'Failed to fetch branches:', error);
       throw new BusinessError('Failed to fetch branches from Gitea', 1006, 500);
     }
   }

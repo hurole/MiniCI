@@ -54,7 +54,7 @@ export class PipelineController {
       const templates = await getAvailableTemplates();
       return templates;
     } catch (error) {
-      console.error('Failed to get templates:', error);
+      log.error('pipeline', 'Failed to get templates:', error);
       throw new BusinessError('获取模板失败', 3002, 500);
     }
   }
@@ -154,7 +154,7 @@ export class PipelineController {
       log.info('pipeline', 'Created pipeline from template: %s', pipeline.name);
       return pipeline;
     } catch (error) {
-      console.error('Failed to create pipeline from template:', error);
+      log.error('pipeline', 'Failed to create pipeline from template:', error);
       if (error instanceof BusinessError) {
         throw error;
       }

@@ -102,22 +102,25 @@ related:
 
 ### 已完成（后端）
 
-- ✅ Prisma Schema：在 Project 表添加 `envPresets` 字段（String? 类型，存储 JSON）
-- ✅ 移除部署创建/重试接口中的 `sparseCheckoutPaths` 写入
-- ✅ 在部署创建接口添加环境校验：验证 env 是否在项目 envPresets 的 options 中
-- ✅ 更新 project DTO 和 controller 支持 envPresets 读写
-- ✅ 移除 pipeline-runner 中的 `SPARSE_CHECKOUT_PATHS` 环境变量
-- ✅ 生成 Prisma Client
+- [x] Prisma Schema：在 Project 表添加 `envPresets` 字段（String? 类型，存储 JSON）
+- [x] 移除部署创建/重试接口中的 `sparseCheckoutPaths` 写入
+- [x] 在部署创建接口添加环境校验：验证 env 是否在项目 envPresets 的 options 中
+- [x] 更新 project DTO 和 controller 支持 envPresets 读写
+- [x] 移除 pipeline-runner 中的 `SPARSE_CHECKOUT_PATHS` 环境变量
+- [x] 生成 Prisma Client
+- [x] 移除项目详情接口中的目录大小计算（保留工作目录状态其他信息）
 
 ### 已完成（前端）
 
-- ✅ 创建 EnvPresetsEditor 组件（支持单选、多选、输入框类型）
-- ✅ 在 CreateProjectModal 和 EditProjectModal 中集成环境预设编辑器
-- ✅ 从 DeployModal 移除稀疏检出表单项
-- ✅ 在 DeployModal 中从项目 envPresets 读取环境选项并展示
-- ✅ 移除 DeployModal 中的动态环境变量列表（envVars Form.List）
-- ✅ 从类型定义中移除 sparseCheckoutPaths 字段
-- ✅ 在项目详情页项目设置 tab 中添加环境变量预设的查看和编辑功能
+- [x] 创建 EnvPresetsEditor 组件（支持单选、多选、输入框类型）
+- [x] 在 CreateProjectModal 和 EditProjectModal 中集成环境预设编辑器
+- [x] 从 DeployModal 移除稀疏检出表单项
+- [x] 在 DeployModal 中从项目 envPresets 读取环境选项并展示
+- [x] 移除 DeployModal 中的动态环境变量列表（envVars Form.List）
+- [x] 从类型定义中移除 sparseCheckoutPaths 字段
+- [x] 在项目详情页项目设置 tab 中添加环境变量预设的查看和编辑功能
+- [x] 移除创建项目时增加环境变量预设的功能，因为编辑环境变量预设的功能放到了项目编详细页面
+- [x] 移除项目详情页项目设置 tab 中的目录大小显示（保留工作目录状态、当前分支、最后提交等信息）
 
 ### 待定问题
 

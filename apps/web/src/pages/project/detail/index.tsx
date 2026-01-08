@@ -729,20 +729,6 @@ function ProjectDetailPage() {
     />
   );
 
-  // 获取选中的流水线
-  const _selectedPipeline = pipelines.find(
-    (pipeline) => pipeline.id === selectedPipelineId,
-  );
-
-  // 格式化文件大小
-  const formatSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
-  };
-
   // 获取工作目录状态标签
   const getWorkspaceStatusTag = (
     status: string,
@@ -785,19 +771,13 @@ function ProjectDetailPage() {
               value: <Tag color={statusInfo.color}>{statusInfo.text}</Tag>,
             },
             {
-              label: '目录大小',
-              value: workspaceStatus.size
-                ? formatSize(workspaceStatus.size)
-                : '-',
-            },
-            {
               label: '当前分支',
               value: workspaceStatus.gitInfo?.branch || '-',
             },
             {
               label: '最后提交',
               value: workspaceStatus.gitInfo?.lastCommit ? (
-                <Space direction="vertical" size="mini">
+                <Space size="small">
                   <Typography.Text code>
                     {workspaceStatus.gitInfo.lastCommit}
                   </Typography.Text>

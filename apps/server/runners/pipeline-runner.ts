@@ -221,7 +221,7 @@ export class PipelineRunner {
         const userEnvVars = JSON.parse(deployment.envVars);
         Object.assign(envVars, userEnvVars);
       } catch (error) {
-        console.error('解析环境变量失败:', error);
+        log.error(this.TAG, '解析环境变量失败:', error);
       }
     }
 

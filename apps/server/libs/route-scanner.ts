@@ -6,6 +6,9 @@ import {
   type RouteMetadata,
 } from '../decorators/route.ts';
 import { createSuccessResponse } from '../middlewares/exception.ts';
+import { log } from './logger.ts';
+
+const TAG = 'RouteScanner';
 
 /**
  * 控制器类型
@@ -79,7 +82,7 @@ export class RouteScanner {
           this.router.patch(fullPath, handler);
           break;
         default:
-          console.warn(`未支持的HTTP方法: ${route.method}`);
+          log.info(TAG, `未支持的HTTP方法: ${route.method}`);
       }
     });
   }

@@ -1,4 +1,7 @@
 import { prisma } from './prisma.ts';
+import { log } from './logger.ts';
+
+const TAG = 'PipelineTemplate';
 
 // 默认流水线模板
 export interface PipelineTemplate {
@@ -52,7 +55,7 @@ export const DEFAULT_PIPELINE_TEMPLATES: PipelineTemplate[] = [
  * 初始化系统默认流水线模板
  */
 export async function initializePipelineTemplates(): Promise<void> {
-  console.log('Initializing pipeline templates...');
+  log.info(TAG, 'Initializing pipeline templates...');
 
   try {
     // 检查是否已经存在模板流水线
@@ -67,7 +70,7 @@ export async function initializePipelineTemplates(): Promise<void> {
 
     // 如果没有现有的模板，则创建默认模板
     if (existingTemplates.length === 0) {
-      console.log('Creating default pipeline templates...');
+      log.info(TAG, 'Creating default pipeline templates...');
 
       for (const template of DEFAULT_PIPELINE_TEMPLATES) {
         // 创建模板流水线（使用负数ID表示模板）
@@ -97,15 +100,15 @@ export async function initializePipelineTemplates(): Promise<void> {
           });
         }
 
-        console.log(`Created template: ${template.name}`);
+        log.info(TAG, `Created template: ${template.name}`);
       }
     } else {
-      console.log('Pipeline templates already exist, skipping initialization');
+      log.info(TAG, 'Pipeline templates already exist, skipping initialization');
     }
 
-    console.log('Pipeline templates initialization completed');
+    log.info(TAG, 'Pipeline templates initialization completed');
   } catch (error) {
-    console.error('Failed to initialize pipeline templates:', error);
+    log.error(TAG, 'Failed to initialize pipeline templates:', error);
     throw error;
   }
 }
@@ -136,7 +139,7 @@ export async function getAvailableTemplates(): Promise<
       description: template.description || '',
     }));
   } catch (error) {
-    console.error('Failed to get pipeline templates:', error);
+    log.error(TAG, 'Failed to get pipeline templates:', error);
     throw error;
   }
 }
@@ -205,12 +208,10 @@ export async function createPipelineFromTemplate(
       });
     }
 
-    console.log(
-      `Created pipeline from template ${templateId}: ${newPipeline.name}`,
-    );
+    log.info(TAG, `Created pipeline from template ${templateId}: ${newPipeline.name}`);
     return newPipeline.id;
   } catch (error) {
-    console.error('Failed to create pipeline from template:', error);
+    log.error(TAG, 'Failed to create pipeline from template:', error);
     throw error;
   }
 }

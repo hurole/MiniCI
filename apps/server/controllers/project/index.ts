@@ -68,19 +68,14 @@ export class ProjectController {
       throw new BusinessError('项目不存在', 1002, 404);
     }
 
-    // 获取工作目录状态信息
+    // 获取工作目录状态信息（不包含目录大小）
     let workspaceStatus = null;
     if (project.projectDir) {
       try {
         const status = await GitManager.checkWorkspaceStatus(
           project.projectDir,
         );
-        let size = 0;
         let gitInfo = null;
-
-        if (status.exists && !status.isEmpty) {
-          size = await GitManager.getDirectorySize(project.projectDir);
-        }
 
         if (status.hasGit) {
           gitInfo = await GitManager.getGitInfo(project.projectDir);
@@ -88,7 +83,6 @@ export class ProjectController {
 
         workspaceStatus = {
           ...status,
-          size,
           gitInfo,
         };
       } catch (error) {

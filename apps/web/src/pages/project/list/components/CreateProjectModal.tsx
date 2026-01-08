@@ -1,13 +1,11 @@
 import {
   Button,
-  Collapse,
   Form,
   Input,
   Message,
   Modal,
 } from '@arco-design/web-react';
 import { useState } from 'react';
-import EnvPresetsEditor from '../../detail/components/EnvPresetsEditor';
 import type { Project } from '../../types';
 import { projectService } from '../service';
 
@@ -30,15 +28,7 @@ function CreateProjectModal({
       const values = await form.validate();
       setLoading(true);
 
-      // 序列化环境预设
-      const submitData = {
-        ...values,
-        envPresets: values.envPresets
-          ? JSON.stringify(values.envPresets)
-          : undefined,
-      };
-
-      const newProject = await projectService.create(submitData);
+      const newProject = await projectService.create(values);
 
       Message.success('项目创建成功');
       onSuccess(newProject);
@@ -142,14 +132,6 @@ function CreateProjectModal({
         >
           <Input placeholder="请输入绝对路径，如: /data/projects/my-app" />
         </Form.Item>
-
-        <Collapse defaultActiveKey={[]} style={{ marginTop: 16 }}>
-          <Collapse.Item header="环境变量预设配置（可选）" name="envPresets">
-            <Form.Item field="envPresets" noStyle>
-              <EnvPresetsEditor />
-            </Form.Item>
-          </Collapse.Item>
-        </Collapse>
       </Form>
     </Modal>
   );

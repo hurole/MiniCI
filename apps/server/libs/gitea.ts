@@ -1,3 +1,7 @@
+import { log } from './logger.ts';
+
+const TAG = 'Gitea';
+
 interface TokenResponse {
   access_token: string;
   token_type: string;
@@ -43,7 +47,7 @@ class Gitea {
 
   async getToken(code: string) {
     const { giteaUrl, clientId, clientSecret, redirectUri } = this.config;
-    console.log('this.config', this.config);
+    log.debug(TAG, 'Gitea token request started');
     const response = await fetch(`${giteaUrl}/login/oauth/access_token`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -56,7 +60,15 @@ class Gitea {
       }),
     });
     if (!response.ok) {
-      console.log(await response.json());
+      const payload = await response
+        .json()
+        .catch(() => null as unknown);
+      log.error(
+        TAG,
+        'Gitea token request failed: status=%d payload=%o',
+        response.status,
+        payload,
+      );
       throw new Error(`Fetch failed: ${response.status}`);
     }
     return (await response.json()) as TokenResponse;
