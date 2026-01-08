@@ -60,9 +60,7 @@ class Gitea {
       }),
     });
     if (!response.ok) {
-      const payload = await response
-        .json()
-        .catch(() => null as unknown);
+      const payload = await response.json().catch(() => null as unknown);
       log.error(
         TAG,
         'Gitea token request failed: status=%d payload=%o',

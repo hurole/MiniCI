@@ -103,7 +103,10 @@ export async function initializePipelineTemplates(): Promise<void> {
         log.info(TAG, `Created template: ${template.name}`);
       }
     } else {
-      log.info(TAG, 'Pipeline templates already exist, skipping initialization');
+      log.info(
+        TAG,
+        'Pipeline templates already exist, skipping initialization',
+      );
     }
 
     log.info(TAG, 'Pipeline templates initialization completed');
@@ -208,7 +211,10 @@ export async function createPipelineFromTemplate(
       });
     }
 
-    log.info(TAG, `Created pipeline from template ${templateId}: ${newPipeline.name}`);
+    log.info(
+      TAG,
+      `Created pipeline from template ${templateId}: ${newPipeline.name}`,
+    );
     return newPipeline.id;
   } catch (error) {
     log.error(TAG, 'Failed to create pipeline from template:', error);

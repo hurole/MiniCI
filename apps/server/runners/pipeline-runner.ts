@@ -66,11 +66,14 @@ export class PipelineRunner {
 
       // 依次执行每个步骤
       for (const [index, step] of pipeline.steps.entries()) {
+        const progress = `[${index + 1}/${pipeline.steps.length}]`;
         // 准备环境变量
         const envVars = this.prepareEnvironmentVariables(pipeline, deployment);
 
         // 记录开始执行步骤的日志
-        const startLog = `[${new Date().toISOString()}] 开始执行步骤 ${index + 1}/${pipeline.steps.length}: ${step.name}\n`;
+        const startLog = this.addTimestamp(
+          `${progress} 开始执行: ${step.name}`,
+        );
         logs += startLog;
 
         // 实时更新日志
@@ -81,10 +84,10 @@ export class PipelineRunner {
 
         // 执行步骤
         const stepLog = await this.executeStep(step, envVars);
-        logs += `${stepLog}\n`;
+        logs += stepLog;
 
         // 记录步骤执行完成的日志
-        const endLog = `[${new Date().toISOString()}] 步骤 "${step.name}" 执行完成\n`;
+        const endLog = this.addTimestamp(`${progress} 执行完成: ${step.name}`);
         logs += endLog;
 
         // 实时更新日志
@@ -93,9 +96,16 @@ export class PipelineRunner {
           data: { buildLog: logs },
         });
       }
+      await prisma.deployment.update({
+        where: { id: this.deploymentId },
+        data: {
+          buildLog: logs,
+          status: 'success',
+          finishedAt: new Date(),
+        },
+      });
     } catch (error) {
-      hasError = true;
-      const errorMsg = `[${new Date().toISOString()}] Error: ${(error as Error).message}\n`;
+      const errorMsg = this.addTimestamp(`${(error as Error).message}`);
       logs += errorMsg;
 
       log.error(
@@ -116,18 +126,6 @@ export class PipelineRunner {
 
       throw error;
     }
-
-    // 更新最终状态
-    if (!hasError) {
-      await prisma.deployment.update({
-        where: { id: this.deploymentId },
-        data: {
-          buildLog: logs,
-          status: 'success',
-          finishedAt: new Date(),
-        },
-      });
-    }
   }
 
   /**
@@ -141,21 +139,20 @@ export class PipelineRunner {
     branch: string,
   ): Promise<string> {
     let logs = '';
-    const timestamp = new Date().toISOString();
 
     try {
-      logs += `[${timestamp}] 检查工作目录状态: ${this.projectDir}\n`;
+      logs += this.addTimestamp(`检查工作目录状态: ${this.projectDir}`);
 
       // 检查工作目录状态
       const status = await GitManager.checkWorkspaceStatus(this.projectDir);
-      logs += `[${new Date().toISOString()}] 工作目录状态: ${status.status}\n`;
+      logs += this.addTimestamp(`工作目录状态: ${status.status}`);
 
       if (
         status.status === WorkspaceDirStatus.NOT_CREATED ||
         status.status === WorkspaceDirStatus.EMPTY
       ) {
         // 目录不存在或为空，需要克隆
-        logs += `[${new Date().toISOString()}] 工作目录不存在或为空，开始克隆仓库\n`;
+        logs += this.addTimestamp('工作目录不存在或为空，开始克隆仓库');
 
         // 确保父目录存在
         await GitManager.ensureDirectory(this.projectDir);
@@ -168,7 +165,7 @@ export class PipelineRunner {
           // TODO: 添加 token 支持
         );
 
-        logs += `[${new Date().toISOString()}] 仓库克隆成功\n`;
+        logs += this.addTimestamp('仓库克隆成功');
       } else if (status.status === WorkspaceDirStatus.NO_GIT) {
         // 目录存在但不是 Git 仓库
         throw new Error(
@@ -176,14 +173,16 @@ export class PipelineRunner {
         );
       } else if (status.status === WorkspaceDirStatus.READY) {
         // 已存在 Git 仓库，更新代码
-        logs += `[${new Date().toISOString()}] 工作目录已存在 Git 仓库，开始更新代码\n`;
+        logs += this.addTimestamp('工作目录已存在 Git 仓库，开始更新代码');
         await GitManager.updateRepository(this.projectDir, branch);
-        logs += `[${new Date().toISOString()}] 代码更新成功\n`;
+        logs += this.addTimestamp('代码更新成功');
       }
 
       return logs;
     } catch (error) {
-      const errorLog = `[${new Date().toISOString()}] 准备工作目录失败: ${(error as Error).message}\n`;
+      const errorLog = this.addTimestamp(
+        `准备工作目录失败: ${(error as Error).message}`,
+      );
       logs += errorLog;
       log.error(
         this.TAG,
@@ -237,28 +236,9 @@ export class PipelineRunner {
    * @param isError 是否为错误日志
    * @returns 带时间戳的日志消息
    */
-  private addTimestamp(message: string, isError = false): string {
+  private addTimestamp(message: string): string {
     const timestamp = new Date().toISOString();
-    if (isError) {
-      return `[${timestamp}] [ERROR] ${message}`;
-    }
-    return `[${timestamp}] ${message}`;
-  }
-
-  /**
-   * 为多行日志添加时间戳前缀
-   * @param content 多行日志内容
-   * @param isError 是否为错误日志
-   * @returns 带时间戳的多行日志消息
-   */
-  private addTimestampToLines(content: string, isError = false): string {
-    if (!content) return '';
-
-    return `${content
-      .split('\n')
-      .filter((line) => line.trim() !== '')
-      .map((line) => this.addTimestamp(line, isError))
-      .join('\n')}\n`;
+    return `[${timestamp}] [ERROR] ${message}\n`;
   }
 
   /**
@@ -272,35 +252,21 @@ export class PipelineRunner {
   ): Promise<string> {
     let logs = '';
 
-    try {
-      // 添加步骤开始执行的时间戳
-      logs += `${this.addTimestamp(`执行脚本: ${step.script}`)}\n`;
+    // 使用zx执行脚本，设置项目目录为工作目录和环境变量
+    const script = step.script;
 
-      // 使用zx执行脚本，设置项目目录为工作目录和环境变量
-      const script = step.script;
+    // bash -c 执行脚本，确保环境变量能被正确解析
+    const result = await $({
+      cwd: this.projectDir,
+      env: { ...process.env, ...envVars },
+    })`bash -c ${script}`;
 
-      // 通过bash -c执行脚本，确保环境变量能被正确解析
-      const result = await $({
-        cwd: this.projectDir,
-        env: { ...process.env, ...envVars },
-      })`bash -c ${script}`;
+    if (result.stdout) {
+      logs += this.addTimestamp(`\n${result.stdout}`);
+    }
 
-      if (result.stdout) {
-        // 为stdout中的每一行添加时间戳
-        logs += this.addTimestampToLines(result.stdout);
-      }
-
-      if (result.stderr) {
-        // 为stderr中的每一行添加时间戳和错误标记
-        logs += this.addTimestampToLines(result.stderr, true);
-      }
-
-      logs += `${this.addTimestamp(`步骤执行完成`)}\n`;
-    } catch (error) {
-      const errorMsg = `Error executing step "${step.name}": ${(error as Error).message}`;
-      logs += `${this.addTimestamp(errorMsg, true)}\n`;
-      log.error(this.TAG, errorMsg);
-      throw error;
+    if (result.stderr) {
+      logs += this.addTimestamp(`\n${result.stderr}`);
     }
 
     return logs;
