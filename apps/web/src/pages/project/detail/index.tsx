@@ -725,7 +725,6 @@ function ProjectDetailPage() {
       item={item}
       isSelected={selectedRecordId === item.id}
       onSelect={setSelectedRecordId}
-      onRetry={handleRetryDeployment} // 传递重新执行函数
     />
   );
 
