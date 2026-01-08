@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output = "../generated"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Project {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String?
+  repository  String
+  projectDir  String       @unique  // 项目工作目录路径（必填）
+  envPresets  String?      // 环境预设配置（JSON格式）
+  // Relations
+  deployments Deployment[]
+  pipelines   Pipeline[]
+
+  valid     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+  updatedBy String
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String
+  login      String
+  email      String
+  avatar_url String?
+  active     Boolean  @default(true)
+  valid      Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  createdBy  String   @default("system")
+  updatedBy  String   @default("system")
+}
+
+model Pipeline {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  valid       Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  updatedBy   String
+
+  // Relations
+  projectId Int?
+  Project   Project? @relation(fields: [projectId], references: [id])
+  steps     Step[]
+}
+
+model Step {
+  id          Int      @id @default(autoincrement())
+  name        String
+  order       Int
+  script      String   // 执行的脚本命令
+  valid       Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  updatedBy   String
+
+  pipelineId  Int
+  pipeline    Pipeline @relation(fields: [pipelineId], references: [id])
+}
+
+model Deployment {
+  id            Int       @id @default(autoincrement())
+  branch        String
+  envVars       String?   // 环境变量（JSON格式），统一存储所有配置
+  status        String // pending, running, success, failed, cancelled
+  commitHash    String?
+  commitMessage String?
+  buildLog      String?
+  sparseCheckoutPaths String? // 稀疏检出路径，用于monorepo项目
+  startedAt     DateTime  @default(now())
+  finishedAt    DateTime?
+  valid         Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String
+  updatedBy     String
+
+  projectId     Int
+  Project       Project?  @relation(fields: [projectId], references: [id])
+  pipelineId    Int
+}

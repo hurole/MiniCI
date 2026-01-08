@@ -1,0 +1,28 @@
+openapi: 3.0.1
+info:
+  title: Foka-CI 示例 API
+  version: '1.0.0'
+paths:
+  /health:
+    get:
+      summary: 健康检查
+      responses:
+        '200':
+          description: OK
+  /projects:
+    get:
+      summary: 列出项目
+      responses:
+        '200':
+          description: 项目列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
