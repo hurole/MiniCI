@@ -28,7 +28,12 @@ web 项目代码组织如下：
 │   └── ...
 ```
 
-## 3. 响应格式
+## 3. 代码规范
+
+- 注释符合 jsdoc 规范
+- 代码简洁，避免冗余，移除无用的代码引用、变量、函数和css样式
+
+## 4. 响应格式
 
 - 后端统一返回 `APIResponse<T>` 结构：
 
@@ -38,12 +43,12 @@ web 项目代码组织如下：
 
 - 由 `RouteScanner` 中的 `wrapControllerMethod` 自动封装。
 
-## 3. 异步处理
+## 5. 异步处理
 
 - 统一使用 `async/await`。
 - 后端错误通过抛出异常由 `exception.ts` 中间件统一捕获。
 
-## 4. 格式化
+## 6. 格式化
 
 - 使用 Biome 进行 Lint 和 Format。
 - 提交代码前建议运行 `pnpm --filter web format`。

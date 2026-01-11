@@ -4,11 +4,11 @@ import type { Middleware } from './types.ts';
 
 export class Session implements Middleware {
   apply(app: Koa): void {
-    app.keys = ['foka-ci'];
+    app.keys = ['mini-ci'];
     app.use(
       session(
         {
-          key: 'foka.sid',
+          key: 'mini-ci.sid',
           maxAge: 86400000,
           autoCommit: true /** (boolean) automatically commit headers (default true) */,
           overwrite: true /** (boolean) can overwrite or not (default true) */,

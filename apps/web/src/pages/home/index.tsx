@@ -31,7 +31,7 @@ function Home() {
       >
         <div className="flex flex-row items-center justify-center h-[56px]">
           <Logo />
-          {!collapsed && <h2 className="ml-4 text-xl font-medium">Foka CI</h2>}
+          {!collapsed && <h2 className="ml-4 text-xl font-medium">Mini CI</h2>}
         </div>
         <Menu
           className="flex-1"
