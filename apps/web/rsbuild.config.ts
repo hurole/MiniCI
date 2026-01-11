@@ -7,7 +7,7 @@ import { pluginSvgr } from '@rsbuild/plugin-svgr';
 export default defineConfig({
   plugins: [pluginReact(), pluginLess(), pluginSvgr()],
   html: {
-    title: 'Foka CI',
+    title: 'Mini CI',
   },
   source: {
     define: {

@@ -59,7 +59,7 @@ function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <Card
-      className="foka-card !rounded-xl border border-gray-200 h-[280px] cursor-pointer"
+      className="!rounded-xl border border-gray-200 h-[280px] cursor-pointer"
       hoverable
       bodyStyle={{ padding: '20px' }}
       onClick={onProjectClick}
