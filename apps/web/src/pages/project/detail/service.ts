@@ -1,4 +1,4 @@
-import { type APIResponse, net } from '../../../utils';
+import { net } from '../../../utils';
 import type {
   Branch,
   Commit,
@@ -11,7 +11,7 @@ import type {
 
 class DetailService {
   async getProject(id: string) {
-    const { data } = await net.request<APIResponse<Project>>({
+    const { data } = await net.request<Project>({
       url: `/api/projects/${id}`,
     });
     return data;
@@ -19,28 +19,32 @@ class DetailService {
 
   // 获取项目的所有流水线
   async getPipelines(projectId: number) {
-    const { data } = await net.request<APIResponse<Pipeline[]>>({
+    const { data } = await net.request<Pipeline[] | { list: Pipeline[] }>({
       url: `/api/pipelines?projectId=${projectId}`,
     });
-    return data;
+    return Array.isArray(data) ? data : data.list;
   }
 
   // 获取可用的流水线模板
   async getPipelineTemplates() {
     const { data } = await net.request<
-      APIResponse<{ id: number; name: string; description: string }[]>
+      | { id: number; name: string; description: string }[]
+      | { list: { id: number; name: string; description: string }[] }
     >({
       url: '/api/pipelines/templates',
     });
-    return data;
+    return Array.isArray(data) ? data : data.list;
   }
 
-  // 获取项目的部署记录
-  async getDeployments(projectId: number) {
-    const { data } = await net.request<any>({
-      url: `/api/deployments?projectId=${projectId}`,
+  async getDeployments(
+    projectId: number,
+    page: number = 1,
+    pageSize: number = 10,
+  ) {
+    const { data } = await net.request<DeploymentListResponse>({
+      url: `/api/deployments?projectId=${projectId}&page=${page}&pageSize=${pageSize}`,
     });
-    return data.data;
+    return data;
   }
 
   // 创建流水线
@@ -56,7 +60,7 @@ class DetailService {
       | 'steps'
     >,
   ) {
-    const { data } = await net.request<APIResponse<Pipeline>>({
+    const { data } = await net.request<Pipeline>({
       url: '/api/pipelines',
       method: 'POST',
       data: pipeline,
@@ -71,7 +75,7 @@ class DetailService {
     name: string,
     description?: string,
   ) {
-    const { data } = await net.request<APIResponse<Pipeline>>({
+    const { data } = await net.request<Pipeline>({
       url: '/api/pipelines/from-template',
       method: 'POST',
       data: {
@@ -100,7 +104,7 @@ class DetailService {
       >
     >,
   ) {
-    const { data } = await net.request<APIResponse<Pipeline>>({
+    const { data } = await net.request<Pipeline>({
       url: `/api/pipelines/${id}`,
       method: 'PUT',
       data: pipeline,
@@ -110,7 +114,7 @@ class DetailService {
 
   // 删除流水线
   async deletePipeline(id: number) {
-    const { data } = await net.request<APIResponse<null>>({
+    const { data } = await net.request<null>({
       url: `/api/pipelines/${id}`,
       method: 'DELETE',
     });
@@ -119,10 +123,10 @@ class DetailService {
 
   // 获取流水线的所有步骤
   async getSteps(pipelineId: number) {
-    const { data } = await net.request<APIResponse<Step[]>>({
+    const { data } = await net.request<Step[] | { list: Step[] }>({
       url: `/api/steps?pipelineId=${pipelineId}`,
     });
-    return data;
+    return Array.isArray(data) ? data : data.list;
   }
 
   // 创建步骤
@@ -132,7 +136,7 @@ class DetailService {
       'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'valid'
     >,
   ) {
-    const { data } = await net.request<APIResponse<Step>>({
+    const { data } = await net.request<Step>({
       url: '/api/steps',
       method: 'POST',
       data: step,
@@ -150,7 +154,7 @@ class DetailService {
       >
     >,
   ) {
-    const { data } = await net.request<APIResponse<Step>>({
+    const { data } = await net.request<Step>({
       url: `/api/steps/${id}`,
       method: 'PUT',
       data: step,
@@ -161,7 +165,7 @@ class DetailService {
   // 删除步骤
   async deleteStep(id: number) {
     // DELETE请求返回204状态码，通过拦截器处理为成功响应
-    const { data } = await net.request<APIResponse<null>>({
+    const { data } = await net.request<null>({
       url: `/api/steps/${id}`,
       method: 'DELETE',
     });
@@ -170,23 +174,23 @@ class DetailService {
 
   // 获取项目的提交记录
   async getCommits(projectId: number, branch?: string) {
-    const { data } = await net.request<APIResponse<Commit[]>>({
+    const { data } = await net.request<Commit[] | { list: Commit[] }>({
       url: `/api/git/commits?projectId=${projectId}${branch ? `&branch=${branch}` : ''}`,
     });
-    return data;
+    return Array.isArray(data) ? data : data.list;
   }
 
   // 获取项目的分支列表
   async getBranches(projectId: number) {
-    const { data } = await net.request<APIResponse<Branch[]>>({
+    const { data } = await net.request<Branch[] | { list: Branch[] }>({
       url: `/api/git/branches?projectId=${projectId}`,
     });
-    return data;
+    return Array.isArray(data) ? data : data.list;
   }
 
   // 创建部署
   async createDeployment(deployment: CreateDeploymentRequest) {
-    const { data } = await net.request<APIResponse<Deployment>>({
+    const { data } = await net.request<Deployment>({
       url: '/api/deployments',
       method: 'POST',
       data: deployment,
@@ -196,7 +200,7 @@ class DetailService {
 
   // 重新执行部署
   async retryDeployment(deploymentId: number) {
-    const { data } = await net.request<APIResponse<Deployment>>({
+    const { data } = await net.request<Deployment>({
       url: `/api/deployments/${deploymentId}/retry`,
       method: 'POST',
     });
@@ -205,7 +209,7 @@ class DetailService {
 
   // 获取项目详情（包含工作目录状态）
   async getProjectDetail(id: number) {
-    const { data } = await net.request<APIResponse<Project>>({
+    const { data } = await net.request<Project>({
       url: `/api/projects/${id}`,
     });
     return data;
@@ -213,7 +217,7 @@ class DetailService {
 
   // 更新项目
   async updateProject(id: number, project: Partial<Project>) {
-    const { data } = await net.request<APIResponse<Project>>({
+    const { data } = await net.request<Project>({
       url: `/api/projects/${id}`,
       method: 'PUT',
       data: project,
@@ -231,3 +235,10 @@ class DetailService {
 }
 
 export const detailService = new DetailService();
+
+export interface DeploymentListResponse {
+  list: Deployment[];
+  page: number;
+  pageSize: number;
+  total: number;
+}

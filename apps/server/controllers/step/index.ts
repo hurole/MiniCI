@@ -26,27 +26,30 @@ export class StepController {
       whereCondition.pipelineId = query.pipelineId;
     }
 
+    const isPagination = query?.page !== undefined && query?.pageSize !== undefined;
+
     const [total, steps] = await Promise.all([
       prisma.step.count({ where: whereCondition }),
       prisma.step.findMany({
         where: whereCondition,
-        skip: query ? (query.page - 1) * query.limit : 0,
-        take: query?.limit,
+        skip: isPagination ? (query.page! - 1) * query.pageSize! : 0,
+        take: isPagination ? query.pageSize : undefined,
         orderBy: {
           order: 'asc',
         },
       }),
     ]);
 
-    return {
-      data: steps,
-      pagination: {
-        page: query?.page || 1,
-        limit: query?.limit || 10,
+    if (isPagination) {
+      return {
+        list: steps,
+        page: query.page,
+        pageSize: query.pageSize,
         total,
-        totalPages: Math.ceil(total / (query?.limit || 10)),
-      },
-    };
+      };
+    }
+
+    return steps;
   }
 
   // GET /api/steps/:id - 获取单个步骤

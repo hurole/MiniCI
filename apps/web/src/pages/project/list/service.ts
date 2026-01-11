@@ -1,18 +1,20 @@
-import { type APIResponse, net } from '../../../utils';
+import { net } from '../../../utils';
 import type { Project } from '../types';
 
 class ProjectService {
   async list(params?: ProjectQueryParams) {
-    const { data } = await net.request<APIResponse<ProjectListResponse>>({
+    const { data } = await net.request<Project[] | ProjectListResponse>({
       method: 'GET',
       url: '/api/projects',
       params,
     });
-    return data;
+    return Array.isArray(data)
+      ? { list: data, page: 1, pageSize: data.length, total: data.length }
+      : data;
   }
 
   async show(id: string) {
-    const { data } = await net.request<APIResponse<Project>>({
+    const { data } = await net.request<Project>({
       method: 'GET',
       url: `/api/projects/${id}`,
     });
@@ -24,7 +26,7 @@ class ProjectService {
     description?: string;
     repository: string;
   }) {
-    const { data } = await net.request<APIResponse<Project>>({
+    const { data } = await net.request<Project>({
       method: 'POST',
       url: '/api/projects',
       data: project,
@@ -36,7 +38,7 @@ class ProjectService {
     id: string,
     project: Partial<{ name: string; description: string; repository: string }>,
   ) {
-    const { data } = await net.request<APIResponse<Project>>({
+    const { data } = await net.request<Project>({
       method: 'PUT',
       url: `/api/projects/${id}`,
       data: project,
@@ -56,17 +58,14 @@ class ProjectService {
 export const projectService = new ProjectService();
 
 interface ProjectListResponse {
-  data: Project[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  list: Project[];
+  page: number;
+  pageSize: number;
+  total: number;
 }
 
 interface ProjectQueryParams {
   page?: number;
-  limit?: number;
+  pageSize?: number;
   name?: string;
 }

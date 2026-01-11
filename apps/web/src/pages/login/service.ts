@@ -2,11 +2,11 @@ import { Message, Notification } from '@arco-design/web-react';
 import { net } from '../../utils';
 import type { NavigateFunction } from 'react-router';
 import { useGlobalStore } from '../../stores/global';
-import type { AuthLoginResponse, AuthURLResponse } from './types';
+import type { AuthURL, User } from './types';
 
 class LoginService {
   async getAuthUrl() {
-    const { code, data } = await net.request<AuthURLResponse>({
+    const { code, data } = await net.request<AuthURL>({
       method: 'GET',
       url: '/api/auth/url',
       params: {
@@ -19,7 +19,7 @@ class LoginService {
   }
 
   async login(authCode: string, navigate: NavigateFunction) {
-    const { data, code } = await net.request<AuthLoginResponse>({
+    const { data, code } = await net.request<User>({
       method: 'POST',
       url: '/api/auth/login',
       data: {
@@ -37,7 +37,7 @@ class LoginService {
   }
 
   async logout() {
-    const { code } = await net.request<AuthURLResponse>({
+    const { code } = await net.request<null>({
       method: 'GET',
       url: '/api/auth/logout',
     });

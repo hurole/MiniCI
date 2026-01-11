@@ -4,7 +4,7 @@ import {
   IconExport,
   IconMenuFold,
   IconMenuUnfold,
-  IconRobot,
+
 } from '@arco-design/web-react/icon';
 import Logo from '@assets/images/logo.svg?react';
 import { loginService } from '@pages/login/service';
@@ -45,12 +45,7 @@ function Home() {
               <span>项目管理</span>
             </Link>
           </Menu.Item>
-          <Menu.Item key="1">
-            <Link to="/env">
-              <IconRobot fontSize={16} />
-              环境管理
-            </Link>
-          </Menu.Item>
+
         </Menu>
       </Layout.Sider>
       <Layout>

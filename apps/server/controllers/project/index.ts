@@ -29,27 +29,30 @@ export class ProjectController {
       };
     }
 
+    const isPagination = query?.page !== undefined && query?.pageSize !== undefined;
+
     const [total, projects] = await Promise.all([
       prisma.project.count({ where: whereCondition }),
       prisma.project.findMany({
         where: whereCondition,
-        skip: query ? (query.page - 1) * query.limit : 0,
-        take: query?.limit,
+        skip: isPagination ? (query.page! - 1) * query.pageSize! : 0,
+        take: isPagination ? query.pageSize : undefined,
         orderBy: {
           createdAt: 'desc',
         },
       }),
     ]);
 
-    return {
-      data: projects,
-      pagination: {
-        page: query?.page || 1,
-        limit: query?.limit || 10,
+    if (isPagination) {
+      return {
+        list: projects,
+        page: query.page,
+        pageSize: query.pageSize,
         total,
-        totalPages: Math.ceil(total / (query?.limit || 10)),
-      },
-    };
+      };
+    }
+
+    return projects;
   }
 
   // GET /api/projects/:id - 获取单个项目

@@ -80,6 +80,7 @@ this.routeScanner.registerControllers([
 ## TC39 装饰器特性
 
 ### 1. 标准语法
+
 ```typescript
 // TC39 标准装饰器使用 addInitializer
 @Get('/users')
@@ -89,6 +90,7 @@ async getUsers(ctx: Context) {
 ```
 
 ### 2. 类型安全
+
 ```typescript
 // 完整的 TypeScript 类型检查
 @Controller('/api')
@@ -101,6 +103,7 @@ export class ApiController {
 ```
 
 ### 3. 无外部依赖
+
 ```typescript
 // 不再需要 reflect-metadata
 // 使用内置的 WeakMap 存储元数据
@@ -136,6 +139,7 @@ export class ApiController {
 最终的API路径 = 全局前缀 + 控制器前缀 + 方法路径
 
 例如：
+
 - 全局前缀：`/api`
 - 控制器前缀：`/user`
 - 方法路径：`/list`
@@ -176,56 +180,11 @@ async getUser(ctx: Context) {
 
 ## 现有路由
 
-项目中已注册的路由：
-
-### ApplicationController
-- `GET /api/application/list` - 获取应用列表
-- `GET /api/application/detail/:id` - 获取应用详情
-
 ### UserController
+
 - `GET /api/user/list` - 获取用户列表
 - `GET /api/user/detail/:id` - 获取用户详情
 - `POST /api/user` - 创建用户
 - `PUT /api/user/:id` - 更新用户
 - `DELETE /api/user/:id` - 删除用户
 - `GET /api/user/search` - 搜索用户
-
-## 与旧版本装饰器的区别
-
-| 特性 | 实验性装饰器 | TC39 标准装饰器 |
-|------|-------------|----------------|
-| 标准化 | ❌ TypeScript 特有 | ✅ ECMAScript 标准 |
-| 依赖 | ❌ 需要 reflect-metadata | ✅ 零依赖 |
-| 性能 | ❌ 运行时反射 | ✅ 编译时优化 |
-| 类型安全 | ⚠️ 部分支持 | ✅ 完整支持 |
-| 未来兼容 | ❌ 可能被废弃 | ✅ 持续演进 |
-
-## 迁移指南
-
-从实验性装饰器迁移到 TC39 标准装饰器：
-
-1. **更新 tsconfig.json**
-   ```json
-   {
-     "experimentalDecorators": false,
-     "emitDecoratorMetadata": false
-   }
-   ```
-
-2. **移除依赖**
-   ```bash
-   pnpm remove reflect-metadata
-   ```
-
-3. **代码无需修改**
-   - 装饰器语法保持不变
-   - 控制器代码无需修改
-   - 自动兼容新标准
-
-## 注意事项
-
-1. 需要 TypeScript 5.0+ 支持
-2. 需要 Node.js 16+ 运行环境
-3. 控制器类需要导出并在路由中间件中注册
-4. 控制器方法应该返回数据而不是直接操作 `ctx.body`
-5. TC39 装饰器使用 `addInitializer` 进行初始化，性能更优

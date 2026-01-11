@@ -118,11 +118,6 @@ export class UserController {
       results = results.filter((user) => user.status === status);
     }
 
-    return {
-      keyword,
-      status,
-      total: results.length,
-      results,
-    };
+    return results;
   }
 }

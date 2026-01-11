@@ -42,9 +42,9 @@ class Net {
     );
   }
 
-  async request<T>(config: AxiosRequestConfig): Promise<T> {
+  async request<T>(config: AxiosRequestConfig): Promise<APIResponse<T>> {
     try {
-      const response = await this.instance.request<T>(config);
+      const response = await this.instance.request<APIResponse<T>>(config);
       if (!response || !response.data) {
         throw new Error('Invalid response');
       }
@@ -54,6 +54,13 @@ class Net {
       throw error;
     }
   }
+}
+
+export interface APIPagination<T> {
+  list: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface APIResponse<T> {
