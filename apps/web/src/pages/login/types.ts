@@ -1,4 +1,4 @@
-import type { APIResponse } from '@shared';
+import type { APIResponse } from '../../utils';
 
 export interface User {
   id: string;

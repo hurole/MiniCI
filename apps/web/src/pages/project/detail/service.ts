@@ -1,4 +1,4 @@
-import { type APIResponse, net } from '@shared';
+import { type APIResponse, net } from '../../../utils';
 import type {
   Branch,
   Commit,

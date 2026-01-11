@@ -1,5 +1,5 @@
 import { Message, Notification } from '@arco-design/web-react';
-import { net } from '@shared';
+import { net } from '../../utils';
 import type { NavigateFunction } from 'react-router';
 import { useGlobalStore } from '../../stores/global';
 import type { AuthLoginResponse, AuthURLResponse } from './types';
