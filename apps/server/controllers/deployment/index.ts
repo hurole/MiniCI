@@ -20,22 +20,28 @@ export class DeploymentController {
       where.projectId = projectId;
     }
 
+    const isPagination = page !== undefined && pageSize !== undefined;
+
     const result = await prisma.deployment.findMany({
       where,
-      take: pageSize,
-      skip: (page - 1) * pageSize,
+      take: isPagination ? pageSize : undefined,
+      skip: isPagination ? (page! - 1) * pageSize! : 0,
       orderBy: {
         createdAt: 'desc',
       },
     });
     const total = await prisma.deployment.count({ where });
 
-    return {
-      data: result,
-      page,
-      pageSize,
-      total,
-    };
+    if (isPagination) {
+      return {
+        list: result,
+        page,
+        pageSize,
+        total,
+      };
+    }
+
+    return result;
   }
 
   @Post('')

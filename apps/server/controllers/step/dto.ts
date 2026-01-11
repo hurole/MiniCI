@@ -84,15 +84,13 @@ export const listStepsQuerySchema = z
       .number()
       .int()
       .min(1, { message: '页码必须大于0' })
-      .optional()
-      .default(1),
-    limit: z.coerce
+      .optional(),
+    pageSize: z.coerce
       .number()
       .int()
       .min(1, { message: '每页数量必须大于0' })
       .max(100, { message: '每页数量不能超过100' })
-      .optional()
-      .default(10),
+      .optional(),
   })
   .optional();
 

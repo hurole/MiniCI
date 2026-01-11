@@ -1,5 +1,3 @@
-import type { APIResponse } from '../../utils';
-
 export interface User {
   id: string;
   username: string;
@@ -8,8 +6,6 @@ export interface User {
   active: boolean;
 }
 
-export type AuthURLResponse = APIResponse<{
+export interface AuthURL {
   url: string;
-}>;
-
-export type AuthLoginResponse = APIResponse<User>;
+};

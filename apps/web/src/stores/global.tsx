@@ -1,25 +1,13 @@
-import { type APIResponse, net } from '../utils';
+import { net } from '@utils';
 import { create } from 'zustand';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  avatar_url: string;
-  active: boolean;
-}
-
-interface GlobalStore {
-  user: User | null;
-  setUser: (user: User) => void;
-  refreshUser: () => Promise<void>;
-}
+import type { GlobalStore } from './types';
+import type { User } from '@pages/login/types';
 
 export const useGlobalStore = create<GlobalStore>((set) => ({
   user: null,
   setUser: (user: User) => set({ user }),
   async refreshUser() {
-    const { data } = await net.request<APIResponse<User>>({
+    const { data } = await net.request<User>({
       method: 'GET',
       url: '/api/auth/info',
     });

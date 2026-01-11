@@ -15,7 +15,7 @@ function ProjectPage() {
 
   useAsyncEffect(async () => {
     const response = await projectService.list();
-    setProjects(response.data);
+    setProjects(response.list);
   }, []);
 
   const handleCreateProject = () => {

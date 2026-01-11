@@ -66,19 +66,8 @@ export const updateProjectSchema = z.object({
  */
 export const listProjectQuerySchema = z
   .object({
-    page: z.coerce
-      .number()
-      .int()
-      .min(1, { message: '页码必须大于0' })
-      .optional()
-      .default(1),
-    limit: z.coerce
-      .number()
-      .int()
-      .min(1, { message: '每页数量必须大于0' })
-      .max(100, { message: '每页数量不能超过100' })
-      .optional()
-      .default(10),
+    page: z.coerce.number().int().min(1).optional(),
+    pageSize: z.coerce.number().int().min(1).max(100).optional(),
     name: z.string().optional(),
   })
   .optional();

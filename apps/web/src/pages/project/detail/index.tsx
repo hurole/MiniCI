@@ -10,6 +10,7 @@ import {
   Menu,
   Message,
   Modal,
+  Pagination,
   Select,
   Space,
   Switch,
@@ -94,6 +95,11 @@ function ProjectDetailPage() {
   const [pipelineForm] = Form.useForm();
   const [deployRecords, setDeployRecords] = useState<Deployment[]>([]);
   const [deployModalVisible, setDeployModalVisible] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
   // 流水线模板相关状态
   const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
@@ -153,10 +159,15 @@ function ProjectDetailPage() {
 
       // 获取部署记录
       try {
-        const records = await detailService.getDeployments(Number(id));
-        setDeployRecords(records);
-        if (records.length > 0) {
-          setSelectedRecordId(records[0].id);
+        const res = await detailService.getDeployments(
+          Number(id),
+          1,
+          pagination.pageSize,
+        );
+        setDeployRecords(res.list);
+        setPagination((prev) => ({ ...prev, total: res.total, current: 1 }));
+        if (res.list.length > 0) {
+          setSelectedRecordId(res.list[0].id);
         }
       } catch (error) {
         console.error('获取部署记录失败:', error);
@@ -175,32 +186,40 @@ function ProjectDetailPage() {
   };
 
   // 定期轮询部署记录以更新状态和日志
-  useAsyncEffect(async () => {
-    const interval = setInterval(async () => {
-      if (id) {
-        try {
-          const records = await detailService.getDeployments(Number(id));
-          setDeployRecords(records);
+  useEffect(() => {
+    if (!id) return;
+    
+    const poll = async () => {
+      try {
+        const res = await detailService.getDeployments(
+          Number(id),
+          pagination.current,
+          pagination.pageSize,
+        );
+        setDeployRecords(res.list);
+        setPagination((prev) => ({ ...prev, total: res.total }));
 
-          // 如果当前选中的记录正在运行，则更新选中记录
-          const selectedRecord = records.find(
-            (r: Deployment) => r.id === selectedRecordId,
-          );
-          if (
-            selectedRecord &&
-            (selectedRecord.status === 'running' ||
-              selectedRecord.status === 'pending')
-          ) {
-            // 保持当前选中状态，但更新数据
-          }
-        } catch (error) {
-          console.error('轮询部署记录失败:', error);
+        // 如果当前选中的记录正在运行，则更新选中记录
+        const selectedRecord = res.list.find(
+          (r: Deployment) => r.id === selectedRecordId,
+        );
+        if (
+          selectedRecord &&
+          (selectedRecord.status === 'running' ||
+            selectedRecord.status === 'pending')
+        ) {
+          // 保持当前选中状态，但更新数据
         }
+      } catch (error) {
+        console.error('轮询部署记录失败:', error);
       }
-    }, 3000); // 每3秒轮询一次
+    };
+
+    poll(); // 立即执行一次
+    const interval = setInterval(poll, 3000); // 每3秒轮询一次
 
     return () => clearInterval(interval);
-  }, [id, selectedRecordId]);
+  }, [id, selectedRecordId, pagination.current, pagination.pageSize]);
 
   // 触发部署
   const handleDeploy = () => {
@@ -601,8 +620,13 @@ function ProjectDetailPage() {
 
       // 刷新部署记录
       if (id) {
-        const records = await detailService.getDeployments(Number(id));
-        setDeployRecords(records);
+        const res = await detailService.getDeployments(
+          Number(id),
+          pagination.current,
+          pagination.pageSize,
+        );
+        setDeployRecords(res.list);
+        setPagination((prev) => ({ ...prev, total: res.total }));
       }
     } catch (error) {
       console.error('重新执行部署失败:', error);
@@ -841,19 +865,33 @@ function ProjectDetailPage() {
                     刷新
                   </Button>
                 </div>
-                <div className="flex-1 overflow-y-auto min-h-0">
-                  {deployRecords.length > 0 ? (
-                    <List
-                      className="bg-white rounded-lg border"
-                      dataSource={deployRecords}
-                      render={renderDeployRecordItem}
-                      split={true}
+                <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+                  <div className="flex-1 overflow-y-auto">
+                    {deployRecords.length > 0 ? (
+                      <List
+                        className="bg-white rounded-lg border"
+                        dataSource={deployRecords}
+                        render={renderDeployRecordItem}
+                        split={true}
+                      />
+                    ) : (
+                      <div className="text-center py-12">
+                        <Empty description="暂无部署记录" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2 text-right">
+                    <Pagination
+                      total={pagination.total}
+                      current={pagination.current}
+                      pageSize={pagination.pageSize}
+                      size="small"
+                      simple
+                      onChange={(page) =>
+                        setPagination((prev) => ({ ...prev, current: page }))
+                      }
                     />
-                  ) : (
-                    <div className="text-center py-12">
-                      <Empty description="暂无部署记录" />
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
 
@@ -1383,14 +1421,7 @@ function ProjectDetailPage() {
               style={{ fontFamily: 'Monaco, Consolas, monospace' }}
             />
           </Form.Item>
-          <div className="bg-blue-50 p-3 rounded text-sm">
-            <Typography.Text type="secondary">
-              <strong>可用环境变量：</strong>
-              <br />• $PROJECT_NAME - 项目名称
-              <br />• $BUILD_NUMBER - 构建编号
-              <br />• $REGISTRY - 镜像仓库地址
-            </Typography.Text>
-          </div>
+
         </Form>
       </Modal>
 
@@ -1401,12 +1432,19 @@ function ProjectDetailPage() {
           setDeployModalVisible(false);
           // 刷新部署记录
           if (id) {
-            detailService.getDeployments(Number(id)).then((records) => {
-              setDeployRecords(records);
-              if (records.length > 0) {
-                setSelectedRecordId(records[0].id);
-              }
-            });
+            detailService
+              .getDeployments(Number(id), 1, pagination.pageSize)
+              .then((res) => {
+                setDeployRecords(res.list);
+                setPagination((prev) => ({
+                   ...prev,
+                   total: res.total,
+                   current: 1,
+                }));
+                if (res.list.length > 0) {
+                  setSelectedRecordId(res.list[0].id);
+                }
+              });
           }
         }}
         pipelines={pipelines}

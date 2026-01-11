@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const listDeploymentsQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).optional().default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).optional().default(10),
+  page: z.coerce.number().int().min(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(100).optional(),
   projectId: z.coerce.number().int().positive().optional(),
 });
 

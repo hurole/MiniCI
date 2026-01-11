@@ -32,16 +32,48 @@ web 项目代码组织如下：
 
 - 注释符合 jsdoc 规范
 - 代码简洁，避免冗余，移除无用的代码引用、变量、函数和css样式
+- 禁止使用 any 类型
 
-## 4. 响应格式
+## 4. 前端发送net请求示例
 
-- 后端统一返回 `APIResponse<T>` 结构：
+- 分页
 
-  ```json
-  { "code": 0, "data": {}, "message": "success", "timestamp": 12345678 }
-  ```
+```typescript
+import {net} from '@utils';
+import type {APIPagination} from '@utils/net';
 
-- 由 `RouteScanner` 中的 `wrapControllerMethod` 自动封装。
+const data = await net.request<APIPagination<Deployment>>({
+  method: 'GET',
+  url: '/api/deployments',
+  // 注意：查询参数使用 params 传递，不要手动拼接到 url 上
+  params: {
+    projectId: 1,
+    page: 1,
+    pageSize: 10,
+  },
+})
+```
+
+- 其他
+
+```typescript
+import {net} from '@utils';
+
+const data = await net.request<void>({
+  method: 'POST',
+  url: '/api/deployment',
+  data: {
+    name: 'xxx',
+    description: 'xxx',
+    repository: 'https://a.com',
+  }
+})
+if (data.code === 0) {
+  console.log("创建成功")
+} else {
+  console.log("创建失败")
+}
+```
 
 ## 5. 异步处理
 
