@@ -839,7 +839,7 @@ function ProjectDetailPage() {
         </Button>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md flex-1 flex flex-col overflow-hidden">
+      <div className="bg-white p-6 rounded-lg shadow-md flex-1 overflow-hidden">
         <Tabs
           type="line"
           size="large"
@@ -852,12 +852,13 @@ function ProjectDetailPage() {
                 部署记录
               </Space>
             }
+            className="h-full"
             key="deployRecords"
           >
-            <div className="grid grid-cols-5 gap-6 h-full">
+            <div className="flex flex-row gap-6 h-full">
               {/* 左侧部署记录列表 */}
-              <div className="col-span-2 space-y-4 h-full flex flex-col">
-                <div className="flex items-center justify-between shrink-0">
+              <div className="w-150 h-full flex flex-col">
+                <div className="flex items-center justify-between py-3">
                   <Typography.Text type="secondary">
                     共 {deployRecords.length} 条部署记录
                   </Typography.Text>
@@ -865,38 +866,36 @@ function ProjectDetailPage() {
                     刷新
                   </Button>
                 </div>
-                <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
-                  <div className="flex-1 overflow-y-auto">
-                    {deployRecords.length > 0 ? (
-                      <List
-                        className="bg-white rounded-lg border"
-                        dataSource={deployRecords}
-                        render={renderDeployRecordItem}
-                        split={true}
-                      />
-                    ) : (
-                      <div className="text-center py-12">
-                        <Empty description="暂无部署记录" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-2 text-right">
-                    <Pagination
-                      total={pagination.total}
-                      current={pagination.current}
-                      pageSize={pagination.pageSize}
-                      size="small"
-                      simple
-                      onChange={(page) =>
-                        setPagination((prev) => ({ ...prev, current: page }))
-                      }
+                <div className="flex-1 flex flex-col overflow-y-auto">
+                  {deployRecords.length > 0 ? (
+                    <List
+                      className="bg-white rounded-lg border"
+                      dataSource={deployRecords}
+                      render={renderDeployRecordItem}
+                      split={true}
                     />
-                  </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Empty description="暂无部署记录" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-3 flex flex-row justify-end">
+                  <Pagination
+                    total={pagination.total}
+                    current={pagination.current}
+                    pageSize={pagination.pageSize}
+                    showTotal
+                    size="default"
+                    onChange={(page) =>
+                      setPagination((prev) => ({ ...prev, current: page }))
+                    }
+                  />
                 </div>
               </div>
 
               {/* 右侧构建日志 */}
-              <div className="col-span-3 bg-white rounded-lg border h-full overflow-hidden flex flex-col">
+              <div className="flex-1 bg-white rounded-lg border h-full overflow-hidden flex flex-col">
                 <div className="p-4 border-b bg-gray-50 shrink-0">
                   <div className="flex items-center justify-between">
                     <div>
@@ -905,7 +904,7 @@ function ProjectDetailPage() {
                       </Typography.Title>
                       {selectedRecord && (
                         <Typography.Text type="secondary" className="text-sm">
-                          {selectedRecord.branch}
+                          {selectedRecord.branch}&nbsp;
                           {formatDateTime(selectedRecord.createdAt)}
                         </Typography.Text>
                       )}
