@@ -115,6 +115,7 @@ function ProjectDetailPage() {
   const [projectForm] = Form.useForm();
   const [envPresets, setEnvPresets] = useState<EnvPreset[]>([]);
   const [envPresetsLoading, setEnvPresetsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('deployRecords');
 
   const { id } = useParams();
 
@@ -187,7 +188,7 @@ function ProjectDetailPage() {
 
   // 定期轮询部署记录以更新状态和日志
   useEffect(() => {
-    if (!id) return;
+    if (!id || activeTab !== 'deployRecords') return;
     
     const poll = async () => {
       try {
@@ -219,7 +220,7 @@ function ProjectDetailPage() {
     const interval = setInterval(poll, 3000); // 每3秒轮询一次
 
     return () => clearInterval(interval);
-  }, [id, selectedRecordId, pagination.current, pagination.pageSize]);
+  }, [id, selectedRecordId, pagination.current, pagination.pageSize, activeTab]);
 
   // 触发部署
   const handleDeploy = () => {
@@ -843,6 +844,8 @@ function ProjectDetailPage() {
         <Tabs
           type="line"
           size="large"
+          activeTab={activeTab}
+          onChange={setActiveTab}
           className="h-full flex flex-col [&>.arco-tabs-content]:flex-1 [&>.arco-tabs-content]:overflow-hidden [&>.arco-tabs-content_.arco-tabs-content-inner]:h-full [&>.arco-tabs-pane]:h-full"
         >
           <Tabs.TabPane
