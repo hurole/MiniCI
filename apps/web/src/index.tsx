@@ -1,6 +1,7 @@
 import App from '@pages/App';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
+import { ConfigProvider } from '@arco-design/web-react';
 import { useGlobalStore } from './stores/global';
 import '@arco-design/web-react/es/_util/react-19-adapter';
 
@@ -11,8 +12,14 @@ if (rootEl) {
   useGlobalStore.getState().refreshUser();
 
   root.render(
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>,
+    <ConfigProvider
+      theme={{
+        primaryColor: '#385079',
+      }}
+    >
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ConfigProvider>,
   );
 }

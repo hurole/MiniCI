@@ -3,8 +3,7 @@ import {
   IconApps,
   IconExport,
   IconMenuFold,
-  IconMenuUnfold,
-
+  IconMenuUnfold
 } from '@arco-design/web-react/icon';
 import Logo from '@assets/images/logo.svg?react';
 import { loginService } from '@pages/login/service';
@@ -30,8 +29,8 @@ function Home() {
         }
       >
         <div className="flex flex-row items-center justify-center h-[56px]">
-          <Logo />
-          {!collapsed && <h2 className="ml-4 text-xl font-medium">Mini CI</h2>}
+          <Logo className="h-10 w-10" aria-label="MiniCI" />
+          {!collapsed && <h2 className="ml-3 text-xl font-medium">Mini CI</h2>}
         </div>
         <Menu
           className="flex-1"
