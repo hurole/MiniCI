@@ -1,7 +1,7 @@
 import { Button, Grid, Typography } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
+import { useAsyncEffect } from '@hooks/useAsyncEffect';
 import { useState } from 'react';
-import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
 import type { Project } from '../types';
 import CreateProjectModal from './components/CreateProjectModal';
 import ProjectCard from './components/ProjectCard';

@@ -1,4 +1,3 @@
-
 import Home from '@pages/home';
 import Login from '@pages/login';
 import ProjectDetail from '@pages/project/detail';
@@ -13,7 +12,6 @@ const App = () => {
         <Route index element={<Navigate to="project" replace />} />
         <Route path="project" element={<ProjectList />} />
         <Route path="project/:id" element={<ProjectDetail />} />
-
       </Route>
       <Route path="/login" element={<Login />} />
     </Routes>

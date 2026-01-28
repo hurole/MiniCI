@@ -64,7 +64,7 @@ export function DeployRecordsTab({
       <div className="w-150 h-full flex flex-col">
         <div className="flex items-center justify-between py-3">
           <Typography.Text type="secondary">
-            共 {deployRecords.length} 条部署记录
+            共 {pagination.total} 条部署记录
           </Typography.Text>
           <Button size="small" type="outline" onClick={onRefresh}>
             刷新

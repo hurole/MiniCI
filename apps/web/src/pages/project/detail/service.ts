@@ -1,4 +1,4 @@
-import { net } from '../../../utils';
+import { net } from '@utils';
 import type {
   Branch,
   Commit,

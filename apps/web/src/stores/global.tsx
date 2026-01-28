@@ -1,7 +1,7 @@
 import { net } from '@utils';
 import { create } from 'zustand';
-import type { GlobalStore } from './types';
 import type { User } from '@pages/login/types';
+import type { GlobalStore } from './types';
 
 export const useGlobalStore = create<GlobalStore>((set) => ({
   user: null,

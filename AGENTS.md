@@ -129,8 +129,10 @@ export const useStore = create<State>((set) => ({
 ```
 
 ## 6. Rules & Restrictions
+- **使用中文:** 对话和文档、代码注释优先使用中文
 - **No Tests:** Do not run non-existent test commands.
 - **No Class Components:** Use React Functional Components.
 - **Strict ESM:** Remember `.ts` extensions in server imports.
 - **Environment:** Respect `.env` files (using `dotenv`).
 - **Package Manager:** Use `pnpm` exclusively. Do not use `npm` or `yarn`.
+- **Imports Order:** `import type` 要在 `import` 之后

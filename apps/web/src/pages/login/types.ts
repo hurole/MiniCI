@@ -8,4 +8,4 @@ export interface User {
 
 export interface AuthURL {
   url: string;
-};
+}

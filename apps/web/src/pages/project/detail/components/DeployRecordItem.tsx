@@ -1,5 +1,5 @@
 import { List, Space, Tag } from '@arco-design/web-react';
-import { formatDateTime } from '../../../../utils/time';
+import { formatDateTime } from '@utils/time';
 import type { Deployment } from '../../types';
 
 interface DeployRecordItemProps {
