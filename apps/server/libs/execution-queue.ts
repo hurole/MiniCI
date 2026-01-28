@@ -1,8 +1,8 @@
-import { PipelineRunner } from '../runners/index.ts';
-import { prisma } from './prisma.ts';
-import { log } from '../libs/logger.ts';
+import { PipelineRunner } from "../runners/index.ts";
+import { prisma } from "./prisma.ts";
+import { log } from "../libs/logger.ts";
 
-const TAG = 'Queue';
+const TAG = "Queue";
 // 存储正在运行的部署任务
 const runningDeployments = new Set<number>();
 
@@ -42,14 +42,14 @@ export class ExecutionQueue {
    * 初始化执行队列，包括恢复未完成的任务
    */
   public async initialize(): Promise<void> {
-    log.info(TAG, 'Initializing execution queue...');
+    log.info(TAG, "Initializing execution queue...");
     // 恢复未完成的任务
     await this.recoverPendingDeployments();
 
     // 启动定时轮询
     this.startPolling();
 
-    log.info(TAG, 'Execution queue initialized');
+    log.info(TAG, "Execution queue initialized");
   }
 
   /**
@@ -57,12 +57,12 @@ export class ExecutionQueue {
    */
   private async recoverPendingDeployments(): Promise<void> {
     try {
-      log.info(TAG, 'Recovering pending deployments from database...');
+      log.info(TAG, "Recovering pending deployments from database...");
 
       // 查询数据库中状态为pending的部署任务
       const pendingDeployments = await prisma.deployment.findMany({
         where: {
-          status: 'pending',
+          status: "pending",
           valid: 1,
         },
         select: {
@@ -78,9 +78,9 @@ export class ExecutionQueue {
         await this.addTask(deployment.id, deployment.pipelineId);
       }
 
-      log.info(TAG, 'Pending deployments recovery completed');
+      log.info(TAG, "Pending deployments recovery completed");
     } catch (error) {
-      log.error(TAG, 'Failed to recover pending deployments:', error);
+      log.error(TAG, "Failed to recover pending deployments:", error);
     }
   }
 
@@ -89,7 +89,7 @@ export class ExecutionQueue {
    */
   private startPolling(): void {
     if (this.isPolling) {
-      log.info(TAG, 'Polling is already running');
+      log.info(TAG, "Polling is already running");
       return;
     }
 
@@ -113,7 +113,7 @@ export class ExecutionQueue {
       clearInterval(pollingTimer);
       pollingTimer = null;
       this.isPolling = false;
-      log.info(TAG, 'Polling stopped');
+      log.info(TAG, "Polling stopped");
     }
   }
 
@@ -122,12 +122,12 @@ export class ExecutionQueue {
    */
   private async checkPendingDeployments(): Promise<void> {
     try {
-      log.info(TAG, 'Checking for pending deployments in database...');
+      log.info(TAG, "Checking for pending deployments in database...");
 
       // 查询数据库中状态为pending的部署任务
       const pendingDeployments = await prisma.deployment.findMany({
         where: {
-          status: 'pending',
+          status: "pending",
           valid: 1,
         },
         select: {
@@ -153,7 +153,7 @@ export class ExecutionQueue {
         }
       }
     } catch (error) {
-      log.error(TAG, 'Failed to check pending deployments:', error);
+      log.error(TAG, "Failed to check pending deployments:", error);
     }
   }
 
@@ -198,7 +198,7 @@ export class ExecutionQueue {
           // 执行流水线
           await this.executePipeline(task.deploymentId, task.pipelineId);
         } catch (error) {
-          log.error(TAG, '执行流水线失败:', error);
+          log.error(TAG, "执行流水线失败:", error);
           // 这里可以添加更多的错误处理逻辑
         } finally {
           // 从运行队列中移除
@@ -223,33 +223,16 @@ export class ExecutionQueue {
     pipelineId: number,
   ): Promise<void> {
     try {
-      // 获取部署信息以获取项目和 projectDir
       const deployment = await prisma.deployment.findUnique({
         where: { id: deploymentId },
-        include: {
-          Project: true,
-        },
       });
-
-      if (!deployment || !deployment.Project) {
-        throw new Error(
-          `Deployment ${deploymentId} or associated project not found`,
-        );
+      if (deployment === null) {
+        throw new Error(`部署不存在, id: ${deploymentId}`);
       }
-
-      if (!deployment.Project.projectDir) {
-        throw new Error(
-          `项目 "${deployment.Project.name}" 未配置工作目录，无法执行流水线`,
-        );
-      }
-
-      const runner = new PipelineRunner(
-        deploymentId,
-        deployment.Project.projectDir,
-      );
+      const runner = new PipelineRunner(deployment);
       await runner.run(pipelineId);
     } catch (error) {
-      log.error(TAG, '执行流水线失败:', error);
+      log.error(TAG, "执行流水线失败:", error);
       // 错误处理可以在这里添加，比如更新部署状态为失败
       throw error;
     }

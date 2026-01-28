@@ -1,14 +1,13 @@
 import {
   Button,
-  Collapse,
   Form,
   Input,
   Message,
   Modal,
 } from '@arco-design/web-react';
 import React, { useState } from 'react';
-import EnvPresetsEditor, {
-  type EnvPreset,
+import type {
+  EnvPreset,
 } from '../../detail/components/EnvPresetsEditor';
 import type { Project } from '../../types';
 import { projectService } from '../service';
@@ -142,14 +141,6 @@ function EditProjectModal({
         >
           <Input placeholder="请输入仓库地址，如: https://github.com/user/repo" />
         </Form.Item>
-
-        <Collapse defaultActiveKey={[]} style={{ marginTop: 16 }}>
-          <Collapse.Item header="环境变量预设配置" name="envPresets">
-            <Form.Item field="envPresets" noStyle>
-              <EnvPresetsEditor />
-            </Form.Item>
-          </Collapse.Item>
-        </Collapse>
       </Form>
     </Modal>
   );

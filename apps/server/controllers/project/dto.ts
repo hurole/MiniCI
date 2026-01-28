@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { projectDirSchema } from '../../libs/path-validator.js';
+import { projectDirSchema } from '../../libs/path-validator.ts';
 
 /**
  * 创建项目验证架构

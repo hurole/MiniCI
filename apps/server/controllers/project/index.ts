@@ -75,17 +75,8 @@ export class ProjectController {
     let workspaceStatus = null;
     if (project.projectDir) {
       try {
-        const status = await GitManager.checkWorkspaceStatus(
-          project.projectDir,
-        );
-        let gitInfo = null;
-
-        if (status.hasGit) {
-          gitInfo = await GitManager.getGitInfo(project.projectDir);
-        }
-
+        const gitInfo = await GitManager.getGitInfo(project.projectDir);
         workspaceStatus = {
-          ...status,
           gitInfo,
         };
       } catch (error) {

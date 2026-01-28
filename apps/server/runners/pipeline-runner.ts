@@ -1,27 +1,15 @@
 import { $ } from 'zx';
-import type { Step } from '../generated/client.ts';
-import { GitManager, WorkspaceDirStatus } from '../libs/git-manager.ts';
+import type { Deployment, Project, Step } from '../generated/client.ts';
+import { GitManager } from '../libs/git-manager.ts';
 import { log } from '../libs/logger.ts';
 import { prisma } from '../libs/prisma.ts';
 
 export class PipelineRunner {
   private readonly TAG = 'PipelineRunner';
-  private deploymentId: number;
-  private projectDir: string;
+  private deployment: Deployment;
 
-  constructor(deploymentId: number, projectDir: string) {
-    this.deploymentId = deploymentId;
-
-    if (!projectDir) {
-      throw new Error('项目工作目录未配置，无法执行流水线');
-    }
-
-    this.projectDir = projectDir;
-    log.info(
-      this.TAG,
-      'PipelineRunner initialized with projectDir: %s',
-      this.projectDir,
-    );
+  constructor(deployment: Deployment) {
+    this.deployment = deployment;
   }
 
   /**
@@ -29,12 +17,19 @@ export class PipelineRunner {
    * @param pipelineId 流水线ID
    */
   async run(pipelineId: number): Promise<void> {
+    const project = await prisma.project.findUnique({
+      where: { id: this.deployment.projectId, valid: 1 },
+    });
+
+    if (!project) {
+      throw new Error(`Project with id ${this.deployment.projectId} not found`);
+    }
+
     // 获取流水线及其步骤
     const pipeline = await prisma.pipeline.findUnique({
       where: { id: pipelineId },
       include: {
         steps: { where: { valid: 1 }, orderBy: { order: 'asc' } },
-        Project: true, // 同时获取关联的项目信息
       },
     });
 
@@ -42,25 +37,15 @@ export class PipelineRunner {
       throw new Error(`Pipeline with id ${pipelineId} not found`);
     }
 
-    // 获取部署信息
-    const deployment = await prisma.deployment.findUnique({
-      where: { id: this.deploymentId },
-    });
-
-    if (!deployment) {
-      throw new Error(`Deployment with id ${this.deploymentId} not found`);
-    }
-
     let logs = '';
-    let hasError = false;
 
     try {
-      // 准备工作目录（检查、克隆或更新）
-      logs += await this.prepareWorkspace(pipeline.Project, deployment.branch);
+      // 准备工作目录
+      logs += await this.prepareWorkspace(project);
 
       // 更新部署状态为running
       await prisma.deployment.update({
-        where: { id: this.deploymentId },
+        where: { id: this.deployment.id },
         data: { status: 'running', buildLog: logs },
       });
 
@@ -68,7 +53,11 @@ export class PipelineRunner {
       for (const [index, step] of pipeline.steps.entries()) {
         const progress = `[${index + 1}/${pipeline.steps.length}]`;
         // 准备环境变量
-        const envVars = this.prepareEnvironmentVariables(pipeline, deployment);
+        const envVars = this.prepareEnvironmentVariables(
+          pipeline,
+          this.deployment,
+          project,
+        );
 
         // 记录开始执行步骤的日志
         const startLog = this.addTimestamp(
@@ -76,14 +65,8 @@ export class PipelineRunner {
         );
         logs += startLog;
 
-        // 实时更新日志
-        await prisma.deployment.update({
-          where: { id: this.deploymentId },
-          data: { buildLog: logs },
-        });
-
         // 执行步骤
-        const stepLog = await this.executeStep(step, envVars);
+        const stepLog = await this.executeStep(step, envVars, project);
         logs += stepLog;
 
         // 记录步骤执行完成的日志
@@ -92,12 +75,12 @@ export class PipelineRunner {
 
         // 实时更新日志
         await prisma.deployment.update({
-          where: { id: this.deploymentId },
+          where: { id: this.deployment.id },
           data: { buildLog: logs },
         });
       }
       await prisma.deployment.update({
-        where: { id: this.deploymentId },
+        where: { id: this.deployment.id },
         data: {
           buildLog: logs,
           status: 'success',
@@ -116,7 +99,7 @@ export class PipelineRunner {
 
       // 记录错误日志
       await prisma.deployment.update({
-        where: { id: this.deploymentId },
+        where: { id: this.deployment.id },
         data: {
           buildLog: logs,
           status: 'failed',
@@ -130,85 +113,62 @@ export class PipelineRunner {
 
   /**
    * 准备工作目录：检查状态、克隆或更新代码
-   * @param project 项目信息
-   * @param branch 目标分支
    * @returns 准备过程的日志
    */
-  private async prepareWorkspace(
-    project: any,
-    branch: string,
-  ): Promise<string> {
+  private async prepareWorkspace(project: Project): Promise<string> {
     let logs = '';
 
     try {
-      logs += this.addTimestamp(`检查工作目录状态: ${this.projectDir}`);
+      logs += this.addTimestamp('准备工作目录...\n');
 
-      // 检查工作目录状态
-      const status = await GitManager.checkWorkspaceStatus(this.projectDir);
-      logs += this.addTimestamp(`工作目录状态: ${status.status}`);
-
-      if (
-        status.status === WorkspaceDirStatus.NOT_CREATED ||
-        status.status === WorkspaceDirStatus.EMPTY
-      ) {
-        // 目录不存在或为空，需要克隆
-        logs += this.addTimestamp('工作目录不存在或为空，开始克隆仓库');
-
-        // 确保父目录存在
-        await GitManager.ensureDirectory(this.projectDir);
-
-        // 克隆仓库（注意：如果需要认证，token 应该从环境变量或配置中获取）
-        await GitManager.cloneRepository(
-          project.repository,
-          this.projectDir,
-          branch,
-          // TODO: 添加 token 支持
-        );
-
-        logs += this.addTimestamp('仓库克隆成功');
-      } else if (status.status === WorkspaceDirStatus.NO_GIT) {
-        // 目录存在但不是 Git 仓库
-        throw new Error(
-          `工作目录 ${this.projectDir} 已存在但不是 Git 仓库，请检查配置`,
-        );
-      } else if (status.status === WorkspaceDirStatus.READY) {
-        // 已存在 Git 仓库，更新代码
-        logs += this.addTimestamp('工作目录已存在 Git 仓库，开始更新代码');
-        await GitManager.updateRepository(this.projectDir, branch);
-        logs += this.addTimestamp('代码更新成功');
+      if (!project.repository) {
+        throw new Error('项目仓库地址未配置');
       }
 
-      return logs;
+      if (!this.deployment.branch || !this.deployment.commitHash) {
+        throw new Error('部署分支或提交哈希未指定');
+      }
+
+      await GitManager.ensureDirectory(project.projectDir);
+
+      // 不是git仓库，初始话为git仓库，然后添加remote并拉取代码
+      await GitManager.ensureGitRepository(
+        project.projectDir,
+        project.repository,
+      );
+
+      // 拉取代码
+      await GitManager.pullRepository(
+        project.projectDir,
+        this.deployment.branch,
+        this.deployment.commitHash,
+      );
     } catch (error) {
-      const errorLog = this.addTimestamp(
+      logs += this.addTimestamp(
         `准备工作目录失败: ${(error as Error).message}`,
       );
-      logs += errorLog;
-      log.error(
-        this.TAG,
-        'Failed to prepare workspace: %s',
-        (error as Error).message,
-      );
-      throw new Error(`准备工作目录失败: ${(error as Error).message}`);
+      throw error;
     }
+
+    return logs;
   }
 
   /**
    * 准备环境变量
    * @param pipeline 流水线信息
    * @param deployment 部署信息
+   * @param project 项目信息
    */
   private prepareEnvironmentVariables(
     pipeline: any,
     deployment: any,
+    project: Project,
   ): Record<string, string> {
     const envVars: Record<string, string> = {};
 
     // 项目相关信息
-    if (pipeline.Project) {
-      envVars.REPOSITORY_URL = pipeline.Project.repository || '';
-      envVars.PROJECT_NAME = pipeline.Project.name || '';
-    }
+    envVars.REPOSITORY_URL = project.repository || '';
+    envVars.PROJECT_NAME = project.name || '';
 
     // 部署相关信息
     envVars.BRANCH_NAME = deployment.branch || '';
@@ -225,7 +185,7 @@ export class PipelineRunner {
     }
 
     // 工作空间路径（使用配置的项目目录）
-    envVars.WORKSPACE = this.projectDir;
+    envVars.WORKSPACE = project.projectDir;
 
     return envVars;
   }
@@ -233,12 +193,11 @@ export class PipelineRunner {
   /**
    * 为日志添加时间戳前缀
    * @param message 日志消息
-   * @param isError 是否为错误日志
    * @returns 带时间戳的日志消息
    */
   private addTimestamp(message: string): string {
     const timestamp = new Date().toISOString();
-    return `[${timestamp}] [ERROR] ${message}\n`;
+    return `[${timestamp}] ${message}\n`;
   }
 
   /**
@@ -249,6 +208,7 @@ export class PipelineRunner {
   private async executeStep(
     step: Step,
     envVars: Record<string, string>,
+    project: Project,
   ): Promise<string> {
     let logs = '';
 
@@ -257,7 +217,7 @@ export class PipelineRunner {
 
     // bash -c 执行脚本，确保环境变量能被正确解析
     const result = await $({
-      cwd: this.projectDir,
+      cwd: project.projectDir,
       env: { ...process.env, ...envVars },
     })`bash -c ${script}`;
 
