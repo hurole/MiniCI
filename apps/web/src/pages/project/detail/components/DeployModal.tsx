@@ -1,6 +1,6 @@
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
+import { formatDateTime } from '@utils/time';
 import { useCallback, useEffect, useState } from 'react';
-import { formatDateTime } from '../../../../utils/time';
 import type { Branch, Commit, Pipeline, Project } from '../../types';
 import { detailService } from '../service';
 

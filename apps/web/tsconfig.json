@@ -25,7 +25,10 @@
       "@styles/*": ["./src/styles/*"],
       "@assets/*": ["./src/assets/*"],
       "@utils/*": ["./src/utils/*"],
-      "@utils": ["./src/utils"]
+      "@utils": ["./src/utils"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@components/*": ["./src/components/*"]
     }
   },
   "include": ["src"]

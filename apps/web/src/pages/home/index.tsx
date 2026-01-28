@@ -3,13 +3,13 @@ import {
   IconApps,
   IconExport,
   IconMenuFold,
-  IconMenuUnfold
+  IconMenuUnfold,
 } from '@arco-design/web-react/icon';
 import Logo from '@assets/images/logo.svg?react';
 import { loginService } from '@pages/login/service';
+import { useGlobalStore } from '@stores/global';
 import { useState } from 'react';
 import { Link, Outlet } from 'react-router';
-import { useGlobalStore } from '../../stores/global';
 
 function Home() {
   const [collapsed, setCollapsed] = useState(false);
@@ -44,7 +44,6 @@ function Home() {
               <span>项目管理</span>
             </Link>
           </Menu.Item>
-
         </Menu>
       </Layout.Sider>
       <Layout>
