@@ -18,3 +18,10 @@
 ## 4. 依赖管理
 
 - **禁止** 混合使用 npm/yarn，必须统一使用 `pnpm`。
+
+## 5. 引入时要优先使用路径别名
+
+- 例如:
+
+  ❌ `import { formatDateTime } from '../../../../utils/time';`
+  ✅ `import { formatDateTime } from '@utils/time';` (使用路径别名)

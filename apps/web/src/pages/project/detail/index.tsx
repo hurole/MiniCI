@@ -1,73 +1,40 @@
 import {
   Button,
-  Card,
-  Descriptions,
-  Dropdown,
-  Empty,
   Form,
   Input,
-  List,
-  Menu,
   Message,
   Modal,
-  Pagination,
   Select,
   Space,
-  Switch,
   Tabs,
-  Tag,
   Typography,
 } from '@arco-design/web-react';
 import {
   IconCode,
   IconCommand,
-  IconCopy,
-  IconDelete,
-  IconEdit,
-  IconFolder,
   IconHistory,
-  IconMore,
   IconPlayArrow,
-  IconPlus,
-  IconRefresh,
   IconSettings,
 } from '@arco-design/web-react/icon';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
-  closestCenter,
-  DndContext,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useAsyncEffect } from '../../../hooks/useAsyncEffect';
-import { formatDateTime } from '../../../utils/time';
-import type { Deployment, Pipeline, Project, Step } from '../types';
+import type { Deployment, Project } from '../types';
 import DeployModal from './components/DeployModal';
-import DeployRecordItem from './components/DeployRecordItem';
-import EnvPresetsEditor, {
-  type EnvPreset,
-} from './components/EnvPresetsEditor';
-import PipelineStepItem from './components/PipelineStepItem';
 import { detailService } from './service';
-
-interface StepWithEnabled extends Step {
-  enabled: boolean;
-}
-
-interface PipelineWithEnabled extends Pipeline {
-  steps?: StepWithEnabled[];
-  enabled: boolean;
-}
+import { DeployRecordsTab } from './tabs/DeployRecordsTab';
+import { EnvPresetsTab } from './tabs/EnvPresetsTab';
+import { PipelineTab } from './tabs/PipelineTab';
+import { SettingsTab } from './tabs/SettingsTab';
+import type { EnvPreset, PipelineWithEnabled, StepWithEnabled } from './tabs/types';
 
 function ProjectDetailPage() {
   const [detail, setDetail] = useState<Project | null>();
@@ -189,7 +156,7 @@ function ProjectDetailPage() {
   // 定期轮询部署记录以更新状态和日志
   useEffect(() => {
     if (!id || activeTab !== 'deployRecords') return;
-    
+
     const poll = async () => {
       try {
         const res = await detailService.getDeployments(
@@ -220,7 +187,13 @@ function ProjectDetailPage() {
     const interval = setInterval(poll, 3000); // 每3秒轮询一次
 
     return () => clearInterval(interval);
-  }, [id, selectedRecordId, pagination.current, pagination.pageSize, activeTab]);
+  }, [
+    id,
+    selectedRecordId,
+    pagination.current,
+    pagination.pageSize,
+    activeTab,
+  ]);
 
   // 触发部署
   const handleDeploy = () => {
@@ -726,105 +699,7 @@ function ProjectDetailPage() {
     });
   };
 
-  const selectedRecord = deployRecords.find(
-    (record) => record.id === selectedRecordId,
-  );
   const buildLogs = getBuildLogs(selectedRecordId);
-
-  // 简单的状态标签渲染函数（仅用于构建日志区域）
-  const renderStatusTag = (status: Deployment['status']) => {
-    const statusMap: Record<string, { color: string; text: string }> = {
-      success: { color: 'green', text: '成功' },
-      running: { color: 'blue', text: '运行中' },
-      failed: { color: 'red', text: '失败' },
-      pending: { color: 'orange', text: '等待中' },
-    };
-    const config = statusMap[status];
-    return <Tag color={config.color}>{config.text}</Tag>;
-  };
-
-  // 渲染部署记录项
-  const renderDeployRecordItem = (item: Deployment) => (
-    <DeployRecordItem
-      key={item.id}
-      item={item}
-      isSelected={selectedRecordId === item.id}
-      onSelect={setSelectedRecordId}
-    />
-  );
-
-  // 获取工作目录状态标签
-  const getWorkspaceStatusTag = (
-    status: string,
-  ): { text: string; color: string } => {
-    const statusMap: Record<string, { text: string; color: string }> = {
-      not_created: { text: '未创建', color: 'gray' },
-      empty: { text: '空目录', color: 'orange' },
-      no_git: { text: '无Git仓库', color: 'orange' },
-      ready: { text: '就绪', color: 'green' },
-    };
-    return statusMap[status] || { text: '未知', color: 'gray' };
-  };
-
-  // 渲染工作目录状态卡片
-  const renderWorkspaceStatus = () => {
-    if (!detail?.workspaceStatus) return null;
-
-    const { workspaceStatus } = detail;
-    const statusInfo = getWorkspaceStatusTag(workspaceStatus.status as string);
-
-    return (
-      <Card
-        className="mb-6"
-        title={
-          <Space>
-            <IconFolder />
-            工作目录状态
-          </Space>
-        }
-      >
-        <Descriptions
-          column={2}
-          data={[
-            {
-              label: '目录路径',
-              value: detail.projectDir,
-            },
-            {
-              label: '状态',
-              value: <Tag color={statusInfo.color}>{statusInfo.text}</Tag>,
-            },
-            {
-              label: '当前分支',
-              value: workspaceStatus.gitInfo?.branch || '-',
-            },
-            {
-              label: '最后提交',
-              value: workspaceStatus.gitInfo?.lastCommit ? (
-                <Space size="small">
-                  <Typography.Text code>
-                    {workspaceStatus.gitInfo.lastCommit}
-                  </Typography.Text>
-                  <Typography.Text type="secondary">
-                    {workspaceStatus.gitInfo.lastCommitMessage}
-                  </Typography.Text>
-                </Space>
-              ) : (
-                '-'
-              ),
-            },
-          ]}
-        />
-        {workspaceStatus.error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
-            <Typography.Text type="error">
-              {workspaceStatus.error}
-            </Typography.Text>
-          </div>
-        )}
-      </Card>
-    );
-  };
 
   return (
     <div className="p-6 flex flex-col h-full">
@@ -858,93 +733,20 @@ function ProjectDetailPage() {
             className="h-full"
             key="deployRecords"
           >
-            <div className="flex flex-row gap-6 h-full">
-              {/* 左侧部署记录列表 */}
-              <div className="w-150 h-full flex flex-col">
-                <div className="flex items-center justify-between py-3">
-                  <Typography.Text type="secondary">
-                    共 {deployRecords.length} 条部署记录
-                  </Typography.Text>
-                  <Button size="small" type="outline">
-                    刷新
-                  </Button>
-                </div>
-                <div className="flex-1 flex flex-col overflow-y-auto">
-                  {deployRecords.length > 0 ? (
-                    <List
-                      className="bg-white rounded-lg border"
-                      dataSource={deployRecords}
-                      render={renderDeployRecordItem}
-                      split={true}
-                    />
-                  ) : (
-                    <div className="text-center py-12">
-                      <Empty description="暂无部署记录" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-3 flex flex-row justify-end">
-                  <Pagination
-                    total={pagination.total}
-                    current={pagination.current}
-                    pageSize={pagination.pageSize}
-                    showTotal
-                    size="default"
-                    onChange={(page) =>
-                      setPagination((prev) => ({ ...prev, current: page }))
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* 右侧构建日志 */}
-              <div className="flex-1 bg-white rounded-lg border h-full overflow-hidden flex flex-col">
-                <div className="p-4 border-b bg-gray-50 shrink-0">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Typography.Title heading={5} className="!m-0">
-                        构建日志 #{selectedRecordId}
-                      </Typography.Title>
-                      {selectedRecord && (
-                        <Typography.Text type="secondary" className="text-sm">
-                          {selectedRecord.branch}&nbsp;
-                          {formatDateTime(selectedRecord.createdAt)}
-                        </Typography.Text>
-                      )}
-                    </div>
-                    {selectedRecord && (
-                      <div className="flex items-center gap-2">
-                        {selectedRecord.status === 'failed' && (
-                          <Button
-                            type="primary"
-                            icon={<IconRefresh />}
-                            size="small"
-                            onClick={() =>
-                              handleRetryDeployment(selectedRecord.id)
-                            }
-                          >
-                            重新执行
-                          </Button>
-                        )}
-                        {renderStatusTag(selectedRecord.status)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="p-4 flex-1 overflow-hidden flex flex-col">
-                  <div className="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm flex-1 overflow-y-auto">
-                    {buildLogs.map((log: string, index: number) => (
-                      <div
-                        key={`${selectedRecordId}-${log.slice(0, 30)}-${index}`}
-                        className="mb-1 leading-relaxed"
-                      >
-                        {log}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DeployRecordsTab
+              deployRecords={deployRecords}
+              pagination={pagination}
+              onPageChange={(page) =>
+                setPagination((prev) => ({ ...prev, current: page }))
+              }
+              onRefresh={() => {
+                // Refresh logic if any
+              }}
+              selectedRecordId={selectedRecordId}
+              onSelectRecord={setSelectedRecordId}
+              buildLogs={buildLogs}
+              onRetry={handleRetryDeployment}
+            />
           </Tabs.TabPane>
           <Tabs.TabPane
             title={
@@ -955,212 +757,22 @@ function ProjectDetailPage() {
             }
             key="pipeline"
           >
-            <div className="grid grid-cols-5 gap-6 h-full">
-              {/* 左侧流水线列表 */}
-              <div className="col-span-2 space-y-4">
-                <div className="flex items-center justify-between">
-                  <Typography.Text type="secondary">
-                    共 {pipelines.length} 条流水线
-                  </Typography.Text>
-                  <Button
-                    type="primary"
-                    icon={<IconPlus />}
-                    size="small"
-                    onClick={handleAddPipeline}
-                  >
-                    新建流水线
-                  </Button>
-                </div>
-                <div className="h-full overflow-y-auto">
-                  <div className="space-y-3">
-                    {pipelines.map((pipeline) => {
-                      const isSelected = pipeline.id === selectedPipelineId;
-                      return (
-                        <Card
-                          key={pipeline.id}
-                          className={`cursor-pointer transition-all duration-200 ${
-                            isSelected
-                              ? 'bg-blue-50 border-l-4 border-blue-500'
-                              : 'hover:bg-gray-50 border-gray-200'
-                          }`}
-                          onClick={() => setSelectedPipelineId(pipeline.id)}
-                        >
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <Typography.Title
-                                  heading={6}
-                                  className={`!m-0 ${
-                                    isSelected
-                                      ? 'text-blue-600'
-                                      : 'text-gray-900'
-                                  }`}
-                                >
-                                  {pipeline.name}
-                                </Typography.Title>
-                                <Switch
-                                  size="small"
-                                  checked={pipeline.enabled}
-                                  onChange={(enabled, e) => {
-                                    // 阻止事件冒泡
-                                    e?.stopPropagation?.();
-                                    handleTogglePipeline(pipeline.id, enabled);
-                                  }}
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                                {!pipeline.enabled && (
-                                  <Tag color="gray" size="small">
-                                    已禁用
-                                  </Tag>
-                                )}
-                              </div>
-                              <Dropdown
-                                droplist={
-                                  <Menu>
-                                    <Menu.Item
-                                      key="edit"
-                                      onClick={() =>
-                                        handleEditPipeline(pipeline)
-                                      }
-                                    >
-                                      <IconEdit className="mr-2" />
-                                      编辑流水线
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="copy"
-                                      onClick={() =>
-                                        handleCopyPipeline(pipeline)
-                                      }
-                                    >
-                                      <IconCopy className="mr-2" />
-                                      复制流水线
-                                    </Menu.Item>
-                                    <Menu.Item
-                                      key="delete"
-                                      onClick={() =>
-                                        handleDeletePipeline(pipeline.id)
-                                      }
-                                    >
-                                      <IconDelete className="mr-2" />
-                                      删除流水线
-                                    </Menu.Item>
-                                  </Menu>
-                                }
-                                position="br"
-                                trigger="click"
-                              >
-                                <button
-                                  className="p-1 hover:bg-gray-100 rounded cursor-pointer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.stopPropagation();
-                                    }
-                                  }}
-                                  type="button"
-                                >
-                                  <IconMore />
-                                </button>
-                              </Dropdown>
-                            </div>
-                            <Typography.Text type="secondary">
-                              {pipeline.description}
-                            </Typography.Text>
-                            <div className="flex items-center justify-between text-xs text-gray-500">
-                              <span>{pipeline.steps?.length || 0} 个步骤</span>
-                              <span>{formatDateTime(pipeline.updatedAt)}</span>
-                            </div>
-                          </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* 右侧流水线步骤详情 */}
-              <div className="col-span-3 bg-white rounded-lg border h-full overflow-hidden">
-                {selectedPipelineId &&
-                pipelines.find((p) => p.id === selectedPipelineId) ? (
-                  (() => {
-                    const selectedPipeline = pipelines.find(
-                      (p) => p.id === selectedPipelineId,
-                    );
-                    if (!selectedPipeline) return null;
-                    return (
-                      <>
-                        <div className="p-4 border-b bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Typography.Title heading={5} className="!m-0">
-                                {selectedPipeline.name} - 流水线步骤
-                              </Typography.Title>
-                              <Typography.Text
-                                type="secondary"
-                                className="text-sm"
-                              >
-                                {selectedPipeline.description} · 共{' '}
-                                {selectedPipeline.steps?.length || 0} 个步骤
-                              </Typography.Text>
-                            </div>
-                            <Button
-                              type="primary"
-                              size="small"
-                              onClick={() => handleAddStep(selectedPipelineId)}
-                            >
-                              添加步骤
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="p-4 flex-1 overflow-hidden">
-                          <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDragEnd}
-                          >
-                            <SortableContext
-                              items={
-                                selectedPipeline.steps?.map(
-                                  (step) => step.id,
-                                ) || []
-                              }
-                              strategy={verticalListSortingStrategy}
-                            >
-                              <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
-                                {selectedPipeline.steps?.map((step, index) => (
-                                  <PipelineStepItem
-                                    key={step.id}
-                                    step={step}
-                                    index={index}
-                                    pipelineId={selectedPipelineId}
-                                    onToggle={handleToggleStep}
-                                    onEdit={handleEditStep}
-                                    onDelete={handleDeleteStep}
-                                  />
-                                ))}
-
-                                {selectedPipeline.steps?.length === 0 && (
-                                  <div className="text-center py-12">
-                                    <Empty description="暂无步骤" />
-                                    <Typography.Text type="secondary">
-                                      点击上方"添加步骤"按钮开始配置
-                                    </Typography.Text>
-                                  </div>
-                                )}
-                              </div>
-                            </SortableContext>
-                          </DndContext>
-                        </div>
-                      </>
-                    );
-                  })()
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <Empty description="请选择流水线" />
-                  </div>
-                )}
-              </div>
-            </div>
+            <PipelineTab
+              pipelines={pipelines}
+              selectedPipelineId={selectedPipelineId}
+              onSelectPipeline={setSelectedPipelineId}
+              onAddPipeline={handleAddPipeline}
+              onEditPipeline={handleEditPipeline}
+              onCopyPipeline={handleCopyPipeline}
+              onDeletePipeline={handleDeletePipeline}
+              onTogglePipeline={handleTogglePipeline}
+              onAddStep={handleAddStep}
+              onEditStep={handleEditStep}
+              onDeleteStep={handleDeleteStep}
+              onToggleStep={handleToggleStep}
+              onDragEnd={handleDragEnd}
+              sensors={sensors}
+            />
           </Tabs.TabPane>
 
           {/* 项目设置标签页 */}
@@ -1173,99 +785,15 @@ function ProjectDetailPage() {
               </Space>
             }
           >
-            <div className="p-6">
-              <Card title="项目信息" className="mb-4">
-                {!isEditingProject ? (
-                  <>
-                    <Descriptions
-                      column={1}
-                      data={[
-                        {
-                          label: '项目名称',
-                          value: detail?.name,
-                        },
-                        {
-                          label: '项目描述',
-                          value: detail?.description || '-',
-                        },
-                        {
-                          label: 'Git 仓库',
-                          value: detail?.repository,
-                        },
-                        {
-                          label: '工作目录',
-                          value: detail?.projectDir || '-',
-                        },
-                        {
-                          label: '创建时间',
-                          value: formatDateTime(detail?.createdAt),
-                        },
-                      ]}
-                    />
-                    <div className="mt-4 flex gap-2">
-                      <Button type="primary" onClick={handleEditProject}>
-                        编辑项目
-                      </Button>
-                      <Button status="danger" onClick={handleDeleteProject}>
-                        删除项目
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Form form={projectForm} layout="vertical">
-                      <Form.Item
-                        field="name"
-                        label="项目名称"
-                        rules={[
-                          { required: true, message: '请输入项目名称' },
-                          { minLength: 2, message: '项目名称至少2个字符' },
-                        ]}
-                      >
-                        <Input placeholder="例如：我的应用" />
-                      </Form.Item>
-                      <Form.Item
-                        field="description"
-                        label="项目描述"
-                        rules={[
-                          { maxLength: 200, message: '描述不能超过200个字符' },
-                        ]}
-                      >
-                        <Input.TextArea
-                          placeholder="请输入项目描述"
-                          rows={3}
-                          maxLength={200}
-                          showWordLimit
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        field="repository"
-                        label="Git 仓库地址"
-                        rules={[{ required: true, message: '请输入仓库地址' }]}
-                      >
-                        <Input placeholder="例如：https://github.com/user/repo.git" />
-                      </Form.Item>
-                      <div className="text-sm text-gray-500 mb-4">
-                        <strong>工作目录：</strong> {detail?.projectDir || '-'}
-                      </div>
-                      <div className="text-sm text-gray-500 mb-4">
-                        <strong>创建时间：</strong>{' '}
-                        {formatDateTime(detail?.createdAt)}
-                      </div>
-                    </Form>
-                    <div className="mt-4 flex gap-2">
-                      <Button type="primary" onClick={handleSaveProject}>
-                        保存
-                      </Button>
-                      <Button onClick={handleCancelEditProject}>取消</Button>
-                    </div>
-                  </>
-                )}
-              </Card>
-
-              {/* 工作目录状态 */}
-              {renderWorkspaceStatus()}
-            </div>
+            <SettingsTab
+              detail={detail}
+              isEditingProject={isEditingProject}
+              projectForm={projectForm}
+              onEditProject={handleEditProject}
+              onCancelEditProject={handleCancelEditProject}
+              onSaveProject={handleSaveProject}
+              onDeleteProject={handleDeleteProject}
+            />
           </Tabs.TabPane>
 
           {/* 环境变量预设标签页 */}
@@ -1278,25 +806,12 @@ function ProjectDetailPage() {
               </Space>
             }
           >
-            <div className="p-6">
-              <Card
-                title="环境变量预设"
-                extra={
-                  <Button
-                    type="primary"
-                    onClick={handleSaveEnvPresets}
-                    loading={envPresetsLoading}
-                  >
-                    保存预设
-                  </Button>
-                }
-              >
-                <div className="text-sm text-gray-600 mb-4">
-                  配置项目的环境变量预设，在部署时可以选择这些预设值。支持单选、多选和输入框类型。
-                </div>
-                <EnvPresetsEditor value={envPresets} onChange={setEnvPresets} />
-              </Card>
-            </div>
+            <EnvPresetsTab
+              envPresets={envPresets}
+              setEnvPresets={setEnvPresets}
+              envPresetsLoading={envPresetsLoading}
+              handleSaveEnvPresets={handleSaveEnvPresets}
+            />
           </Tabs.TabPane>
         </Tabs>
       </div>
@@ -1423,7 +938,6 @@ function ProjectDetailPage() {
               style={{ fontFamily: 'Monaco, Consolas, monospace' }}
             />
           </Form.Item>
-
         </Form>
       </Modal>
 
@@ -1439,9 +953,9 @@ function ProjectDetailPage() {
               .then((res) => {
                 setDeployRecords(res.list);
                 setPagination((prev) => ({
-                   ...prev,
-                   total: res.total,
-                   current: 1,
+                  ...prev,
+                  total: res.total,
+                  current: 1,
                 }));
                 if (res.list.length > 0) {
                   setSelectedRecordId(res.list[0].id);
