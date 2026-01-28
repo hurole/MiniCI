@@ -1,2 +1,10 @@
 packages:
- - 'apps/*'
+  - apps/*
+
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - '@tailwindcss/oxide'
+  - better-sqlite3
+  - core-js
+  - esbuild
+  - prisma
