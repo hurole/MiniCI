@@ -6,12 +6,32 @@ import { BusinessError } from '../../middlewares/exception.ts';
 import {
   createStepSchema,
   listStepsQuerySchema,
+  reorderStepsSchema,
   stepIdSchema,
   updateStepSchema,
 } from './dto.ts';
 
 @Controller('/steps')
 export class StepController {
+  // POST /api/steps/reorder - 重新排序步骤
+  @Post('/reorder')
+  async reorder(ctx: Context) {
+    const { ids } = reorderStepsSchema.parse(ctx.request.body);
+
+    // 使用事务原子性地更新所有步骤的顺序
+    await prisma.$transaction(
+      ids.map((id, index) =>
+        prisma.step.update({
+          where: { id },
+          data: { order: index },
+        }),
+      ),
+    );
+
+    log.info('step', '重排了 %d 个步骤', ids.length);
+    return { success: true };
+  }
+
   // GET /api/steps - 获取步骤列表
   @Get('')
   async list(ctx: Context) {
@@ -26,7 +46,8 @@ export class StepController {
       whereCondition.pipelineId = query.pipelineId;
     }
 
-    const isPagination = query?.page !== undefined && query?.pageSize !== undefined;
+    const isPagination =
+      query?.page !== undefined && query?.pageSize !== undefined;
 
     const [total, steps] = await Promise.all([
       prisma.step.count({ where: whereCondition }),

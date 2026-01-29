@@ -94,8 +94,15 @@ export const listStepsQuerySchema = z
   })
   .optional();
 
+export const reorderStepsSchema = z.object({
+  ids: z
+    .array(z.number().int().positive())
+    .min(1, { message: '步骤ID列表不能为空' }),
+});
+
 // TypeScript 类型
 export type CreateStepInput = z.infer<typeof createStepSchema>;
 export type UpdateStepInput = z.infer<typeof updateStepSchema>;
 export type StepIdParams = z.infer<typeof stepIdSchema>;
 export type ListStepsQuery = z.infer<typeof listStepsQuerySchema>;
+export type ReorderStepsInput = z.infer<typeof reorderStepsSchema>;
