@@ -172,6 +172,16 @@ class DetailService {
     return data;
   }
 
+  // 重新排序步骤
+  async reorderSteps(ids: number[]) {
+    const { data } = await net.request<{ success: boolean }>({
+      url: '/api/steps/reorder',
+      method: 'POST',
+      data: { ids },
+    });
+    return data;
+  }
+
   // 获取项目的提交记录
   async getCommits(projectId: number, branch?: string) {
     const { data } = await net.request<Commit[] | { list: Commit[] }>({

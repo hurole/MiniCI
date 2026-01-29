@@ -3,7 +3,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 import { useState } from 'react';
 import { detailService } from '../service';
-import type { DragEndEvent } from '@dnd-kit/core';
+import type {  DragEndEvent } from '@dnd-kit/core';
 import type { PipelineWithEnabled } from '../tabs/types';
 
 export function usePipelines(projectId: number | undefined) {
@@ -111,20 +111,40 @@ export function usePipelines(projectId: number | undefined) {
     const { active, over } = event;
     if (!over || active.id === over.id || !selectedPipelineId) return;
 
+    const pipeline = pipelines.find((p) => p.id === selectedPipelineId);
+    if (!pipeline || !pipeline.steps) return;
+
+    const oldIndex = pipeline.steps.findIndex((s) => s.id === active.id);
+    const newIndex = pipeline.steps.findIndex((s) => s.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const newSteps = arrayMove(pipeline.steps, oldIndex, newIndex);
+
+    // 立即更新本地状态以保证 UI 流畅
     setPipelines((prev) =>
       prev.map((p) => {
         if (p.id === selectedPipelineId) {
-          const oldIndex = p.steps?.findIndex((s) => s.id === active.id) ?? 0;
-          const newIndex = p.steps?.findIndex((s) => s.id === over.id) ?? 0;
           return {
             ...p,
-            steps: p.steps ? arrayMove(p.steps, oldIndex, newIndex) : [],
+            steps: newSteps,
             updatedAt: new Date().toISOString(),
           };
         }
         return p;
       }),
     );
+
+    try {
+      // 调用 API 同步到后端
+      await detailService.reorderSteps(newSteps.map((s) => s.id));
+      Message.success('顺序已更新');
+    } catch (error) {
+      console.error('更新步骤顺序失败:', error);
+      Message.error('更新步骤顺序失败');
+      // 如果失败，可以考虑回滚状态或刷新数据
+      fetchPipelines();
+    }
   };
 
   return {
