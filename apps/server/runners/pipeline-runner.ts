@@ -49,15 +49,17 @@ export class PipelineRunner {
         data: { status: 'running', buildLog: logs },
       });
 
+      // 部署环境变量
+      const envVars = JSON.parse(this.deployment.envVars || '{}');
+      log.info(
+        this.TAG,
+        'Prepared environment variables: %o',
+        envVars,
+      );
+
       // 依次执行每个步骤
       for (const [index, step] of pipeline.steps.entries()) {
         const progress = `[${index + 1}/${pipeline.steps.length}]`;
-        // 准备环境变量
-        const envVars = this.prepareEnvironmentVariables(
-          pipeline,
-          this.deployment,
-          project,
-        );
 
         // 记录开始执行步骤的日志
         const startLog = this.addTimestamp(
@@ -88,7 +90,7 @@ export class PipelineRunner {
         },
       });
     } catch (error) {
-      const errorMsg = this.addTimestamp(`${(error as Error).message}`);
+      const errorMsg = this.addTimestamp(`Error: ${(error as Error).message}`);
       logs += errorMsg;
 
       log.error(
@@ -129,20 +131,24 @@ export class PipelineRunner {
         throw new Error('部署分支或提交哈希未指定');
       }
 
+      logs += this.addTimestamp('确保项目目录存在...\n');
       await GitManager.ensureDirectory(project.projectDir);
 
       // 不是git仓库，初始话为git仓库，然后添加remote并拉取代码
+      logs += this.addTimestamp('确保Git仓库存在...\n');
       await GitManager.ensureGitRepository(
         project.projectDir,
         project.repository,
       );
 
       // 拉取代码
+      logs += this.addTimestamp(`拉取指定代码...\n`);
       await GitManager.pullRepository(
         project.projectDir,
         this.deployment.branch,
         this.deployment.commitHash,
       );
+      logs += this.addTimestamp('工作目录准备完成。\n');
     } catch (error) {
       logs += this.addTimestamp(
         `准备工作目录失败: ${(error as Error).message}`,
@@ -151,43 +157,6 @@ export class PipelineRunner {
     }
 
     return logs;
-  }
-
-  /**
-   * 准备环境变量
-   * @param pipeline 流水线信息
-   * @param deployment 部署信息
-   * @param project 项目信息
-   */
-  private prepareEnvironmentVariables(
-    pipeline: any,
-    deployment: any,
-    project: Project,
-  ): Record<string, string> {
-    const envVars: Record<string, string> = {};
-
-    // 项目相关信息
-    envVars.REPOSITORY_URL = project.repository || '';
-    envVars.PROJECT_NAME = project.name || '';
-
-    // 部署相关信息
-    envVars.BRANCH_NAME = deployment.branch || '';
-    envVars.COMMIT_HASH = deployment.commitHash || '';
-
-    // 注入用户配置的环境变量
-    if (deployment.envVars) {
-      try {
-        const userEnvVars = JSON.parse(deployment.envVars);
-        Object.assign(envVars, userEnvVars);
-      } catch (error) {
-        log.error(this.TAG, '解析环境变量失败:', error);
-      }
-    }
-
-    // 工作空间路径（使用配置的项目目录）
-    envVars.WORKSPACE = project.projectDir;
-
-    return envVars;
   }
 
   /**
