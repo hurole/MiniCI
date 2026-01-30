@@ -23,7 +23,7 @@ function Login() {
   }, [authCode, navigate]);
 
   return (
-    <div className="flex  justify-center items-center h-[100vh]">
+    <div className="flex justify-center items-center h-[100vh]">
       <Button
         type="primary"
         color="green"

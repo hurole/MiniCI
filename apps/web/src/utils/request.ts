@@ -4,7 +4,6 @@ class Net {
   private readonly instance: Axios;
   constructor() {
     this.instance = axios.create({
-      baseURL: process.env.BASE_URL,
       timeout: 20000,
       withCredentials: true,
     });
@@ -45,7 +44,7 @@ class Net {
   async request<T>(config: AxiosRequestConfig): Promise<APIResponse<T>> {
     try {
       const response = await this.instance.request<APIResponse<T>>(config);
-      if (!response || !response.data) {
+      if (!response) {
         throw new Error('Invalid response');
       }
       return response.data;

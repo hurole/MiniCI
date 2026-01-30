@@ -9,10 +9,11 @@ export default defineConfig({
   html: {
     title: 'Mini CI',
   },
-  source: {
-    define: {
-      'process.env.BASE_URL': JSON.stringify(process.env.BASE_URL),
-    },
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': 'http://localhost:3001',
+    }
   },
   tools: {
     rspack: {
