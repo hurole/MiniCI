@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "tsx watch ./app.ts"
+    "dev": "tsx watch ./app.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "type": "module",
