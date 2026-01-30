@@ -59,6 +59,7 @@
 - **导入 (重要):** 相对导入**必须**包含 `.ts` 扩展名。
   - ✅ `import { log } from './libs/logger.ts';`
   - ❌ `import { log } from './libs/logger';` (这会导致 `tsx` 运行时失败)
+- **命名:** 文件名使用 kebab-case (如 `route-scanner.ts`)；DTO 类名使用 PascalCase (如 `CreateUserDTO`)。
 - **架构:** 轻量级的 Controller-Service-Repository 模式。
 - **装饰器:** 使用自定义的 TC39 (Stage 3) 装饰器进行路由定义。
   ```typescript
@@ -71,8 +72,9 @@
 - **Async/Await:** 优先于 Promise。
 - **日志:** 使用 `libs/logger.ts` (Pino 的包装类)。
   - `log.info('模块名', '消息内容 %s', 变量);`
-- **注释:** 采用中文注释 (`// 初始化应用`) 作为高层文档和复杂逻辑的标准。
-- **错误处理:** 在 Controller 中使用 `try/catch`。返回结构化的 JSON 错误信息。
+- **注释:** 采用中文注释 (`// 初始化应用`)，必须符合 JSDoc 规范。
+- **错误处理:** 异常由 `exception.ts` 中间件统一捕获。**禁止**在 Controller 中使用 `try/catch`，应直接抛出错误。
+- **响应结构:** 必须遵循 `{ code: 0, message: 'success', data: any, timestamp: string }` 标准格式。
 
 ### Web 端 (`apps/web`)
 - **语言:** TypeScript (`.tsx`, `.ts`)。
@@ -89,8 +91,10 @@
   - `@assets/*` -> `./src/assets/*`
   - `@styles/*` -> `./src/styles/*`
   - 以及其他在 `tsconfig.json` 中定义的别名（如 `@components/*`, `@hooks/*`, `@stores/*`）。
-- **组件:** 使用 Hooks 的函数式组件。避免使用类组件。
+- **组件:** 使用 Hooks 的函数式组件。避免使用类组件。组件命名使用 PascalCase。
 - **类型定义:** 优先提取到 `types.ts` 文件中，避免在组件文件中混杂复杂的类型定义。
+- **页面结构:** 页面目录下应包含 `index.tsx` (入口), `components/`, `service.ts` (API), `types.ts`。
+- **API 请求:** 必须使用 `@utils` 中的 `net`。GET 请求参数通过 `params` 对象传递。
 - **路由:** React Router v7。
 
 ## 4. 开发工作流
