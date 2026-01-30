@@ -83,12 +83,14 @@
 - **样式:** TailwindCSS + Arco Design。
   - 使用 Arco 组件作为基础 UI。
   - 使用 Tailwind 进行布局和自定义调整。
-- **路径别名:** 使用 `tsconfig.json` 中配置的别名：
+- **路径别名:** 使用 `tsconfig.json` 中配置的别名。**引入模块时务必优先使用这些别名，而非相对路径**：
   - `@pages/*` -> `./src/pages/*`
   - `@utils/*` -> `./src/utils/*`
   - `@assets/*` -> `./src/assets/*`
   - `@styles/*` -> `./src/styles/*`
+  - 以及其他在 `tsconfig.json` 中定义的别名（如 `@components/*`, `@hooks/*`, `@stores/*`）。
 - **组件:** 使用 Hooks 的函数式组件。避免使用类组件。
+- **类型定义:** 优先提取到 `types.ts` 文件中，避免在组件文件中混杂复杂的类型定义。
 - **路由:** React Router v7。
 
 ## 4. 开发工作流

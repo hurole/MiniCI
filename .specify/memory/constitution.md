@@ -1,3 +1,17 @@
+<!--
+Sync Impact Report:
+- Version change: 1.1.0 → 1.2.0
+- List of modified principles: 
+  - III. Frontend Modernity: Added mandatory extraction of types to types.ts.
+- Added sections: N/A
+- Removed sections: N/A
+- Templates requiring updates: 
+  - ⚠ .specify/templates/plan-template.md (Testing references still pending from v1.0.0)
+  - ⚠ .specify/templates/spec-template.md (Testing references still pending from v1.0.0)
+  - ⚠ .specify/templates/tasks-template.md (Testing references still pending from v1.0.0)
+- Follow-up TODOs: Update AGENTS.md to match the new type definition rule.
+-->
+
 # MiniCI Constitution
 
 ## Core Principles
@@ -12,7 +26,7 @@
 
 ### III. Frontend Modernity
 
-前端必须使用 React 19+ 的函数式组件和 Hooks；禁止使用类组件。状态管理必须使用带原子选择器（atomic selectors）的 Zustand。样式必须使用 TailwindCSS + Arco Design。
+前端必须使用 React 19+ 的函数式组件和 Hooks；禁止使用类组件。状态管理必须使用带原子选择器（atomic selectors）的 Zustand。样式必须使用 TailwindCSS + Arco Design。引入模块时必须优先使用 tsconfig.json 中配置的路径别名（如 `@components/*`, `@hooks/*` 等），而非相对路径。类型声明必须优先提取到 `types.ts` 文件中，禁止在组件代码文件中混合定义复杂类型。
 
 ### IV. Testing Prohibition
 
@@ -38,4 +52,4 @@ Database: 使用 `pnpm prisma db push` 进行 Schema 更新 (SQLite)。
 
 本宪法取代所有其他实践。修订需要文档记录、批准并更新 `AGENTS.md`。合规性审查必须验证严格的 ESM 导入和中文文档。
 
-**Version**: 1.0.0 | **Ratified**: 2026-01-30 | **Last Amended**: 2026-01-30
+**Version**: 1.2.0 | **Ratified**: 2026-01-30 | **Last Amended**: 2026-01-30
