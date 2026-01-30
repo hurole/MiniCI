@@ -1,50 +1,41 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# MiniCI Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Monorepo Strictness
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+架构必须保持 `apps/server` (Node.js/Koa) 和 `apps/web` (React 19) 之间的严格分离。共享代码仅允许存在于 `libs` 包中（如果已外部化）或 `apps/server/libs`（仅限服务端）。`pnpm` 是唯一允许的包管理器；严禁使用 `npm` 和 `yarn`。
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Server Architecture & ESM
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+服务端代码必须是严格类型的 TypeScript。相对导入必须包含 `.ts` 扩展名（例如 `import x from './file.ts'`）。架构必须遵循 Controller-Service-Repository 模式。路由必须使用 `apps/server/decorators` 中自定义的 TC39 stage 3 装饰器（例如 `@Get`, `@Post`）进行定义。
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### III. Frontend Modernity
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+前端必须使用 React 19+ 的函数式组件和 Hooks；禁止使用类组件。状态管理必须使用带原子选择器（atomic selectors）的 Zustand。样式必须使用 TailwindCSS + Arco Design。
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Testing Prohibition
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+不要编写或运行 `test` 或 `spec` 文件（例如 `*.test.ts`）。目前没有测试基础设施。验证必须通过手动方式或在 `apps/server/runners/` 中编写临时的 `runner` 脚本进行。除非明确指示搭建基础设施，否则不要尝试安装测试框架。
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### V. Language & Style
+
+所有文档、注释和 Agent 对话必须使用中文。代码风格必须遵守 `biome.json`（2 空格缩进，单引号，排序导入）。强烈不建议使用 `any` 类型（已启用严格模式）。
+
+## Implementation Constraints
+
+Server: 使用 `libs/logger.ts` 进行日志记录（Pino 封装）。Controller 中的错误必须使用 `try/catch` 并返回结构化的 JSON。
+Web: 在 `src/pages` 中使用 React Router v7 进行路由。
+Env: 使用 `dotenv` 遵循 `.env` 配置。
+
+## Workflow Standards
+
+Linting: 在完成实现前运行 `pnpm check` (Web) 或依赖 Biome。
+Dev: 使用 `pnpm dev` (根目录) 或特定应用的命令。
+Database: 使用 `pnpm prisma db push` 进行 Schema 更新 (SQLite)。
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+本宪法取代所有其他实践。修订需要文档记录、批准并更新 `AGENTS.md`。合规性审查必须验证严格的 ESM 导入和中文文档。
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-01-30 | **Last Amended**: 2026-01-30

@@ -23,14 +23,20 @@ export class Router implements Middleware {
       prefix: '/api',
     });
 
-    // 初始化路由扫描器
     this.routeScanner = new RouteScanner('/api');
 
-    // 注册装饰器路由
     this.registerDecoratorRoutes();
 
-    // 注册传统路由（向后兼容）
     this.registerTraditionalRoutes();
+  }
+
+  apply(app: Koa) {
+    // 应用装饰器路由
+    this.routeScanner.applyToApp(app);
+
+    // 应用传统路由
+    app.use(this.router.routes());
+    app.use(this.router.allowedMethods());
   }
 
   /**
@@ -65,14 +71,5 @@ export class Router implements Middleware {
   private registerTraditionalRoutes(): void {
     // 保持对老版本的兼容，如果需要可以在这里注册非装饰器路由
     // this.router.get('/application/list-legacy', wrapController(application.list));
-  }
-
-  apply(app: Koa) {
-    // 应用装饰器路由
-    this.routeScanner.applyToApp(app);
-
-    // 应用传统路由
-    app.use(this.router.routes());
-    app.use(this.router.allowedMethods());
   }
 }

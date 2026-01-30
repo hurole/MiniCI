@@ -49,7 +49,7 @@ export class Exception implements Middleware {
   }
 
   /**
-   * 处理错误
+   * 统一错误处理
    */
   private handleError(ctx: Koa.Context, error: any): void {
     if (error instanceof z.ZodError) {
@@ -137,22 +137,6 @@ export function createSuccessResponse<T>(
 ): ApiResponse<T> {
   return {
     code: 0,
-    message,
-    data,
-    timestamp: Date.now(),
-  };
-}
-
-/**
- * 创建失败响应的辅助函数
- */
-export function createErrorResponse(
-  code: number,
-  message: string,
-  data?: any,
-): ApiResponse {
-  return {
-    code,
     message,
     data,
     timestamp: Date.now(),

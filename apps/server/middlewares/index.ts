@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import { Authorization } from './authorization.ts';
 import { BodyParser } from './body-parser.ts';
-import { CORS } from './cors.ts';
+// import { CORS } from './cors.ts';
 import { Exception } from './exception.ts';
 import { HttpLogger } from './logger.ts';
 import { Router } from './router.ts';
@@ -21,7 +21,8 @@ export function initMiddlewares(app: Koa) {
   // Session 中间件需要在请求体解析之前注册
   new Session().apply(app);
 
-  new CORS().apply(app);
+  // 跨域中间件 暂时用不到 部署上线后前后端同源
+  // new CORS().apply(app);
 
   new Authorization().apply(app);
 
