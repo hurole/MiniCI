@@ -51,11 +51,7 @@ export class PipelineRunner {
 
       // 部署环境变量
       const envVars = JSON.parse(this.deployment.envVars || '{}');
-      log.info(
-        this.TAG,
-        'Prepared environment variables: %o',
-        envVars,
-      );
+      log.info(this.TAG, 'Prepared environment variables: %o', envVars);
 
       // 依次执行每个步骤
       for (const [index, step] of pipeline.steps.entries()) {

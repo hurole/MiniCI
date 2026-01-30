@@ -29,7 +29,8 @@ export class ProjectController {
       };
     }
 
-    const isPagination = query?.page !== undefined && query?.pageSize !== undefined;
+    const isPagination =
+      query?.page !== undefined && query?.pageSize !== undefined;
 
     const [total, projects] = await Promise.all([
       prisma.project.count({ where: whereCondition }),

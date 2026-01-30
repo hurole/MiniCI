@@ -111,7 +111,6 @@ export async function initializePipelineTemplates(): Promise<void> {
 
     log.info(TAG, 'Pipeline templates initialization completed');
   } catch (error) {
-    console.log('error', error)
     log.error(TAG, 'Failed to initialize pipeline templates:', error);
     throw error;
   }
