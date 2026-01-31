@@ -37,6 +37,7 @@ export interface Project {
   repository: string;
   projectDir: string; // 项目工作目录路径（必填）
   envPresets?: string; // 环境预设配置（JSON格式）
+  webhookUrl?: string; // Webhook 通知地址
   valid: number;
   createdAt: string;
   updatedAt: string;

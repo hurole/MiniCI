@@ -3,13 +3,16 @@ import type { Deployment, Project, Step } from '../generated/client.ts';
 import { GitManager } from '../libs/git-manager.ts';
 import { log } from '../libs/logger.ts';
 import { prisma } from '../libs/prisma.ts';
+import { WebhookSender } from '../libs/webhook-sender.ts';
 
 export class PipelineRunner {
   private readonly TAG = 'PipelineRunner';
   private deployment: Deployment;
+  private webhookSender: WebhookSender;
 
   constructor(deployment: Deployment) {
     this.deployment = deployment;
+    this.webhookSender = new WebhookSender();
   }
 
   /**
@@ -104,6 +107,26 @@ export class PipelineRunner {
           finishedAt: new Date(),
         },
       });
+
+      // 触发Webhook通知
+      try {
+        if (project.webhookUrl) {
+          const payload = this.webhookSender.buildFailurePayload(
+            project.name,
+            this.deployment.id,
+            (error as Error).message,
+          );
+
+          await this.webhookSender.send(project.webhookUrl, payload);
+        }
+      } catch (webhookError) {
+        log.error(
+          this.TAG,
+          'Failed to trigger webhook: %s',
+          (webhookError as Error).message,
+        );
+        // webhook错误不应影响部署状态（部署已经失败了）
+      }
 
       throw error;
     }

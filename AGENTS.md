@@ -141,3 +141,10 @@ export const useStore = create<State>((set) => ({
 - **严格 ESM:** 服务端导入务必记得带上 `.ts` 扩展名。
 - **环境变量:** 尊重 `.env` 文件 (使用 `dotenv`)。
 - **包管理器:** 仅使用 `pnpm`。不要使用 `npm` 或 `yarn`。
+
+## Active Technologies
+- TypeScript (Node 22) + `zod` (validation), Native `fetch` (HTTP), Native `crypto` (HMAC). (001-deploy-fail-webhook)
+- SQLite (Prisma), `Project` table update. (001-deploy-fail-webhook)
+
+## Recent Changes
+- 001-deploy-fail-webhook: Added TypeScript (Node 22) + `zod` (validation), Native `fetch` (HTTP), Native `crypto` (HMAC).

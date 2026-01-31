@@ -25,6 +25,7 @@ Sync Impact Report:
 ### II. Server Architecture & ESM
 
 服务端代码必须是严格类型的 TypeScript。相对导入必须包含 `.ts` 扩展名（例如 `import x from './file.ts'`）。架构必须遵循 Controller-Service-Repository 模式。
+
 - **命名规范**: 文件使用 kebab-case (如 `route-scanner.ts`)。DTO 文件名为 `dto.ts`，类名为 `XxxDTO`。
 - **路由定义**: 必须使用 `apps/server/decorators` 中自定义的 TC39 stage 3 装饰器（例如 `@Get`, `@Post`）。
 - **错误处理**: 异常必须由 `exception.ts` 中间件统一捕获。Controller 中**禁止**使用 `try/catch`，应直接抛出错误。
@@ -33,6 +34,7 @@ Sync Impact Report:
 ### III. Frontend Modernity
 
 前端必须使用 React 19+ 的函数式组件和 Hooks；禁止使用类组件。状态管理必须使用带原子选择器（atomic selectors）的 Zustand。样式必须使用 TailwindCSS + Arco Design。
+
 - **命名规范**: 组件使用 PascalCase (如 `ProjectCard.tsx`)。
 - **目录结构**: 页面代码 (`src/pages/*`) 必须包含 `index.tsx` (入口), `components/` (私有组件), `service.ts` (API/纯函数), `types.ts` (类型定义)。
 - **路径别名**: 引入模块时必须优先使用 `tsconfig.json` 中配置的别名（如 `@components/*`, `@utils/*` 等），而非相对路径。
@@ -46,6 +48,7 @@ Sync Impact Report:
 ### V. Language & Style
 
 所有文档、注释和 Agent 对话必须使用中文。代码风格必须遵守 `biome.json`（2 空格缩进，单引号，排序导入）。
+
 - **注释**: 必须符合 JSDoc 规范。
 - **代码质量**: 保持简洁，严禁保留无用的代码引用、变量、函数和 CSS 样式。
 - **类型安全**: `any` 类型被**强烈劝阻**（严格模式已启用）。
