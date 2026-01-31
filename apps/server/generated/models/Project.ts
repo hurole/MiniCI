@@ -43,6 +43,7 @@ export type ProjectMinAggregateOutputType = {
   repository: string | null
   projectDir: string | null
   envPresets: string | null
+  webhookUrl: string | null
   valid: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -57,6 +58,7 @@ export type ProjectMaxAggregateOutputType = {
   repository: string | null
   projectDir: string | null
   envPresets: string | null
+  webhookUrl: string | null
   valid: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -71,6 +73,7 @@ export type ProjectCountAggregateOutputType = {
   repository: number
   projectDir: number
   envPresets: number
+  webhookUrl: number
   valid: number
   createdAt: number
   updatedAt: number
@@ -97,6 +100,7 @@ export type ProjectMinAggregateInputType = {
   repository?: true
   projectDir?: true
   envPresets?: true
+  webhookUrl?: true
   valid?: true
   createdAt?: true
   updatedAt?: true
@@ -111,6 +115,7 @@ export type ProjectMaxAggregateInputType = {
   repository?: true
   projectDir?: true
   envPresets?: true
+  webhookUrl?: true
   valid?: true
   createdAt?: true
   updatedAt?: true
@@ -125,6 +130,7 @@ export type ProjectCountAggregateInputType = {
   repository?: true
   projectDir?: true
   envPresets?: true
+  webhookUrl?: true
   valid?: true
   createdAt?: true
   updatedAt?: true
@@ -226,6 +232,7 @@ export type ProjectGroupByOutputType = {
   repository: string
   projectDir: string
   envPresets: string | null
+  webhookUrl: string | null
   valid: number
   createdAt: Date
   updatedAt: Date
@@ -263,6 +270,7 @@ export type ProjectWhereInput = {
   repository?: Prisma.StringFilter<"Project"> | string
   projectDir?: Prisma.StringFilter<"Project"> | string
   envPresets?: Prisma.StringNullableFilter<"Project"> | string | null
+  webhookUrl?: Prisma.StringNullableFilter<"Project"> | string | null
   valid?: Prisma.IntFilter<"Project"> | number
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -279,6 +287,7 @@ export type ProjectOrderByWithRelationInput = {
   repository?: Prisma.SortOrder
   projectDir?: Prisma.SortOrder
   envPresets?: Prisma.SortOrderInput | Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   valid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -298,6 +307,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Project"> | string | null
   repository?: Prisma.StringFilter<"Project"> | string
   envPresets?: Prisma.StringNullableFilter<"Project"> | string | null
+  webhookUrl?: Prisma.StringNullableFilter<"Project"> | string | null
   valid?: Prisma.IntFilter<"Project"> | number
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -314,6 +324,7 @@ export type ProjectOrderByWithAggregationInput = {
   repository?: Prisma.SortOrder
   projectDir?: Prisma.SortOrder
   envPresets?: Prisma.SortOrderInput | Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   valid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -336,6 +347,7 @@ export type ProjectScalarWhereWithAggregatesInput = {
   repository?: Prisma.StringWithAggregatesFilter<"Project"> | string
   projectDir?: Prisma.StringWithAggregatesFilter<"Project"> | string
   envPresets?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
+  webhookUrl?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
   valid?: Prisma.IntWithAggregatesFilter<"Project"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
@@ -349,6 +361,7 @@ export type ProjectCreateInput = {
   repository: string
   projectDir: string
   envPresets?: string | null
+  webhookUrl?: string | null
   valid?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -365,6 +378,7 @@ export type ProjectUncheckedCreateInput = {
   repository: string
   projectDir: string
   envPresets?: string | null
+  webhookUrl?: string | null
   valid?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -380,6 +394,7 @@ export type ProjectUpdateInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -396,6 +411,7 @@ export type ProjectUncheckedUpdateInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,6 +428,7 @@ export type ProjectCreateManyInput = {
   repository: string
   projectDir: string
   envPresets?: string | null
+  webhookUrl?: string | null
   valid?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -425,6 +442,7 @@ export type ProjectUpdateManyMutationInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -439,6 +457,7 @@ export type ProjectUncheckedUpdateManyInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -453,6 +472,7 @@ export type ProjectCountOrderByAggregateInput = {
   repository?: Prisma.SortOrder
   projectDir?: Prisma.SortOrder
   envPresets?: Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrder
   valid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -472,6 +492,7 @@ export type ProjectMaxOrderByAggregateInput = {
   repository?: Prisma.SortOrder
   projectDir?: Prisma.SortOrder
   envPresets?: Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrder
   valid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -486,6 +507,7 @@ export type ProjectMinOrderByAggregateInput = {
   repository?: Prisma.SortOrder
   projectDir?: Prisma.SortOrder
   envPresets?: Prisma.SortOrder
+  webhookUrl?: Prisma.SortOrder
   valid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -561,6 +583,7 @@ export type ProjectCreateWithoutPipelinesInput = {
   repository: string
   projectDir: string
   envPresets?: string | null
+  webhookUrl?: string | null
   valid?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -576,6 +599,7 @@ export type ProjectUncheckedCreateWithoutPipelinesInput = {
   repository: string
   projectDir: string
   envPresets?: string | null
+  webhookUrl?: string | null
   valid?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -606,6 +630,7 @@ export type ProjectUpdateWithoutPipelinesInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -621,6 +646,7 @@ export type ProjectUncheckedUpdateWithoutPipelinesInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -635,6 +661,7 @@ export type ProjectCreateWithoutDeploymentsInput = {
   repository: string
   projectDir: string
   envPresets?: string | null
+  webhookUrl?: string | null
   valid?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -650,6 +677,7 @@ export type ProjectUncheckedCreateWithoutDeploymentsInput = {
   repository: string
   projectDir: string
   envPresets?: string | null
+  webhookUrl?: string | null
   valid?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -680,6 +708,7 @@ export type ProjectUpdateWithoutDeploymentsInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -695,6 +724,7 @@ export type ProjectUncheckedUpdateWithoutDeploymentsInput = {
   repository?: Prisma.StringFieldUpdateOperationsInput | string
   projectDir?: Prisma.StringFieldUpdateOperationsInput | string
   envPresets?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   valid?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -750,6 +780,7 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   repository?: boolean
   projectDir?: boolean
   envPresets?: boolean
+  webhookUrl?: boolean
   valid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -767,6 +798,7 @@ export type ProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   repository?: boolean
   projectDir?: boolean
   envPresets?: boolean
+  webhookUrl?: boolean
   valid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -781,6 +813,7 @@ export type ProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   repository?: boolean
   projectDir?: boolean
   envPresets?: boolean
+  webhookUrl?: boolean
   valid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -795,6 +828,7 @@ export type ProjectSelectScalar = {
   repository?: boolean
   projectDir?: boolean
   envPresets?: boolean
+  webhookUrl?: boolean
   valid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -802,7 +836,7 @@ export type ProjectSelectScalar = {
   updatedBy?: boolean
 }
 
-export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "repository" | "projectDir" | "envPresets" | "valid" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy", ExtArgs["result"]["project"]>
+export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "repository" | "projectDir" | "envPresets" | "webhookUrl" | "valid" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy", ExtArgs["result"]["project"]>
 export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   deployments?: boolean | Prisma.Project$deploymentsArgs<ExtArgs>
   pipelines?: boolean | Prisma.Project$pipelinesArgs<ExtArgs>
@@ -824,6 +858,7 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     repository: string
     projectDir: string
     envPresets: string | null
+    webhookUrl: string | null
     valid: number
     createdAt: Date
     updatedAt: Date
@@ -1260,6 +1295,7 @@ export interface ProjectFieldRefs {
   readonly repository: Prisma.FieldRef<"Project", 'String'>
   readonly projectDir: Prisma.FieldRef<"Project", 'String'>
   readonly envPresets: Prisma.FieldRef<"Project", 'String'>
+  readonly webhookUrl: Prisma.FieldRef<"Project", 'String'>
   readonly valid: Prisma.FieldRef<"Project", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Project", 'DateTime'>

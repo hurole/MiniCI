@@ -130,6 +130,10 @@ export function SettingsTab({
                   value: detail?.projectDir || '-',
                 },
                 {
+                  label: 'Webhook URL',
+                  value: detail?.webhookUrl || '-',
+                },
+                {
                   label: '创建时间',
                   value: formatDateTime(detail?.createdAt),
                 },
@@ -175,6 +179,16 @@ export function SettingsTab({
                 rules={[{ required: true, message: '请输入仓库地址' }]}
               >
                 <Input placeholder="例如：https://github.com/user/repo.git" />
+              </Form.Item>
+              <Form.Item
+                field="webhookUrl"
+                label="Webhook URL (部署失败通知)"
+                rules={[
+                  { type: 'url', message: '请输入有效的URL' },
+                  { required: false },
+                ]}
+              >
+                <Input placeholder="例如：https://api.example.com/hooks/fail" />
               </Form.Item>
               <div className="text-sm text-gray-500 mb-4">
                 <strong>工作目录：</strong> {detail?.projectDir || '-'}

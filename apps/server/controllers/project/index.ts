@@ -175,6 +175,9 @@ export class ProjectController {
     if (validatedData.envPresets !== undefined) {
       updateData.envPresets = validatedData.envPresets;
     }
+    if (validatedData.webhookUrl !== undefined) {
+      updateData.webhookUrl = validatedData.webhookUrl;
+    }
 
     const project = await prisma.project.update({
       where: { id },

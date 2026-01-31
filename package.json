@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "pnpm --parallel -r run dev",
+    "lint": "biome format --write",
     "start": "./bin/start.sh",
     "stop": "./bin/stop.sh"
   },

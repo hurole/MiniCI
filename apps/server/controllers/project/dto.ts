@@ -29,6 +29,14 @@ export const createProjectSchema = z.object({
   projectDir: projectDirSchema,
 
   envPresets: z.string().optional(), // JSON 字符串格式
+
+  webhookUrl: z
+    .string({
+      message: 'Webhook URL必须是字符串',
+    })
+    .url({ message: '请输入有效的Webhook URL' })
+    .optional()
+    .or(z.literal('')), // 允许空字符串以清空设置
 });
 
 /**
@@ -59,6 +67,14 @@ export const updateProjectSchema = z.object({
     .optional(),
 
   envPresets: z.string().optional(), // JSON 字符串格式
+
+  webhookUrl: z
+    .string({
+      message: 'Webhook URL必须是字符串',
+    })
+    .url({ message: '请输入有效的Webhook URL' })
+    .optional()
+    .or(z.literal('')), // 允许空字符串以清空设置
 });
 
 /**

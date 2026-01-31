@@ -78,6 +78,7 @@ export const ProjectScalarFieldEnum = {
   repository: 'repository',
   projectDir: 'projectDir',
   envPresets: 'envPresets',
+  webhookUrl: 'webhookUrl',
   valid: 'valid',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
