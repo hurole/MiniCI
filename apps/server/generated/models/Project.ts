@@ -299,13 +299,13 @@ export type ProjectOrderByWithRelationInput = {
 
 export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  projectDir?: string
   AND?: Prisma.ProjectWhereInput | Prisma.ProjectWhereInput[]
   OR?: Prisma.ProjectWhereInput[]
   NOT?: Prisma.ProjectWhereInput | Prisma.ProjectWhereInput[]
   name?: Prisma.StringFilter<"Project"> | string
   description?: Prisma.StringNullableFilter<"Project"> | string | null
   repository?: Prisma.StringFilter<"Project"> | string
+  projectDir?: Prisma.StringFilter<"Project"> | string
   envPresets?: Prisma.StringNullableFilter<"Project"> | string | null
   webhookUrl?: Prisma.StringNullableFilter<"Project"> | string | null
   valid?: Prisma.IntFilter<"Project"> | number
@@ -315,7 +315,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   updatedBy?: Prisma.StringFilter<"Project"> | string
   deployments?: Prisma.DeploymentListRelationFilter
   pipelines?: Prisma.PipelineListRelationFilter
-}, "id" | "projectDir">
+}, "id">
 
 export type ProjectOrderByWithAggregationInput = {
   id?: Prisma.SortOrder

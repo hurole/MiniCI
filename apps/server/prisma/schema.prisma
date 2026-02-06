@@ -15,7 +15,7 @@ model Project {
   name        String
   description String?
   repository  String
-  projectDir  String       @unique  // 项目工作目录路径（必填）
+  projectDir  String       // 项目工作目录路径（必填）
   envPresets  String?      // 环境预设配置（JSON格式）
   webhookUrl  String?      // Webhook 目标 URL
   // Relations

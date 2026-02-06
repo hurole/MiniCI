@@ -77,7 +77,8 @@ export class GitManager {
       );
 
       const $$ = $({ cwd: dirPath });
-
+      // 丢弃变更的文件
+      await $$`git checkout .`;
       // 获取最新代码
       await $$`git fetch origin ${branch}`;
       // 切换到目标提交
