@@ -107,16 +107,16 @@ export class ProjectController {
     const validatedData = createProjectSchema.parse(ctx.request.body);
 
     // 检查工作目录是否已被其他项目使用
-    const existingProject = await prisma.project.findFirst({
-      where: {
-        projectDir: validatedData.projectDir,
-        valid: 1,
-      },
-    });
+    // const existingProject = await prisma.project.findFirst({
+    //   where: {
+    //     projectDir: validatedData.projectDir,
+    //     valid: 1,
+    //   },
+    // });
 
-    if (existingProject) {
-      throw new BusinessError('该工作目录已被其他项目使用', 1003, 400);
-    }
+    // if (existingProject) {
+    //   throw new BusinessError('该工作目录已被其他项目使用', 1003, 400);
+    // }
 
     const project = await prisma.project.create({
       data: {
