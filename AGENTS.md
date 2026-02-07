@@ -145,6 +145,8 @@ export const useStore = create<State>((set) => ({
 ## Active Technologies
 - TypeScript (Node 22) + `zod` (validation), Native `fetch` (HTTP), Native `crypto` (HMAC). (001-deploy-fail-webhook)
 - SQLite (Prisma), `Project` table update. (001-deploy-fail-webhook)
+- TypeScript (Node 22 for Server, React 19 for Web) (002-lazy-fetch-commits)
+- N/A (Data sourced from external Gitea API) (002-lazy-fetch-commits)
 
 ## Recent Changes
 - 001-deploy-fail-webhook: Added TypeScript (Node 22) + `zod` (validation), Native `fetch` (HTTP), Native `crypto` (HMAC).

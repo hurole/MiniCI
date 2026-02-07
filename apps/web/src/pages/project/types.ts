@@ -130,3 +130,20 @@ export interface CreateDeploymentRequest {
   commitMessage: string;
   envVars?: Record<string, string>; // 环境变量 key-value 对象
 }
+
+export interface EnvPreset {
+  key: string;
+  label: string;
+  type: 'select' | 'multiselect' | 'input';
+  required?: boolean;
+  options?: Array<{ label: string; value: string }>;
+}
+
+export interface DeployModalProps {
+  visible: boolean;
+  onCancel: () => void;
+  onOk: () => void;
+  pipelines: Pipeline[];
+  projectId: number;
+  project?: Project | null;
+}

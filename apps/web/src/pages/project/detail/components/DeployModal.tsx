@@ -1,25 +1,8 @@
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
 import { formatDateTime } from '@utils/time';
 import { useCallback, useEffect, useState } from 'react';
-import type { Branch, Commit, Pipeline, Project } from '../../types';
+import type { Branch, Commit, DeployModalProps, EnvPreset } from '../../types';
 import { detailService } from '../service';
-
-interface EnvPreset {
-  key: string;
-  label: string;
-  type: 'select' | 'multiselect' | 'input';
-  required?: boolean;
-  options?: Array<{ label: string; value: string }>;
-}
-
-interface DeployModalProps {
-  visible: boolean;
-  onCancel: () => void;
-  onOk: () => void;
-  pipelines: Pipeline[];
-  projectId: number;
-  project?: Project | null;
-}
 
 function DeployModal({
   visible,
@@ -35,6 +18,8 @@ function DeployModal({
   const [loading, setLoading] = useState(false);
   const [branchLoading, setBranchLoading] = useState(false);
   const [envPresets, setEnvPresets] = useState<EnvPreset[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   // 解析项目环境预设
   useEffect(() => {
@@ -52,14 +37,21 @@ function DeployModal({
   }, [project]);
 
   const fetchCommits = useCallback(
-    async (branch: string) => {
+    async (branch: string, currentPage = 1) => {
       try {
         setLoading(true);
-        const data = await detailService.getCommits(projectId, branch);
-        setCommits(data);
-        if (data.length > 0) {
-          form.setFieldValue('commitHash', data[0].sha);
+        const data = await detailService.getCommits(
+          projectId,
+          branch,
+          currentPage,
+          10,
+        );
+        if (currentPage === 1) {
+          setCommits(data);
+        } else {
+          setCommits((prev) => [...prev, ...data]);
         }
+        setHasMore(data.length === 10);
       } catch (error) {
         console.error('获取提交记录失败:', error);
         Message.error('获取提交记录失败');
@@ -67,7 +59,7 @@ function DeployModal({
         setLoading(false);
       }
     },
-    [projectId, form],
+    [projectId],
   );
 
   const fetchBranches = useCallback(async () => {
@@ -75,34 +67,42 @@ function DeployModal({
       setBranchLoading(true);
       const data = await detailService.getBranches(projectId);
       setBranches(data);
-      // 默认选中 master 或 main
-      const defaultBranch = data.find(
-        (b) => b.name === 'master' || b.name === 'main',
-      );
-      if (defaultBranch) {
-        form.setFieldValue('branch', defaultBranch.name);
-        fetchCommits(defaultBranch.name);
-      } else if (data.length > 0) {
-        form.setFieldValue('branch', data[0].name);
-        fetchCommits(data[0].name);
-      }
+      // 移除自动选中分支和自动获取提交记录的逻辑
     } catch (error) {
       console.error('获取分支列表失败:', error);
       Message.error('获取分支列表失败');
     } finally {
       setBranchLoading(false);
     }
-  }, [projectId, form, fetchCommits]);
+  }, [projectId]);
 
   useEffect(() => {
     if (visible && projectId) {
       fetchBranches();
+    } else if (!visible) {
+      form.resetFields();
+      setCommits([]);
+      setPage(1);
+      setHasMore(true);
     }
-  }, [visible, projectId, fetchBranches]);
+  }, [visible, projectId, fetchBranches, form]);
 
   const handleBranchChange = (value: string) => {
-    fetchCommits(value);
+    setPage(1);
+    setHasMore(true);
+    setCommits([]);
+    fetchCommits(value, 1);
     form.setFieldValue('commitHash', undefined);
+  };
+
+  const loadMoreCommits = () => {
+    if (loading || !hasMore) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    const branch = form.getFieldValue('branch');
+    if (branch) {
+      fetchCommits(branch, nextPage);
+    }
   };
 
   const handleSubmit = async () => {
@@ -205,9 +205,17 @@ function DeployModal({
             <Select
               placeholder="请选择提交记录"
               loading={loading}
-              renderFormat={(option) => {
-                const commit = commits.find((c) => c.sha === option?.value);
+              renderFormat={(option: any) => {
+                const commit = commits.find(
+                  (item) => item.sha === option?.value,
+                );
                 return commit ? commit.sha.substring(0, 7) : '';
+              }}
+              onPopupScroll={(event: any) => {
+                const { scrollTop, scrollHeight, clientHeight } = event;
+                if (scrollTop + clientHeight >= scrollHeight - 10) {
+                  loadMoreCommits();
+                }
               }}
             >
               {commits.map((commit) => (

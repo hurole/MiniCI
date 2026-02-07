@@ -12,7 +12,9 @@ const TAG = 'Git';
 export class GitController {
   @Get('/commits')
   async getCommits(ctx: Context) {
-    const { projectId, branch } = getCommitsQuerySchema.parse(ctx.query);
+    const { projectId, branch, page, limit } = getCommitsQuerySchema.parse(
+      ctx.query,
+    );
 
     const project = await prisma.project.findFirst({
       where: {
@@ -44,7 +46,14 @@ export class GitController {
     }
 
     try {
-      const commits = await gitea.getCommits(owner, repo, accessToken, branch);
+      const commits = await gitea.getCommits(
+        owner,
+        repo,
+        accessToken,
+        branch,
+        page,
+        limit,
+      );
       return commits;
     } catch (error) {
       log.error(TAG, 'Failed to fetch commits:', error);
