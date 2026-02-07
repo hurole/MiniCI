@@ -9,7 +9,7 @@ export class Session implements Middleware {
       session(
         {
           key: 'mini-ci.sid',
-          maxAge: 86400000,
+          maxAge: 3600000,
           autoCommit: true /** (boolean) automatically commit headers (default true) */,
           overwrite: true /** (boolean) can overwrite or not (default true) */,
           httpOnly: true /** (boolean) httpOnly or not (default true) */,
