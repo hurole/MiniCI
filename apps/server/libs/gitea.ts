@@ -120,6 +120,8 @@ class Gitea {
     repo: string,
     accessToken: string,
     sha?: string,
+    page = 1,
+    limit = 10,
   ) {
     const url = new URL(
       `${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/commits`,
@@ -127,6 +129,8 @@ class Gitea {
     if (sha) {
       url.searchParams.append('sha', sha);
     }
+    url.searchParams.append('page', String(page));
+    url.searchParams.append('limit', String(limit));
 
     const response = await fetch(url.toString(), {
       method: 'GET',

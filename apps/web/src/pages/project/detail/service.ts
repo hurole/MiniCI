@@ -20,7 +20,8 @@ class DetailService {
   // 获取项目的所有流水线
   async getPipelines(projectId: number) {
     const { data } = await net.request<Pipeline[] | { list: Pipeline[] }>({
-      url: `/api/pipelines?projectId=${projectId}`,
+      url: '/api/pipelines',
+      params: { projectId },
     });
     return Array.isArray(data) ? data : data.list;
   }
@@ -42,7 +43,12 @@ class DetailService {
     pageSize: number = 10,
   ) {
     const { data } = await net.request<DeploymentListResponse>({
-      url: `/api/deployments?projectId=${projectId}&page=${page}&pageSize=${pageSize}`,
+      url: '/api/deployments',
+      params: {
+        projectId,
+        page,
+        pageSize,
+      },
     });
     return data;
   }
@@ -124,7 +130,8 @@ class DetailService {
   // 获取流水线的所有步骤
   async getSteps(pipelineId: number) {
     const { data } = await net.request<Step[] | { list: Step[] }>({
-      url: `/api/steps?pipelineId=${pipelineId}`,
+      url: '/api/steps',
+      params: { pipelineId },
     });
     return Array.isArray(data) ? data : data.list;
   }
@@ -183,9 +190,20 @@ class DetailService {
   }
 
   // 获取项目的提交记录
-  async getCommits(projectId: number, branch?: string) {
+  async getCommits(
+    projectId: number,
+    branch?: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
     const { data } = await net.request<Commit[] | { list: Commit[] }>({
-      url: `/api/git/commits?projectId=${projectId}${branch ? `&branch=${branch}` : ''}`,
+      url: '/api/git/commits',
+      params: {
+        projectId,
+        branch,
+        page,
+        limit,
+      },
     });
     return Array.isArray(data) ? data : data.list;
   }
@@ -193,7 +211,8 @@ class DetailService {
   // 获取项目的分支列表
   async getBranches(projectId: number) {
     const { data } = await net.request<Branch[] | { list: Branch[] }>({
-      url: `/api/git/branches?projectId=${projectId}`,
+      url: '/api/git/branches',
+      params: { projectId },
     });
     return Array.isArray(data) ? data : data.list;
   }
