@@ -1,9 +1,9 @@
 import { Message, Modal } from '@arco-design/web-react';
+import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 import { useState } from 'react';
 import { detailService } from '../service';
-import type { DragEndEvent } from '@dnd-kit/core';
 import type { PipelineWithEnabled } from '../tabs/types';
 
 export function usePipelines(projectId: number | undefined) {

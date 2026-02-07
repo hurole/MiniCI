@@ -1,8 +1,8 @@
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
+import type { EnvPreset } from '@pages/project/detail/tabs/types';
 import React, { useState } from 'react';
 import type { Project } from '../../types';
 import { projectService } from '../service';
-import type { EnvPreset } from '@pages/project/detail/tabs/types';
 
 interface EditProjectModalProps {
   visible: boolean;

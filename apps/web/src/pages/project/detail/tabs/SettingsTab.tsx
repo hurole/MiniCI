@@ -5,11 +5,7 @@ import {
   Form,
   type FormInstance,
   Input,
-  Space,
-  Tag,
-  Typography,
 } from '@arco-design/web-react';
-import { IconFolder } from '@arco-design/web-react/icon';
 import { formatDateTime } from '@utils/time';
 import type { Project } from '../../types';
 
@@ -32,79 +28,6 @@ export function SettingsTab({
   onSaveProject,
   onDeleteProject,
 }: SettingsTabProps) {
-  // 获取工作目录状态标签
-  const getWorkspaceStatusTag = (
-    status: string,
-  ): { text: string; color: string } => {
-    const statusMap: Record<string, { text: string; color: string }> = {
-      not_created: { text: '未创建', color: 'gray' },
-      empty: { text: '空目录', color: 'orange' },
-      no_git: { text: '无Git仓库', color: 'orange' },
-      ready: { text: '就绪', color: 'green' },
-    };
-    return statusMap[status] || { text: '未知', color: 'gray' };
-  };
-
-  // 渲染工作目录状态卡片
-  const renderWorkspaceStatus = () => {
-    if (!detail?.workspaceStatus) return null;
-
-    const { workspaceStatus } = detail;
-    const statusInfo = getWorkspaceStatusTag(workspaceStatus.status as string);
-
-    return (
-      <Card
-        className="mb-6"
-        title={
-          <Space>
-            <IconFolder />
-            工作目录状态
-          </Space>
-        }
-      >
-        <Descriptions
-          column={2}
-          data={[
-            {
-              label: '目录路径',
-              value: detail.projectDir,
-            },
-            {
-              label: '状态',
-              value: <Tag color={statusInfo.color}>{statusInfo.text}</Tag>,
-            },
-            {
-              label: '当前分支',
-              value: workspaceStatus.gitInfo?.branch || '-',
-            },
-            {
-              label: '最后提交',
-              value: workspaceStatus.gitInfo?.lastCommit ? (
-                <Space size="small">
-                  <Typography.Text code>
-                    {workspaceStatus.gitInfo.lastCommit}
-                  </Typography.Text>
-                  <Typography.Text type="secondary">
-                    {workspaceStatus.gitInfo.lastCommitMessage}
-                  </Typography.Text>
-                </Space>
-              ) : (
-                '-'
-              ),
-            },
-          ]}
-        />
-        {workspaceStatus.error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
-            <Typography.Text type="error">
-              {workspaceStatus.error}
-            </Typography.Text>
-          </div>
-        )}
-      </Card>
-    );
-  };
-
   return (
     <div className="p-6">
       <Card title="项目信息" className="mb-4">
@@ -206,9 +129,6 @@ export function SettingsTab({
           </>
         )}
       </Card>
-
-      {/* 工作目录状态 */}
-      {renderWorkspaceStatus()}
     </div>
   );
 }

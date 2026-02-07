@@ -4,32 +4,6 @@ enum BuildStatus {
   Stopped = 'Stopped',
 }
 
-// 工作目录状态枚举
-export enum WorkspaceDirStatus {
-  NOT_CREATED = 'not_created',
-  EMPTY = 'empty',
-  NO_GIT = 'no_git',
-  READY = 'ready',
-}
-
-// Git 仓库信息
-export interface GitInfo {
-  branch?: string;
-  lastCommit?: string;
-  lastCommitMessage?: string;
-}
-
-// 工作目录状态信息
-export interface WorkspaceStatus {
-  status: WorkspaceDirStatus;
-  exists: boolean;
-  isEmpty?: boolean;
-  hasGit?: boolean;
-  size?: number;
-  gitInfo?: GitInfo;
-  error?: string;
-}
-
 export interface Project {
   id: string;
   name: string;
@@ -44,7 +18,6 @@ export interface Project {
   createdBy: string;
   updatedBy: string;
   status: BuildStatus;
-  workspaceStatus?: WorkspaceStatus; // 工作目录状态信息
 }
 
 // 流水线步骤类型定义

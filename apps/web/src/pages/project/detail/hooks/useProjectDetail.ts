@@ -2,8 +2,8 @@ import { Message } from '@arco-design/web-react';
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import { detailService } from '../service';
 import type { Project } from '../../types';
+import { detailService } from '../service';
 
 export function useProjectDetail() {
   const { id } = useParams<{ id: string }>();

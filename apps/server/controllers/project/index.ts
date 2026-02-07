@@ -1,6 +1,5 @@
 import type { Context } from 'koa';
 import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
-import { GitManager } from '../../libs/git-manager.ts';
 import { log } from '../../libs/logger.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
@@ -72,33 +71,7 @@ export class ProjectController {
       throw new BusinessError('项目不存在', 1002, 404);
     }
 
-    // 获取工作目录状态信息（不包含目录大小）
-    let workspaceStatus = null;
-    if (project.projectDir) {
-      try {
-        const gitInfo = await GitManager.getGitInfo(project.projectDir);
-        workspaceStatus = {
-          gitInfo,
-        };
-      } catch (error) {
-        log.error(
-          'project',
-          'Failed to get workspace status for project %s: %s',
-          project.name,
-          (error as Error).message,
-        );
-        // 即使获取状态失败，也返回项目信息
-        workspaceStatus = {
-          status: 'error',
-          error: (error as Error).message,
-        };
-      }
-    }
-
-    return {
-      ...project,
-      workspaceStatus,
-    };
+    return project;
   }
 
   // POST /api/projects - 创建项目

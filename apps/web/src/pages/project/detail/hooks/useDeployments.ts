@@ -1,7 +1,7 @@
 import { Message } from '@arco-design/web-react';
 import { useCallback, useEffect, useState } from 'react';
-import { detailService } from '../service';
 import type { Deployment } from '../../types';
+import { detailService } from '../service';
 
 export function useDeployments(
   projectId: number | undefined,
