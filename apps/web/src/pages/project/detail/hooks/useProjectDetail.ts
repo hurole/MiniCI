@@ -7,7 +7,7 @@ import { detailService } from '../service';
 
 export function useProjectDetail() {
   const { id } = useParams<{ id: string }>();
-  const [detail, setDetail] = useState<Project | null>(null);
+  const [detail, setDetail] = useState<Project>();
   const [loading, setLoading] = useState(false);
 
   const fetchDetail = async () => {
@@ -15,10 +15,14 @@ export function useProjectDetail() {
     try {
       setLoading(true);
       const project = await detailService.getProject(id);
+      if (project == null) {
+        Message.error('获取项目详情失败');
+        return;
+      }
       setDetail(project);
     } catch (error) {
-      console.error('获取项目详情失败:', error);
       Message.error('获取项目详情失败');
+      console.error('获取项目详情失败:', error);
     } finally {
       setLoading(false);
     }

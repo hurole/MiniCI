@@ -26,17 +26,6 @@ class DetailService {
     return Array.isArray(data) ? data : data.list;
   }
 
-  // 获取可用的流水线模板
-  async getPipelineTemplates() {
-    const { data } = await net.request<
-      | { id: number; name: string; description: string }[]
-      | { list: { id: number; name: string; description: string }[] }
-    >({
-      url: '/api/pipelines/templates',
-    });
-    return Array.isArray(data) ? data : data.list;
-  }
-
   async getDeployments(
     projectId: number,
     page: number = 1,
@@ -70,26 +59,6 @@ class DetailService {
       url: '/api/pipelines',
       method: 'POST',
       data: pipeline,
-    });
-    return data;
-  }
-
-  // 基于模板创建流水线
-  async createPipelineFromTemplate(
-    templateId: number,
-    projectId: number,
-    name: string,
-    description?: string,
-  ) {
-    const { data } = await net.request<Pipeline>({
-      url: '/api/pipelines/from-template',
-      method: 'POST',
-      data: {
-        templateId,
-        projectId,
-        name,
-        description,
-      },
     });
     return data;
   }

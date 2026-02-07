@@ -1,10 +1,6 @@
 import type { Context } from 'koa';
 import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
 import { log } from '../../libs/logger.ts';
-import {
-  createPipelineFromTemplate,
-  getAvailableTemplates,
-} from '../../libs/pipeline-template.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
 import {
@@ -45,18 +41,6 @@ export class PipelineController {
     });
 
     return pipelines;
-  }
-
-  // GET /api/pipelines/templates - 获取可用的流水线模板
-  @Get('/templates')
-  async getTemplates(_ctx: Context) {
-    try {
-      const templates = await getAvailableTemplates();
-      return templates;
-    } catch (error) {
-      log.error('pipeline', 'Failed to get templates:', error);
-      throw new BusinessError('获取模板失败', 3002, 500);
-    }
   }
 
   // GET /api/pipelines/:id - 获取单个流水线
@@ -106,60 +90,6 @@ export class PipelineController {
 
     log.info('pipeline', 'Created new pipeline: %s', pipeline.name);
     return pipeline;
-  }
-
-  // POST /api/pipelines/from-template - 基于模板创建流水线
-  @Post('/from-template')
-  async createFromTemplate(ctx: Context) {
-    try {
-      const { templateId, projectId, name, description } = ctx.request.body as {
-        templateId: number;
-        projectId: number;
-        name: string;
-        description?: string;
-      };
-
-      // 验证必要参数
-      if (!templateId || !projectId || !name) {
-        throw new BusinessError('缺少必要参数', 3003, 400);
-      }
-
-      // 基于模板创建流水线
-      const newPipelineId = await createPipelineFromTemplate(
-        templateId,
-        projectId,
-        name,
-        description || '',
-      );
-
-      // 返回新创建的流水线
-      const pipeline = await prisma.pipeline.findUnique({
-        where: { id: newPipelineId },
-        include: {
-          steps: {
-            where: {
-              valid: 1,
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-        },
-      });
-
-      if (!pipeline) {
-        throw new BusinessError('创建流水线失败', 3004, 500);
-      }
-
-      log.info('pipeline', 'Created pipeline from template: %s', pipeline.name);
-      return pipeline;
-    } catch (error) {
-      log.error('pipeline', 'Failed to create pipeline from template:', error);
-      if (error instanceof BusinessError) {
-        throw error;
-      }
-      throw new BusinessError('基于模板创建流水线失败', 3005, 500);
-    }
   }
 
   // PUT /api/pipelines/:id - 更新流水线

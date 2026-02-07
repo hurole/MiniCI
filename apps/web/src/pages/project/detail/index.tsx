@@ -4,7 +4,6 @@ import {
   Input,
   Message,
   Modal,
-  Select,
   Space,
   Tabs,
   Typography,
@@ -50,7 +49,6 @@ function ProjectDetailPage() {
     setPipelines,
     selectedPipelineId,
     setSelectedPipelineId,
-    templates,
     handleDeletePipeline,
     handleTogglePipeline,
     handleToggleStep,
@@ -88,10 +86,6 @@ function ProjectDetailPage() {
   const [pipelineForm] = Form.useForm();
   const [projectForm] = Form.useForm();
 
-  const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
-    null,
-  );
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [envPresets, setEnvPresets] = useState<EnvPreset[]>([]);
   const [envPresetsLoading, setEnvPresetsLoading] = useState(false);
@@ -112,8 +106,6 @@ function ProjectDetailPage() {
     setEditingPipeline(null);
     pipelineForm.resetFields();
     setPipelineModalVisible(true);
-    setIsCreatingFromTemplate(false);
-    setSelectedTemplateId(null);
   };
 
   const handleEditPipeline = (pipeline: PipelineWithEnabled) => {
@@ -146,31 +138,11 @@ function ProjectDetailPage() {
           ),
         );
         Message.success('流水线更新成功');
-      } else if (isCreatingFromTemplate && selectedTemplateId) {
-        const created = await detailService.createPipelineFromTemplate(
-          selectedTemplateId,
-          detail?.id as number,
-          values.name,
-          values.description || '',
-        );
-        setPipelines((prev) => [
-          ...prev,
-          {
-            ...created,
-            description: created.description || '',
-            enabled: created.valid === 1,
-            steps:
-              created.steps?.map((s) => ({ ...s, enabled: s.valid === 1 })) ||
-              [],
-          },
-        ]);
-        setSelectedPipelineId(created.id);
-        Message.success('基于模板创建成功');
       } else {
         const created = await detailService.createPipeline({
           name: values.name,
           description: values.description || '',
-          projectId: detail?.id as number,
+          projectId: detail?.id,
         });
         setPipelines((prev) => [
           ...prev,
@@ -441,39 +413,6 @@ function ProjectDetailPage() {
         style={{ width: 500 }}
       >
         <Form form={pipelineForm} layout="vertical">
-          {!editingPipeline && templates.length > 0 && (
-            <Form.Item label="创建方式">
-              <Space>
-                <Button
-                  type={isCreatingFromTemplate ? 'default' : 'primary'}
-                  onClick={() => setIsCreatingFromTemplate(false)}
-                >
-                  自定义
-                </Button>
-                <Button
-                  type={isCreatingFromTemplate ? 'primary' : 'default'}
-                  onClick={() => setIsCreatingFromTemplate(true)}
-                >
-                  模板
-                </Button>
-              </Space>
-            </Form.Item>
-          )}
-          {isCreatingFromTemplate ? (
-            <Form.Item
-              field="templateId"
-              label="选择模板"
-              rules={[{ required: true }]}
-            >
-              <Select onChange={setSelectedTemplateId}>
-                {templates.map((t) => (
-                  <Select.Option key={t.id} value={t.id}>
-                    {t.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          ) : null}
           <Form.Item field="name" label="名称" rules={[{ required: true }]}>
             <Input />
           </Form.Item>

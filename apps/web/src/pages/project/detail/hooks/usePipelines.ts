@@ -9,9 +9,6 @@ import type { PipelineWithEnabled } from '../tabs/types';
 export function usePipelines(projectId: number | undefined) {
   const [pipelines, setPipelines] = useState<PipelineWithEnabled[]>([]);
   const [selectedPipelineId, setSelectedPipelineId] = useState<number>(0);
-  const [templates, setTemplates] = useState<
-    Array<{ id: number; name: string; description: string }>
-  >([]);
 
   const fetchPipelines = async () => {
     if (!projectId) return;
@@ -37,22 +34,9 @@ export function usePipelines(projectId: number | undefined) {
     }
   };
 
-  const fetchTemplates = async () => {
-    try {
-      const templateData = await detailService.getPipelineTemplates();
-      setTemplates(templateData);
-    } catch (error) {
-      console.error('获取流水线模板失败:', error);
-    }
-  };
-
   useAsyncEffect(async () => {
     await fetchPipelines();
   }, [projectId]);
-
-  useAsyncEffect(async () => {
-    await fetchTemplates();
-  }, []);
 
   const handleDeletePipeline = async (pipelineId: number) => {
     Modal.confirm({
@@ -152,7 +136,6 @@ export function usePipelines(projectId: number | undefined) {
     setPipelines,
     selectedPipelineId,
     setSelectedPipelineId,
-    templates,
     refreshPipelines: fetchPipelines,
     handleDeletePipeline,
     handleTogglePipeline,

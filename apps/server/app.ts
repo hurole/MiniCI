@@ -1,14 +1,10 @@
 import Koa from 'koa';
 import { ExecutionQueue } from './libs/execution-queue.ts';
 import { log } from './libs/logger.ts';
-import { initializePipelineTemplates } from './libs/pipeline-template.ts';
 import { initMiddlewares } from './middlewares/index.ts';
 
 // 初始化应用
 async function initializeApp() {
-  // 初始化流水线模板
-  await initializePipelineTemplates();
-
   // 初始化执行队列
   const executionQueue = ExecutionQueue.getInstance();
   await executionQueue.initialize();
