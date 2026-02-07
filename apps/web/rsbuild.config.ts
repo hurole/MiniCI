@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [pluginReact(), pluginLess(), pluginSvgr()],
   html: {
     title: 'Mini CI',
+    favicon: './src/assets/images/favicon.png'
   },
   server: {
     port: 3000,
