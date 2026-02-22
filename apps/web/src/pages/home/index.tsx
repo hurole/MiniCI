@@ -62,7 +62,7 @@ function Home() {
               <div className="p-2 rounded-xl cursor-pointer flex items-center hover:bg-gray-100">
                 <Avatar
                   size={28}
-                  className="border-gray-300 border-[1px] border-solid"
+                  className="border-gray-300 border border-solid"
                 >
                   <img
                     alt="avatar"
