@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+.arco-form-item-symbol {
+  display: inline-flex !important;
+}

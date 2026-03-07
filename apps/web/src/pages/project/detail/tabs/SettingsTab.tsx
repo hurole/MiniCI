@@ -3,33 +3,46 @@ import {
   Card,
   Descriptions,
   Form,
-  type FormInstance,
   Input,
+  Message,
+  Modal,
 } from '@arco-design/web-react';
 import { formatDateTime } from '@utils/time';
-import type { Project } from '../../types';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { useProjectDetail } from '../hooks/useProjectDetail';
+import { detailService } from '../service';
 
-interface SettingsTabProps {
-  detail: Project | null | undefined;
-  isEditingProject: boolean;
-  projectForm: FormInstance;
-  onEditProject: () => void;
-  onCancelEditProject: () => void;
-  onSaveProject: () => void;
-  onDeleteProject: () => void;
-}
+export function SettingsTab() {
+  const navigate = useNavigate();
+  const { detail, refreshDetail } = useProjectDetail();
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [projectForm] = Form.useForm();
 
-export function SettingsTab({
-  detail,
-  isEditingProject,
-  projectForm,
-  onEditProject,
-  onCancelEditProject,
-  onSaveProject,
-  onDeleteProject,
-}: SettingsTabProps) {
+  const handleSaveProject = async () => {
+    try {
+      const values = await projectForm.validate();
+      await detailService.updateProject(detail?.id as number, values);
+      Message.success('项目更新成功');
+      setIsEditingProject(false);
+      refreshDetail();
+    } catch (_e) {
+      Message.error('更新项目失败');
+    }
+  };
+
+  const handleDeleteProject = () => {
+    Modal.confirm({
+      title: '删除项目',
+      content: `确定要删除 "${detail?.name}" 吗？`,
+      onOk: async () => {
+        await detailService.deleteProject(detail?.id as number);
+        navigate('/project');
+      },
+    });
+  };
   return (
-    <div className="p-6">
+    <div>
       <Card title="项目信息" className="mb-4">
         {!isEditingProject ? (
           <>
@@ -63,10 +76,16 @@ export function SettingsTab({
               ]}
             />
             <div className="mt-4 flex gap-2">
-              <Button type="primary" onClick={onEditProject}>
+              <Button
+                type="primary"
+                onClick={() => {
+                  projectForm.setFieldsValue(detail);
+                  setIsEditingProject(true);
+                }}
+              >
                 编辑项目
               </Button>
-              <Button status="danger" onClick={onDeleteProject}>
+              <Button status="danger" onClick={handleDeleteProject}>
                 删除项目
               </Button>
             </div>
@@ -121,10 +140,10 @@ export function SettingsTab({
               </div>
             </Form>
             <div className="mt-4 flex gap-2">
-              <Button type="primary" onClick={onSaveProject}>
+              <Button type="primary" onClick={handleSaveProject}>
                 保存
               </Button>
-              <Button onClick={onCancelEditProject}>取消</Button>
+              <Button onClick={() => setIsEditingProject(false)}>取消</Button>
             </div>
           </>
         )}

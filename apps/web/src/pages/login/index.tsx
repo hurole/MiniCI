@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { Button, Space, Tag, Typography } from '@arco-design/web-react';
 import Gitea from '@assets/images/gitea.svg?react';
 import Logo from '@assets/images/logo.svg?react';
-import { Button, Typography, Tag, Space } from '@arco-design/web-react';
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { loginService } from './service';
 
@@ -13,11 +13,10 @@ export default function LoginPage() {
   const authCode = searchParams.get('code');
 
   const onLoginClick = async () => {
-      const url = await loginService.getAuthUrl();
-      if (url) {
-        window.location.href = url;
-      }
-
+    const url = await loginService.getAuthUrl();
+    if (url) {
+      window.location.href = url;
+    }
   };
 
   useEffect(() => {

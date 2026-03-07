@@ -10,33 +10,22 @@ import { IconRefresh } from '@arco-design/web-react/icon';
 import { formatDateTime } from '@utils/time';
 import type { Deployment } from '../../types';
 import DeployRecordItem from '../components/DeployRecordItem';
+import { useDeployments } from '../hooks/useDeployments';
+import { useProjectDetail } from '../hooks/useProjectDetail';
 
-interface DeployRecordsTabProps {
-  deployRecords: Deployment[];
-  pagination: {
-    current: number;
-    pageSize: number;
-    total: number;
-  };
-  onPageChange: (page: number) => void;
-  onRefresh: () => void;
-  selectedRecordId: number;
-  onSelectRecord: (id: number) => void;
-  buildLogs: string[];
-  onRetry: (id: number) => void;
-}
-
-export function DeployRecordsTab({
-  deployRecords,
-  pagination,
-  onPageChange,
-  onRefresh,
-  selectedRecordId,
-  onSelectRecord,
-  buildLogs,
-  onRetry,
-}: DeployRecordsTabProps) {
+export function DeployRecordsTab() {
+  const { detail, refreshDetail } = useProjectDetail();
+  const {
+    deployRecords,
+    selectedRecordId,
+    setSelectedRecordId,
+    pagination,
+    handleRetryDeployment,
+    getBuildLogs,
+    onPageChange,
+  } = useDeployments(detail?.id);
   const selectedRecord = deployRecords.find((r) => r.id === selectedRecordId);
+  const buildLogs = getBuildLogs(selectedRecordId);
 
   const renderStatusTag = (status: Deployment['status']) => {
     const statusMap: Record<string, { color: string; text: string }> = {
@@ -54,23 +43,23 @@ export function DeployRecordsTab({
       key={item.id}
       item={item}
       isSelected={selectedRecordId === item.id}
-      onSelect={onSelectRecord}
+      onSelect={setSelectedRecordId}
     />
   );
 
   return (
     <div className="flex flex-row gap-6 h-full">
       {/* 左侧部署记录列表 */}
-      <div className="w-150 h-full flex flex-col">
+      <div className="w-150 flex flex-col h-full min-h-0">
         <div className="flex items-center justify-between py-3">
           <Typography.Text type="secondary">
             共 {pagination.total} 条部署记录
           </Typography.Text>
-          <Button size="small" type="outline" onClick={onRefresh}>
+          <Button size="small" type="outline" onClick={refreshDetail}>
             刷新
           </Button>
         </div>
-        <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 overflow-y-auto min-h-0">
           {deployRecords.length > 0 ? (
             <List
               className="bg-white rounded-lg border"
@@ -97,11 +86,11 @@ export function DeployRecordsTab({
       </div>
 
       {/* 右侧构建日志 */}
-      <div className="flex-1 bg-white rounded-lg border h-full overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white rounded-lg border flex flex-col overflow-hidden">
         <div className="p-4 border-b bg-gray-50 shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <Typography.Title heading={5} className="!m-0">
+              <Typography.Title heading={5} className="m-0!">
                 构建日志 #{selectedRecordId}
               </Typography.Title>
               {selectedRecord && (
@@ -118,7 +107,7 @@ export function DeployRecordsTab({
                     type="primary"
                     icon={<IconRefresh />}
                     size="small"
-                    onClick={() => onRetry(selectedRecord.id)}
+                    onClick={() => handleRetryDeployment(selectedRecord.id)}
                   >
                     重新执行
                   </Button>
@@ -128,7 +117,7 @@ export function DeployRecordsTab({
             )}
           </div>
         </div>
-        <div className="p-4 flex-1 overflow-hidden flex flex-col">
+        <div className="p-4 flex-1 flex flex-col min-h-0 overflow-hidden">
           <div className="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm flex-1 overflow-y-auto">
             {buildLogs.map((log: string, index: number) => (
               <div

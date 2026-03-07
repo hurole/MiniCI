@@ -3,31 +3,45 @@ import {
   Card,
   Checkbox,
   Input,
+  Message,
   Select,
   Space,
 } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
+import { useProjectDetail } from '../hooks/useProjectDetail';
+import { detailService } from '../service';
 import type { EnvPreset } from './types';
 
-interface EnvPresetsTabProps {
-  envPresets: EnvPreset[];
-  setEnvPresets: (presets: EnvPreset[]) => void;
-  envPresetsLoading: boolean;
-  handleSaveEnvPresets: () => void;
-}
-
-export function EnvPresetsTab({
-  envPresets: initialEnvPresets,
-  setEnvPresets,
-  envPresetsLoading,
-  handleSaveEnvPresets,
-}: EnvPresetsTabProps) {
-  const [presets, setPresets] = useState<EnvPreset[]>(() => initialEnvPresets);
+export function EnvPresetsTab() {
+  const { detail, refreshDetail } = useProjectDetail();
+  const [presets, setPresets] = useState<EnvPreset[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setPresets(initialEnvPresets);
-  }, [initialEnvPresets]);
+    if (detail?.envPresets) {
+      try {
+        setPresets(JSON.parse(detail.envPresets));
+      } catch (_e) {
+        setPresets([]);
+      }
+    }
+  }, [detail]);
+
+  const handleSaveEnvPresets = async () => {
+    try {
+      setLoading(true);
+      await detailService.updateProject(detail?.id as number, {
+        envPresets: JSON.stringify(presets),
+      });
+      Message.success('环境变量保存成功');
+      refreshDetail();
+    } catch (_e) {
+      Message.error('保存环境变量失败');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddPreset = () => {
     const newPreset: EnvPreset = {
@@ -36,15 +50,11 @@ export function EnvPresetsTab({
       type: 'select',
       options: [{ label: '', value: '' }],
     };
-    const newPresets = [...presets, newPreset];
-    setPresets(newPresets);
-    setEnvPresets(newPresets);
+    setPresets((prev) => [...prev, newPreset]);
   };
 
   const handleRemovePreset = (index: number) => {
-    const newPresets = presets.filter((_, i) => i !== index);
-    setPresets(newPresets);
-    setEnvPresets(newPresets);
+    setPresets((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handlePresetChange = (
@@ -52,29 +62,30 @@ export function EnvPresetsTab({
     field: keyof EnvPreset,
     val: string | boolean | EnvPreset['type'] | EnvPreset['options'],
   ) => {
-    const newPresets = [...presets];
-    newPresets[index] = { ...newPresets[index], [field]: val };
-    setPresets(newPresets);
-    setEnvPresets(newPresets);
+    setPresets((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: val };
+      return next;
+    });
   };
 
   const handleAddOption = (presetIndex: number) => {
-    const newPresets = [...presets];
-    if (!newPresets[presetIndex].options) {
-      newPresets[presetIndex].options = [];
-    }
-    newPresets[presetIndex].options?.push({ label: '', value: '' });
-    setPresets(newPresets);
-    setEnvPresets(newPresets);
+    setPresets((prev) => {
+      const next = [...prev];
+      if (!next[presetIndex].options) next[presetIndex].options = [];
+      next[presetIndex].options?.push({ label: '', value: '' });
+      return next;
+    });
   };
 
   const handleRemoveOption = (presetIndex: number, optionIndex: number) => {
-    const newPresets = [...presets];
-    newPresets[presetIndex].options = newPresets[presetIndex].options?.filter(
-      (_, i) => i !== optionIndex,
-    );
-    setPresets(newPresets);
-    setEnvPresets(newPresets);
+    setPresets((prev) => {
+      const next = [...prev];
+      next[presetIndex].options = next[presetIndex].options?.filter(
+        (_, i) => i !== optionIndex,
+      );
+      return next;
+    });
   };
 
   const handleOptionChange = (
@@ -83,24 +94,26 @@ export function EnvPresetsTab({
     field: 'label' | 'value',
     val: string,
   ) => {
-    const newPresets = [...presets];
-    if (newPresets[presetIndex].options) {
-      // biome-ignore lint/style/noNonNullAssertion: options is checked above
-      newPresets[presetIndex].options![optionIndex][field] = val;
-      setPresets(newPresets);
-      setEnvPresets(newPresets);
-    }
+    setPresets((prev) => {
+      const next = [...prev];
+      if (next[presetIndex].options) {
+        // biome-ignore lint/style/noNonNullAssertion: options is checked above
+        next[presetIndex].options![optionIndex][field] = val;
+      }
+      return next;
+    });
   };
 
   return (
-    <div className="p-6">
+    <div className="h-full flex flex-col">
       <Card
         title="环境变量预设"
+        className="flex-1 min-h-0 flex flex-col [&>.arco-card-body]:flex-1 [&>.arco-card-body]:overflow-y-auto [&>.arco-card-body]:min-h-0"
         extra={
           <Button
             type="primary"
             onClick={handleSaveEnvPresets}
-            loading={envPresetsLoading}
+            loading={loading}
           >
             保存预设
           </Button>
@@ -213,6 +226,7 @@ export function EnvPresetsTab({
                           size="small"
                           status="danger"
                           icon={<IconDelete />}
+                          className="mx-1 shrink-0"
                           onClick={() =>
                             handleRemoveOption(presetIndex, optionIndex)
                           }

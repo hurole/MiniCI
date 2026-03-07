@@ -1,85 +1,61 @@
 import { Avatar, Dropdown, Layout, Menu } from '@arco-design/web-react';
-import {
-  IconApps,
-  IconExport,
-  IconMenuFold,
-  IconMenuUnfold,
-} from '@arco-design/web-react/icon';
+import { IconExport } from '@arco-design/web-react/icon';
 import Logo from '@assets/images/logo.svg?react';
+import { PageBreadcrumb } from '@components/PageBreadcrumb';
 import { loginService } from '@pages/login/service';
 import { useGlobalStore } from '@stores/global';
-import { useState } from 'react';
-import { Link, Outlet } from 'react-router';
+import { Outlet, useNavigate } from 'react-router';
 
 function Home() {
-  const [collapsed, setCollapsed] = useState(false);
   const globalStore = useGlobalStore();
+  const navigate = useNavigate();
 
   return (
-    <Layout className="h-screen w-full">
-      <Layout.Sider
-        collapsible
-        onCollapse={setCollapsed}
-        trigger={
-          collapsed ? (
-            <IconMenuUnfold fontSize={16} />
-          ) : (
-            <IconMenuFold fontSize={16} />
-          )
-        }
-      >
-        <div className="flex flex-row items-center justify-center h-[56px]">
-          <Logo className="h-10 w-10" aria-label="MiniCI" />
-          {!collapsed && <h2 className="ml-3 text-xl font-medium">Mini CI</h2>}
-        </div>
-        <Menu
-          className="flex-1"
-          defaultOpenKeys={['0']}
-          defaultSelectedKeys={['0_1']}
-          collapse={collapsed}
+    <Layout className="h-screen">
+      <Layout.Header className="h-14 border-b-gray-100 border-b-[1px] flex items-center justify-between px-4">
+        <button
+          className="flex flex-row items-center cursor-pointer bg-transparent border-none p-0 outline-none"
+          onClick={() => navigate('/project')}
+          type="button"
         >
-          <Menu.Item key="0">
-            <Link to="/project">
-              <IconApps fontSize={16} />
-              <span>项目管理</span>
-            </Link>
-          </Menu.Item>
-        </Menu>
-      </Layout.Sider>
-      <Layout>
-        <Layout.Header className="h-14 border-b-gray-100 border-b-[1px]">
-          <div className="flex items-center justify-end px-4 h-full">
-            <Dropdown
-              droplist={
-                <Menu className="px-3">
-                  <Menu.Item key="1" onClick={loginService.logout}>
-                    <IconExport />
-                    <span className="ml-2">退出登录</span>
-                  </Menu.Item>
-                </Menu>
-              }
-            >
-              <div className="p-2 rounded-xl cursor-pointer flex items-center hover:bg-gray-100">
-                <Avatar
-                  size={28}
-                  className="border-gray-300 border border-solid"
-                >
-                  <img
-                    alt="avatar"
-                    src={globalStore.user?.avatar_url.replace('https', 'http')}
-                  />
-                </Avatar>
-                <span className="ml-2 font-semibold text-gray-500">
-                  {globalStore.user?.username}
-                </span>
-              </div>
-            </Dropdown>
+          <Logo className="h-8 w-8" aria-label="MiniCI" />
+          <h2 className="ml-3 text-lg font-medium m-0 text-gray-800">
+            Mini CI
+          </h2>
+        </button>
+        <div className="flex items-center justify-end h-full">
+          <Dropdown
+            droplist={
+              <Menu className="px-3">
+                <Menu.Item key="1" onClick={loginService.logout}>
+                  <IconExport />
+                  <span className="ml-2">退出登录</span>
+                </Menu.Item>
+              </Menu>
+            }
+          >
+            <div className="p-2 rounded-xl cursor-pointer flex items-center hover:bg-gray-100">
+              <Avatar size={28} className="border-gray-300 border border-solid">
+                <img
+                  alt="avatar"
+                  src={globalStore.user?.avatar_url.replace('https', 'http')}
+                />
+              </Avatar>
+              <span className="ml-2 font-semibold text-gray-500">
+                {globalStore.user?.username}
+              </span>
+            </div>
+          </Dropdown>
+        </div>
+      </Layout.Header>
+      <Layout.Content className="bg-gray-100 min-h-0">
+        <div className="h-full flex flex-col">
+          <PageBreadcrumb />
+          <div className="flex-1 min-h-0">
+            <Outlet />
           </div>
-        </Layout.Header>
-        <Layout.Content className="overflow-y-auto bg-gray-100">
-          <Outlet />
-        </Layout.Content>
-      </Layout>
+        </div>
+      </Layout.Content>
     </Layout>
   );
 }

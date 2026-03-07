@@ -131,6 +131,28 @@ export function usePipelines(projectId: number | undefined) {
     }
   };
 
+  const handleDeleteStep = (pipelineId: number, stepId: number) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: '确定要删除这个步骤吗？',
+      onOk: async () => {
+        try {
+          await detailService.deleteStep(stepId);
+          setPipelines((prev) =>
+            prev.map((p) =>
+              p.id === pipelineId
+                ? { ...p, steps: p.steps?.filter((s) => s.id !== stepId) || [] }
+                : p,
+            ),
+          );
+          Message.success('步骤删除成功');
+        } catch (_e) {
+          Message.error('删除步骤失败');
+        }
+      },
+    });
+  };
+
   return {
     pipelines,
     setPipelines,
@@ -138,6 +160,7 @@ export function usePipelines(projectId: number | undefined) {
     setSelectedPipelineId,
     refreshPipelines: fetchPipelines,
     handleDeletePipeline,
+    handleDeleteStep,
     handleTogglePipeline,
     handleToggleStep,
     handleDragEnd,

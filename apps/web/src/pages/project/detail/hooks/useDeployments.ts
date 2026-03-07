@@ -3,10 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Deployment } from '../../types';
 import { detailService } from '../service';
 
-export function useDeployments(
-  projectId: number | undefined,
-  activeTab: string,
-) {
+export function useDeployments(projectId: number | undefined) {
   const [deployRecords, setDeployRecords] = useState<Deployment[]>([]);
   const [selectedRecordId, setSelectedRecordId] = useState<number>(0);
   const [pagination, setPagination] = useState({
@@ -50,7 +47,7 @@ export function useDeployments(
 
   // Polling for updates on current page
   useEffect(() => {
-    if (!projectId || activeTab !== 'deployRecords') return;
+    if (!projectId) return;
 
     const poll = async () => {
       try {
@@ -68,7 +65,7 @@ export function useDeployments(
 
     const interval = setInterval(poll, 3000);
     return () => clearInterval(interval);
-  }, [projectId, pagination.current, pagination.pageSize, activeTab]);
+  }, [projectId, pagination.current, pagination.pageSize]);
 
   const handleRetryDeployment = async (deploymentId: number) => {
     try {
