@@ -185,7 +185,7 @@ export default function LoginPage() {
         </div>
 
         <div className="flex items-center justify-center gap-4 mt-5">
-          {['MiniCI', 'v0.1.0'].map((item, i) => (
+          {['MiniCI', 'v0.1.1'].map((item, i) => (
             <Space key={item} size={16}>
               <Text
                 type="tertiary"
@@ -196,7 +196,7 @@ export default function LoginPage() {
               >
                 {item}
               </Text>
-              {i < 2 && (
+              {i < 1 && (
                 <span
                   style={{
                     width: 1,
