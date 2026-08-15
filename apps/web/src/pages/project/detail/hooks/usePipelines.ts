@@ -1,10 +1,10 @@
 import { Message, Modal } from '@arco-design/web-react';
-import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 import { useState } from 'react';
 import { detailService } from '../service';
 import type { PipelineWithEnabled } from '../tabs/types';
+import type { DragEndEvent } from '@dnd-kit/core';
 
 export function usePipelines(projectId: number | undefined) {
   const [pipelines, setPipelines] = useState<PipelineWithEnabled[]>([]);
@@ -14,12 +14,12 @@ export function usePipelines(projectId: number | undefined) {
     if (!projectId) return;
     try {
       const pipelineData = await detailService.getPipelines(projectId);
-      const transformedPipelines = pipelineData.map((pipeline) => ({
+      const transformedPipelines = pipelineData.map(pipeline => ({
         ...pipeline,
         description: pipeline.description || '',
         enabled: pipeline.valid === 1,
         steps:
-          pipeline.steps?.map((step) => ({
+          pipeline.steps?.map(step => ({
             ...step,
             enabled: step.valid === 1,
           })) || [],
@@ -41,17 +41,14 @@ export function usePipelines(projectId: number | undefined) {
   const handleDeletePipeline = async (pipelineId: number) => {
     Modal.confirm({
       title: '确认删除',
-      content:
-        '确定要删除这个流水线吗？此操作不可撤销，将同时删除该流水线下的所有步骤。',
+      content: '确定要删除这个流水线吗？此操作不可撤销，将同时删除该流水线下的所有步骤。',
       onOk: async () => {
         try {
           await detailService.deletePipeline(pipelineId);
-          setPipelines((prev) => {
-            const newPipelines = prev.filter((p) => p.id !== pipelineId);
+          setPipelines(prev => {
+            const newPipelines = prev.filter(p => p.id !== pipelineId);
             if (selectedPipelineId === pipelineId) {
-              setSelectedPipelineId(
-                newPipelines.length > 0 ? newPipelines[0].id : 0,
-              );
+              setSelectedPipelineId(newPipelines.length > 0 ? newPipelines[0].id : 0);
             }
             return newPipelines;
           });
@@ -65,25 +62,16 @@ export function usePipelines(projectId: number | undefined) {
 
   const handleTogglePipeline = async (pipelineId: number, enabled: boolean) => {
     // 实际项目中这里应该调用 API 更新数据库
-    setPipelines((prev) =>
-      prev.map((p) => (p.id === pipelineId ? { ...p, enabled } : p)),
-    );
+    setPipelines(prev => prev.map(p => (p.id === pipelineId ? { ...p, enabled } : p)));
   };
 
-  const handleToggleStep = async (
-    pipelineId: number,
-    stepId: number,
-    enabled: boolean,
-  ) => {
-    setPipelines((prev) =>
-      prev.map((p) =>
+  const handleToggleStep = async (pipelineId: number, stepId: number, enabled: boolean) => {
+    setPipelines(prev =>
+      prev.map(p =>
         p.id === pipelineId
           ? {
               ...p,
-              steps:
-                p.steps?.map((s) =>
-                  s.id === stepId ? { ...s, enabled } : s,
-                ) || [],
+              steps: p.steps?.map(s => (s.id === stepId ? { ...s, enabled } : s)) || [],
               updatedAt: new Date().toISOString(),
             }
           : p,
@@ -95,19 +83,19 @@ export function usePipelines(projectId: number | undefined) {
     const { active, over } = event;
     if (!over || active.id === over.id || !selectedPipelineId) return;
 
-    const pipeline = pipelines.find((p) => p.id === selectedPipelineId);
+    const pipeline = pipelines.find(p => p.id === selectedPipelineId);
     if (!pipeline || !pipeline.steps) return;
 
-    const oldIndex = pipeline.steps.findIndex((s) => s.id === active.id);
-    const newIndex = pipeline.steps.findIndex((s) => s.id === over.id);
+    const oldIndex = pipeline.steps.findIndex(s => s.id === active.id);
+    const newIndex = pipeline.steps.findIndex(s => s.id === over.id);
 
     if (oldIndex === -1 || newIndex === -1) return;
 
     const newSteps = arrayMove(pipeline.steps, oldIndex, newIndex);
 
     // 立即更新本地状态以保证 UI 流畅
-    setPipelines((prev) =>
-      prev.map((p) => {
+    setPipelines(prev =>
+      prev.map(p => {
         if (p.id === selectedPipelineId) {
           return {
             ...p,
@@ -121,7 +109,7 @@ export function usePipelines(projectId: number | undefined) {
 
     try {
       // 调用 API 同步到后端
-      await detailService.reorderSteps(newSteps.map((s) => s.id));
+      await detailService.reorderSteps(newSteps.map(s => s.id));
       Message.success('顺序已更新');
     } catch (error) {
       console.error('更新步骤顺序失败:', error);
@@ -138,12 +126,8 @@ export function usePipelines(projectId: number | undefined) {
       onOk: async () => {
         try {
           await detailService.deleteStep(stepId);
-          setPipelines((prev) =>
-            prev.map((p) =>
-              p.id === pipelineId
-                ? { ...p, steps: p.steps?.filter((s) => s.id !== stepId) || [] }
-                : p,
-            ),
+          setPipelines(prev =>
+            prev.map(p => (p.id === pipelineId ? { ...p, steps: p.steps?.filter(s => s.id !== stepId) || [] } : p)),
           );
           Message.success('步骤删除成功');
         } catch (_e) {

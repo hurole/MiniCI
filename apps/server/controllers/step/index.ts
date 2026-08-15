@@ -1,15 +1,9 @@
-import type { Context } from 'koa';
 import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
 import { log } from '../../libs/logger.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
-import {
-  createStepSchema,
-  listStepsQuerySchema,
-  reorderStepsSchema,
-  stepIdSchema,
-  updateStepSchema,
-} from './dto.ts';
+import { createStepSchema, listStepsQuerySchema, reorderStepsSchema, stepIdSchema, updateStepSchema } from './dto.ts';
+import type { Context } from 'koa';
 
 @Controller('/steps')
 export class StepController {
@@ -46,8 +40,7 @@ export class StepController {
       whereCondition.pipelineId = query.pipelineId;
     }
 
-    const isPagination =
-      query?.page !== undefined && query?.pageSize !== undefined;
+    const isPagination = query?.page !== undefined && query?.pageSize !== undefined;
 
     const [total, steps] = await Promise.all([
       prisma.step.count({ where: whereCondition }),

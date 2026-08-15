@@ -2,10 +2,10 @@ import { Button, Grid, Typography } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 import { useState } from 'react';
-import type { Project } from '../types';
 import CreateProjectModal from './components/CreateProjectModal';
 import ProjectCard from './components/ProjectCard';
 import { projectService } from './service';
+import type { Project } from '../types';
 
 const { Text } = Typography;
 
@@ -23,7 +23,7 @@ function ProjectPage() {
   };
 
   const handleCreateSuccess = (newProject: Project) => {
-    setProjects((prev) => [newProject, ...prev]);
+    setProjects(prev => [newProject, ...prev]);
   };
 
   const handleCreateCancel = () => {
@@ -39,29 +39,20 @@ function ProjectPage() {
           </Typography.Title>
           <Text type="secondary">管理和查看您的所有项目</Text>
         </div>
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={handleCreateProject}
-          className="!rounded-lg"
-        >
+        <Button type="primary" icon={<IconPlus />} onClick={handleCreateProject} className="!rounded-lg">
           新建项目
         </Button>
       </div>
 
       <Grid.Row gutter={[16, 16]}>
-        {projects.map((project) => (
+        {projects.map(project => (
           <Grid.Col key={project.id} span={8}>
             <ProjectCard project={project} />
           </Grid.Col>
         ))}
       </Grid.Row>
 
-      <CreateProjectModal
-        visible={createModalVisible}
-        onCancel={handleCreateCancel}
-        onSuccess={handleCreateSuccess}
-      />
+      <CreateProjectModal visible={createModalVisible} onCancel={handleCreateCancel} onSuccess={handleCreateSuccess} />
     </div>
   );
 }

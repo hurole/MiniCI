@@ -1,17 +1,10 @@
-import {
-  Button,
-  Empty,
-  List,
-  Pagination,
-  Tag,
-  Typography,
-} from '@arco-design/web-react';
+import { Button, Empty, List, Pagination, Tag, Typography } from '@arco-design/web-react';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { formatDateTime } from '@utils/time';
-import type { Deployment } from '../../types';
 import DeployRecordItem from '../components/DeployRecordItem';
 import { useDeployments } from '../hooks/useDeployments';
 import { useProjectDetail } from '../hooks/useProjectDetail';
+import type { Deployment } from '../../types';
 
 export function DeployRecordsTab() {
   const { detail, refreshDetail } = useProjectDetail();
@@ -24,7 +17,7 @@ export function DeployRecordsTab() {
     getBuildLogs,
     onPageChange,
   } = useDeployments(detail?.id);
-  const selectedRecord = deployRecords.find((r) => r.id === selectedRecordId);
+  const selectedRecord = deployRecords.find(r => r.id === selectedRecordId);
   const buildLogs = getBuildLogs(selectedRecordId);
 
   const renderStatusTag = (status: Deployment['status']) => {
@@ -48,32 +41,30 @@ export function DeployRecordsTab() {
   );
 
   return (
-    <div className="flex flex-row gap-6 h-full">
+    <div className="flex h-full flex-row gap-6">
       {/* 左侧部署记录列表 */}
-      <div className="w-150 flex flex-col h-full min-h-0">
+      <div className="flex h-full min-h-0 w-150 flex-col">
         <div className="flex items-center justify-between py-3">
-          <Typography.Text type="secondary">
-            共 {pagination.total} 条部署记录
-          </Typography.Text>
+          <Typography.Text type="secondary">共 {pagination.total} 条部署记录</Typography.Text>
           <Button size="small" type="outline" onClick={refreshDetail}>
             刷新
           </Button>
         </div>
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {deployRecords.length > 0 ? (
             <List
-              className="bg-white rounded-lg border"
+              className="rounded-lg border bg-white"
               dataSource={deployRecords}
               render={renderDeployRecordItem}
               split={true}
             />
           ) : (
-            <div className="text-center py-12">
+            <div className="py-12 text-center">
               <Empty description="暂无部署记录" />
             </div>
           )}
         </div>
-        <div className="p-3 flex flex-row justify-end">
+        <div className="flex flex-row justify-end p-3">
           <Pagination
             total={pagination.total}
             current={pagination.current}
@@ -86,8 +77,8 @@ export function DeployRecordsTab() {
       </div>
 
       {/* 右侧构建日志 */}
-      <div className="flex-1 bg-white rounded-lg border flex flex-col overflow-hidden">
-        <div className="p-4 border-b bg-gray-50 shrink-0">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-lg border bg-white">
+        <div className="shrink-0 border-b bg-gray-50 p-4">
           <div className="flex items-center justify-between">
             <div>
               <Typography.Title heading={5} className="m-0!">
@@ -107,8 +98,7 @@ export function DeployRecordsTab() {
                     type="primary"
                     icon={<IconRefresh />}
                     size="small"
-                    onClick={() => handleRetryDeployment(selectedRecord.id)}
-                  >
+                    onClick={() => handleRetryDeployment(selectedRecord.id)}>
                     重新执行
                   </Button>
                 )}
@@ -117,13 +107,10 @@ export function DeployRecordsTab() {
             )}
           </div>
         </div>
-        <div className="p-4 flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
+          <div className="flex-1 overflow-y-auto rounded bg-gray-900 p-4 font-mono text-sm text-green-400">
             {buildLogs.map((log: string, index: number) => (
-              <div
-                key={`${selectedRecordId}-${log.slice(0, 30)}-${index}`}
-                className="mb-1 leading-relaxed"
-              >
+              <div key={`${selectedRecordId}-${log.slice(0, 30)}-${index}`} className="mb-1 leading-relaxed">
                 {log}
               </div>
             ))}

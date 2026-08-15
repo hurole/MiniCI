@@ -16,22 +16,28 @@
   - `src/stores/`: Zustand 状态管理。
   - `src/hooks/`: 自定义 React hooks。
   - `src/components/`: 可复用 UI 组件。
-- **`biome.json`**: 根目录下的 lint 和格式化配置。
+- **`.oxlintrc.json` & `oxfmt.config.ts`**: 根目录下的 lint 与格式化配置（oxfmt 使用 `@fka/oxfmt-config`）。
 
 ## 2. 构建、Lint 和运行命令
 
 ### 根目录
+
 - **安装依赖:** `pnpm install`
 - **启动所有应用 (开发模式):** `pnpm dev` (并行运行)
+- **Lint 检查:** `pnpm lint` (使用 oxlint)
+- **格式化:** `pnpm fmt` (使用 oxfmt)
+- **全量检查:** `pnpm check` (运行 oxlint 和 oxfmt --check)
 
 ### Web 端 (`apps/web`)
+
 - **开发服务器:** `cd apps/web && pnpm dev` (使用 Rsbuild，支持热重载)
 - **构建:** `cd apps/web && pnpm build` (生产环境构建)
-- **Lint/检查:** `cd apps/web && pnpm check` (使用 Biome - 修复导入顺序等)
-- **格式化:** `cd apps/web && pnpm format` (使用 Biome)
+- **Lint/检查:** `cd apps/web && pnpm check` (使用 oxlint 与 oxfmt)
+- **格式化:** `cd apps/web && pnpm fmt` (使用 oxfmt)
 - **预览:** `cd apps/web && pnpm preview` (预览生产环境构建结果)
 
 ### 服务端 (`apps/server`)
+
 - **开发服务器:** `cd apps/server && pnpm dev` (使用 `tsx watch` 自动重启)
 - **数据库设置:**
   - `pnpm prisma generate` (生成客户端)
@@ -39,7 +45,9 @@
   - `pnpm prisma studio` (打开数据库 GUI 视图)
 
 ### 测试
+
 **⚠️ 重要提示：无测试基础设施**
+
 - 本项目目前**没有**配置任何测试框架 (如 Jest, Vitest 等)。
 - **请勿**尝试运行测试命令。
 - **请勿**编写测试文件 (如 `*.test.ts`, `*.spec.ts`)，除非用户明确要求先搭建测试基础设施。
@@ -47,14 +55,16 @@
 
 ## 3. 代码风格与规范
 
-### 通用规范 (Biome)
+### 通用规范 (oxlint & oxfmt)
+
 - **缩进:** 2 个空格。
 - **引号:** 优先使用单引号。
-- **导入:** 由 Biome 自动组织。
+- **导入:** 由 oxfmt 自动排序导入。
 - **分号:** 始终使用分号。
 - **类型安全:** 已启用 `strict: true`。尽量避免使用 `any`。
 
 ### 服务端 (`apps/server`)
+
 - **语言:** TypeScript (`.ts`)。
 - **导入 (重要):** 相对导入**必须**包含 `.ts` 扩展名。
   - ✅ `import { log } from './libs/logger.ts';`
@@ -77,6 +87,7 @@
 - **响应结构:** 必须遵循 `{ code: 0, message: 'success', data: any, timestamp: string }` 标准格式。
 
 ### Web 端 (`apps/web`)
+
 - **语言:** TypeScript (`.tsx`, `.ts`)。
 - **框架:** React 19。
 - **状态管理:** Zustand。
@@ -102,7 +113,7 @@
 1.  **依赖管理:** 在添加新库之前，务必检查对应应用目录下的 `package.json`。
     - 服务端: `apps/server/package.json`
     - Web 端: `apps/web/package.json`
-2.  **Lint 检查:** 在完成任务前，运行 `pnpm check` (在 `apps/web` 中) 或依赖 IDE 的 Biome 集成。
+2.  **Lint 检查:** 在完成任务前，运行 `pnpm check` (在根目录或 `apps/web` 中) 或依赖 IDE 的 oxlint / oxfmt 集成。
     - 确保导入已排序。
     - 确保没有未使用的变量。
 3.  **文件创建:**
@@ -112,14 +123,18 @@
 ## 5. 特定实现细节
 
 ### 服务端装饰器 (`apps/server/decorators/route.ts`)
+
 服务端使用自定义实现的装饰器进行路由管理。
+
 - `createMethodDecorator(method)` 工厂函数创建了 `@Get`, `@Post` 等装饰器。
 - 这些装饰器将元数据存储在类的构造函数上。
 - 加载器 (通常在 `app.ts` 或中间件中) 扫描这些元数据以注册 Koa 路由。
 
 ### Web Store 模式
+
 Zustand stores 定义在 `src/stores/`。
 示例模式：
+
 ```typescript
 import { create } from 'zustand';
 
@@ -128,13 +143,14 @@ interface State {
   inc: () => void;
 }
 
-export const useStore = create<State>((set) => ({
+export const useStore = create<State>(set => ({
   count: 0,
-  inc: () => set((state) => ({ count: state.count + 1 })),
+  inc: () => set(state => ({ count: state.count + 1 })),
 }));
 ```
 
 ## 6. 规则与限制
+
 - **使用中文:** 对话、文档和代码注释优先使用中文。
 - **禁止运行测试:** 不要运行不存在的测试命令。
 - **禁止类组件:** 使用 React 函数式组件。
@@ -143,10 +159,12 @@ export const useStore = create<State>((set) => ({
 - **包管理器:** 仅使用 `pnpm`。不要使用 `npm` 或 `yarn`。
 
 ## Active Technologies
+
 - TypeScript (Node 22) + `zod` (validation), Native `fetch` (HTTP), Native `crypto` (HMAC). (001-deploy-fail-webhook)
 - SQLite (Prisma), `Project` table update. (001-deploy-fail-webhook)
 - TypeScript (Node 22 for Server, React 19 for Web) (002-lazy-fetch-commits)
 - N/A (Data sourced from external Gitea API) (002-lazy-fetch-commits)
 
 ## Recent Changes
+
 - 001-deploy-fail-webhook: Added TypeScript (Node 22) + `zod` (validation), Native `fetch` (HTTP), Native `crypto` (HMAC).

@@ -1,5 +1,4 @@
 import KoaRouter from '@koa/router';
-import type Koa from 'koa';
 import {
   AuthController,
   DeploymentController,
@@ -12,6 +11,7 @@ import {
 import { log } from '../libs/logger.ts';
 import { RouteScanner } from '../libs/route-scanner.ts';
 import type { Middleware } from './types.ts';
+import type Koa from 'koa';
 
 export class Router implements Middleware {
   private router: KoaRouter;
@@ -57,11 +57,8 @@ export class Router implements Middleware {
     // 输出注册的路由信息
     const routes = this.routeScanner.getRegisteredRoutes();
     log.debug(this.TAG, '装饰器路由注册完成:');
-    routes.forEach((route) => {
-      log.debug(
-        this.TAG,
-        `  ${route.method} ${route.path} -> ${route.controller}.${route.action}`,
-      );
+    routes.forEach(route => {
+      log.debug(this.TAG, `  ${route.method} ${route.path} -> ${route.controller}.${route.action}`);
     });
   }
 

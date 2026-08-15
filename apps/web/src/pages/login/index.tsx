@@ -26,9 +26,9 @@ export default function LoginPage() {
   }, [authCode, navigate]);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[(--color-bg-1)]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[(--color-bg-1)]">
       <div
-        className="fixed inset-0 pointer-events-none"
+        className="pointer-events-none fixed inset-0"
         style={{
           backgroundImage: `
             linear-gradient(var(--color-border-1) 1px, transparent 1px),
@@ -39,7 +39,7 @@ export default function LoginPage() {
         }}
       />
       <div
-        className="fixed top-0 left-0 right-0 h-0.75 z-50"
+        className="fixed top-0 right-0 left-0 z-50 h-0.75"
         style={{
           background:
             'linear-gradient(90deg, transparent, rgb(var(--green-6)), rgb(var(--blue-5)), rgb(var(--green-6)), transparent)',
@@ -49,12 +49,11 @@ export default function LoginPage() {
       />
 
       <div
-        className="fixed w-150 h-150 rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none fixed h-150 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           top: '50%',
           left: '50%',
-          background:
-            'radial-gradient(circle, rgba(var(--green-6), 0.06) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(var(--green-6), 0.06) 0%, transparent 70%)',
           animation: 'pulse 6s ease-in-out infinite',
         }}
       />
@@ -62,27 +61,24 @@ export default function LoginPage() {
       {/* Card */}
       <div
         className="relative z-10 w-full max-w-100 px-4"
-        style={{ animation: 'cardIn 0.45s cubic-bezier(0.16,1,0.3,1) both' }}
-      >
+        style={{ animation: 'cardIn 0.45s cubic-bezier(0.16,1,0.3,1) both' }}>
         <div
           className="rounded-xl px-9 py-10"
           style={{
             background: 'var(--color-bg-2)',
             border: '1px solid var(--color-border-2)',
             boxShadow: 'var(--shadow-medium)',
-          }}
-        >
+          }}>
           {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="mb-8 flex flex-col items-center">
             <div
-              className="flex items-center justify-center w-13 h-13 rounded-xl mb-4"
+              className="mb-4 flex h-13 w-13 items-center justify-center rounded-xl"
               style={{
                 width: 52,
                 height: 52,
                 background: 'rgba(var(--green-6), 0.1)',
                 border: '1px solid rgba(var(--green-6), 0.25)',
-              }}
-            >
+              }}>
               <Logo />
             </div>
             <Title
@@ -91,8 +87,7 @@ export default function LoginPage() {
                 marginBottom: 4,
                 fontFamily: 'monospace',
                 letterSpacing: '-0.5px',
-              }}
-            >
+              }}>
               Mini<span style={{ color: 'rgb(var(--green-6))' }}>CI</span>
             </Title>
             <Text type="secondary" style={{ fontSize: 13 }}>
@@ -100,7 +95,7 @@ export default function LoginPage() {
             </Text>
           </div>
 
-          <div className="flex items-center justify-center gap-1 mb-6">
+          <div className="mb-6 flex items-center justify-center gap-1">
             {['Build', 'Test', 'Deploy'].map((stage, index) => (
               <>
                 <Tag
@@ -110,16 +105,11 @@ export default function LoginPage() {
                   style={{
                     fontFamily: 'monospace',
                     fontSize: 11,
-                  }}
-                >
+                  }}>
                   {stage}
                 </Tag>
                 {index < 2 && (
-                  <Text
-                    key={stage}
-                    type="secondary"
-                    style={{ fontSize: 12, lineHeight: 1 }}
-                  >
+                  <Text key={stage} type="secondary" style={{ fontSize: 12, lineHeight: 1 }}>
                     ›
                   </Text>
                 )}
@@ -128,14 +118,13 @@ export default function LoginPage() {
           </div>
 
           <div
-            className="flex items-center gap-2 px-3 py-2 rounded-lg mb-6"
+            className="mb-6 flex items-center gap-2 rounded-lg px-3 py-2"
             style={{
               background: 'rgba(var(--green-6), 0.08)',
               border: '1px solid rgba(var(--green-6), 0.2)',
-            }}
-          >
+            }}>
             <span
-              className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+              className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
               style={{
                 background: 'rgb(var(--green-6))',
                 animation: 'blink 2s ease-in-out infinite',
@@ -146,8 +135,7 @@ export default function LoginPage() {
                 fontSize: 11,
                 fontFamily: 'monospace',
                 color: 'rgb(var(--green-6))',
-              }}
-            >
+              }}>
               Gitea OAuth · 服务正常
             </Text>
           </div>
@@ -159,18 +147,14 @@ export default function LoginPage() {
             style={{
               borderRadius: '8px',
               fontFamily: 'monospace',
-            }}
-          >
-            <span className="flex items-center gap-3 justify-center">
-              <Gitea className="w-5 h-5" />
+            }}>
+            <span className="flex items-center justify-center gap-3">
+              <Gitea className="h-5 w-5" />
               <span className="text-xs">Gitea 授权登录</span>
             </span>
           </Button>
 
-          <div
-            className="my-6"
-            style={{ height: 1, background: 'var(--color-border-1)' }}
-          />
+          <div className="my-6" style={{ height: 1, background: 'var(--color-border-1)' }} />
           <Text
             type="secondary"
             style={{
@@ -178,13 +162,12 @@ export default function LoginPage() {
               textAlign: 'center',
               display: 'block',
               lineHeight: 1.8,
-            }}
-          >
+            }}>
             登录即代表你有权访问系统
           </Text>
         </div>
 
-        <div className="flex items-center justify-center gap-4 mt-5">
+        <div className="mt-5 flex items-center justify-center gap-4">
           {['MiniCI', 'v0.1.1'].map((item, i) => (
             <Space key={item} size={16}>
               <Text
@@ -192,8 +175,7 @@ export default function LoginPage() {
                 style={{
                   fontSize: 11,
                   fontFamily: 'monospace',
-                }}
-              >
+                }}>
                 {item}
               </Text>
               {i < 1 && (

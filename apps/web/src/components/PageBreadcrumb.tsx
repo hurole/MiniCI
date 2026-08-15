@@ -4,13 +4,13 @@ import { Link, useLocation } from 'react-router';
 
 export function PageBreadcrumb() {
   const location = useLocation();
-  const pathnames = location.pathname.split('/').filter((x) => x);
+  const pathnames = location.pathname.split('/').filter(x => x);
 
   // If we are at root, don't show breadcrumb
   if (pathnames.length === 0) return null;
 
   return (
-    <div className="px-6 py-3 bg-white border-b border-gray-200">
+    <div className="border-b border-gray-200 bg-white px-6 py-3">
       <Breadcrumb>
         <Breadcrumb.Item>
           <Link to="/">
@@ -24,11 +24,7 @@ export function PageBreadcrumb() {
           let breadcrumbName = value;
           if (value === 'project') breadcrumbName = '项目管理';
           // project detail ID
-          if (
-            index > 0 &&
-            pathnames[index - 1] === 'project' &&
-            !Number.isNaN(Number(value))
-          ) {
+          if (index > 0 && pathnames[index - 1] === 'project' && !Number.isNaN(Number(value))) {
             breadcrumbName = '项目详情';
           }
 

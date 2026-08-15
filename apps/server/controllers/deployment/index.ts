@@ -1,17 +1,15 @@
-import type { Context } from 'koa';
 import { Controller, Get, Post } from '../../decorators/route.ts';
-import type { Prisma } from '../../generated/client.ts';
 import { ExecutionQueue } from '../../libs/execution-queue.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { createDeploymentSchema, listDeploymentsQuerySchema } from './dto.ts';
+import type { Prisma } from '../../generated/client.ts';
+import type { Context } from 'koa';
 
 @Controller('/deployments')
 export class DeploymentController {
   @Get('')
   async list(ctx: Context) {
-    const { page, pageSize, projectId } = listDeploymentsQuerySchema.parse(
-      ctx.query,
-    );
+    const { page, pageSize, projectId } = listDeploymentsQuerySchema.parse(ctx.query);
     const where: Prisma.DeploymentWhereInput = {
       valid: 1,
     };

@@ -1,12 +1,4 @@
-import {
-  Button,
-  Card,
-  Descriptions,
-  Form,
-  Input,
-  Message,
-  Modal,
-} from '@arco-design/web-react';
+import { Button, Card, Descriptions, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { formatDateTime } from '@utils/time';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -81,8 +73,7 @@ export function SettingsTab() {
                 onClick={() => {
                   projectForm.setFieldsValue(detail);
                   setIsEditingProject(true);
-                }}
-              >
+                }}>
                 编辑项目
               </Button>
               <Button status="danger" onClick={handleDeleteProject}>
@@ -99,43 +90,31 @@ export function SettingsTab() {
                 rules={[
                   { required: true, message: '请输入项目名称' },
                   { minLength: 2, message: '项目名称至少2个字符' },
-                ]}
-              >
+                ]}>
                 <Input placeholder="例如：我的应用" />
               </Form.Item>
               <Form.Item
                 field="description"
                 label="项目描述"
-                rules={[{ maxLength: 200, message: '描述不能超过200个字符' }]}
-              >
-                <Input.TextArea
-                  placeholder="请输入项目描述"
-                  rows={3}
-                  maxLength={200}
-                  showWordLimit
-                />
+                rules={[{ maxLength: 200, message: '描述不能超过200个字符' }]}>
+                <Input.TextArea placeholder="请输入项目描述" rows={3} maxLength={200} showWordLimit />
               </Form.Item>
               <Form.Item
                 field="repository"
                 label="Git 仓库地址"
-                rules={[{ required: true, message: '请输入仓库地址' }]}
-              >
+                rules={[{ required: true, message: '请输入仓库地址' }]}>
                 <Input placeholder="例如：https://github.com/user/repo.git" />
               </Form.Item>
               <Form.Item
                 field="webhookUrl"
                 label="Webhook URL (部署失败通知)"
-                rules={[
-                  { type: 'url', message: '请输入有效的URL' },
-                  { required: false },
-                ]}
-              >
+                rules={[{ type: 'url', message: '请输入有效的URL' }, { required: false }]}>
                 <Input placeholder="例如：https://api.example.com/hooks/fail" />
               </Form.Item>
-              <div className="text-sm text-gray-500 mb-4">
+              <div className="mb-4 text-sm text-gray-500">
                 <strong>工作目录：</strong> {detail?.projectDir || '-'}
               </div>
-              <div className="text-sm text-gray-500 mb-4">
+              <div className="mb-4 text-sm text-gray-500">
                 <strong>创建时间：</strong> {formatDateTime(detail?.createdAt)}
               </div>
             </Form>

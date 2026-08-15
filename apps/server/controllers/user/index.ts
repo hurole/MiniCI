@@ -1,12 +1,7 @@
-import type { Context } from 'koa';
 import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
-import {
-  createUserSchema,
-  searchUserQuerySchema,
-  updateUserSchema,
-  userIdSchema,
-} from './dto.ts';
+import { createUserSchema, searchUserQuerySchema, updateUserSchema, userIdSchema } from './dto.ts';
+import type { Context } from 'koa';
 
 /**
  * 用户控制器
@@ -108,14 +103,14 @@ export class UserController {
 
     if (keyword) {
       results = results.filter(
-        (user) =>
+        user =>
           user.name.toLowerCase().includes(keyword.toLowerCase()) ||
           user.email.toLowerCase().includes(keyword.toLowerCase()),
       );
     }
 
     if (status) {
-      results = results.filter((user) => user.status === status);
+      results = results.filter(user => user.status === status);
     }
 
     return results;

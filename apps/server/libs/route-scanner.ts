@@ -1,12 +1,8 @@
 import KoaRouter from '@koa/router';
-import type Koa from 'koa';
-import {
-  getControllerPrefix,
-  getRouteMetadata,
-  type RouteMetadata,
-} from '../decorators/route.ts';
+import { getControllerPrefix, getRouteMetadata, type RouteMetadata } from '../decorators/route.ts';
 import { createSuccessResponse } from '../middlewares/exception.ts';
 import { log } from './logger.ts';
+import type Koa from 'koa';
 
 const TAG = 'RouteScanner';
 
@@ -40,7 +36,7 @@ export class RouteScanner {
    * 注册多个控制器类
    */
   registerControllers(controllers: ControllerClass[]): void {
-    controllers.forEach((controller) => this.registerController(controller));
+    controllers.forEach(controller => this.registerController(controller));
   }
 
   /**
@@ -57,12 +53,9 @@ export class RouteScanner {
     const routes: RouteMetadata[] = getRouteMetadata(ControllerClass);
 
     // 注册每个路由
-    routes.forEach((route) => {
+    routes.forEach(route => {
       const fullPath = this.buildFullPath(controllerPrefix, route.path);
-      const handler = this.wrapControllerMethod(
-        controllerInstance,
-        route.propertyKey,
-      );
+      const handler = this.wrapControllerMethod(controllerInstance, route.propertyKey);
 
       // 根据HTTP方法注册路由
       switch (route.method) {
@@ -156,11 +149,11 @@ export class RouteScanner {
       action: string;
     }> = [];
 
-    this.controllers.forEach((ControllerClass) => {
+    this.controllers.forEach(ControllerClass => {
       const controllerPrefix = getControllerPrefix(ControllerClass);
       const routeMetadata = getRouteMetadata(ControllerClass);
 
-      routeMetadata.forEach((route) => {
+      routeMetadata.forEach(route => {
         routes.push({
           method: route.method,
           path: this.buildFullPath(controllerPrefix, route.path),

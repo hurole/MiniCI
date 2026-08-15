@@ -48,11 +48,7 @@ export const pipelineIdSchema = z.object({
 
 export const listPipelinesQuerySchema = z
   .object({
-    projectId: z.coerce
-      .number()
-      .int()
-      .positive({ message: '项目ID必须是正整数' })
-      .optional(),
+    projectId: z.coerce.number().int().positive({ message: '项目ID必须是正整数' }).optional(),
   })
   .optional();
 

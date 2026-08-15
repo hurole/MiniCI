@@ -13,17 +13,13 @@ class Net {
 
   private applyInterceptors(instance: Axios) {
     instance.interceptors.response.use(
-      (response) => {
+      response => {
         return response;
       },
-      (error) => {
+      error => {
         console.log('error', error);
         // 对于DELETE请求返回204状态码的情况，视为成功
-        if (
-          error.response &&
-          error.response.status === 204 &&
-          error.config.method === 'delete'
-        ) {
+        if (error.response && error.response.status === 204 && error.config.method === 'delete') {
           // 创建一个模拟的成功响应
           return Promise.resolve({
             ...error.response,

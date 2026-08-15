@@ -1,7 +1,7 @@
-import type Koa from 'koa';
-import type { Context } from 'koa';
 import { log } from '../libs/logger.ts';
 import type { Middleware } from './types.ts';
+import type Koa from 'koa';
+import type { Context } from 'koa';
 
 export class HttpLogger implements Middleware {
   apply(app: Koa): void {

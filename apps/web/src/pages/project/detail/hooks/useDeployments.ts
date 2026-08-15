@@ -1,7 +1,7 @@
 import { Message } from '@arco-design/web-react';
 import { useCallback, useEffect, useState } from 'react';
-import type { Deployment } from '../../types';
 import { detailService } from '../service';
+import type { Deployment } from '../../types';
 
 export function useDeployments(projectId: number | undefined) {
   const [deployRecords, setDeployRecords] = useState<Deployment[]>([]);
@@ -16,13 +16,9 @@ export function useDeployments(projectId: number | undefined) {
     async (page: number, pageSize: number = pagination.pageSize) => {
       if (!projectId) return;
       try {
-        const res = await detailService.getDeployments(
-          projectId,
-          page,
-          pageSize,
-        );
+        const res = await detailService.getDeployments(projectId, page, pageSize);
         setDeployRecords(res.list);
-        setPagination((prev) => ({
+        setPagination(prev => ({
           ...prev,
           total: res.total,
           current: page,
@@ -46,18 +42,15 @@ export function useDeployments(projectId: number | undefined) {
   }, [projectId, fetchDeployments]);
 
   // Polling for updates on current page
+  const { current, pageSize } = pagination;
   useEffect(() => {
     if (!projectId) return;
 
     const poll = async () => {
       try {
-        const res = await detailService.getDeployments(
-          projectId,
-          pagination.current,
-          pagination.pageSize,
-        );
+        const res = await detailService.getDeployments(projectId, current, pageSize);
         setDeployRecords(res.list);
-        setPagination((prev) => ({ ...prev, total: res.total }));
+        setPagination(prev => ({ ...prev, total: res.total }));
       } catch (_error) {
         console.error('轮询部署记录失败');
       }
@@ -65,7 +58,7 @@ export function useDeployments(projectId: number | undefined) {
 
     const interval = setInterval(poll, 3000);
     return () => clearInterval(interval);
-  }, [projectId, pagination.current, pagination.pageSize]);
+  }, [projectId, current, pageSize]);
 
   const handleRetryDeployment = async (deploymentId: number) => {
     try {
@@ -78,7 +71,7 @@ export function useDeployments(projectId: number | undefined) {
   };
 
   const getBuildLogs = (recordId: number): string[] => {
-    const record = deployRecords.find((r) => r.id === recordId);
+    const record = deployRecords.find(r => r.id === recordId);
     return record?.buildLog ? record.buildLog.split('\n') : ['暂无日志记录'];
   };
 

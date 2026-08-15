@@ -15,8 +15,7 @@ if (rootEl) {
     <ConfigProvider
       theme={{
         primaryColor: '#385079',
-      }}
-    >
+      }}>
       <BrowserRouter>
         <App />
       </BrowserRouter>

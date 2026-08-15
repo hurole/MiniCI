@@ -1,7 +1,7 @@
 import { Button, Form, Input, Message, Modal } from '@arco-design/web-react';
 import { useState } from 'react';
-import type { Project } from '../../types';
 import { projectService } from '../service';
+import type { Project } from '../../types';
 
 interface CreateProjectModalProps {
   visible: boolean;
@@ -9,11 +9,7 @@ interface CreateProjectModalProps {
   onSuccess: (newProject: Project) => void;
 }
 
-function CreateProjectModal({
-  visible,
-  onCancel,
-  onSuccess,
-}: CreateProjectModalProps) {
+function CreateProjectModal({ visible, onCancel, onSuccess }: CreateProjectModalProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -50,17 +46,11 @@ function CreateProjectModal({
         <Button key="cancel" onClick={handleCancel}>
           取消
         </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          loading={loading}
-          onClick={handleSubmit}
-        >
+        <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
           创建
         </Button>,
       ]}
-      style={{ width: 500 }}
-    >
+      style={{ width: 500 }}>
       <Form form={form} layout="vertical" autoComplete="off">
         <Form.Item
           label="项目名称"
@@ -68,20 +58,15 @@ function CreateProjectModal({
           rules={[
             { required: true, message: '请输入项目名称' },
             { minLength: 2, message: '项目名称至少2个字符' },
-          ]}
-        >
+          ]}>
           <Input placeholder="请输入项目名称" />
         </Form.Item>
 
         <Form.Item
           label="项目描述"
           field="description"
-          rules={[{ maxLength: 200, message: '项目描述不能超过200个字符' }]}
-        >
-          <Input.TextArea
-            placeholder="请输入项目描述（可选）"
-            autoSize={{ minRows: 3, maxRows: 6 }}
-          />
+          rules={[{ maxLength: 200, message: '项目描述不能超过200个字符' }]}>
+          <Input.TextArea placeholder="请输入项目描述（可选）" autoSize={{ minRows: 3, maxRows: 6 }} />
         </Form.Item>
 
         <Form.Item
@@ -93,8 +78,7 @@ function CreateProjectModal({
               type: 'url',
               message: '请输入有效的仓库地址',
             },
-          ]}
-        >
+          ]}>
           <Input placeholder="请输入仓库地址，如: https://github.com/user/repo" />
         </Form.Item>
 
@@ -115,15 +99,14 @@ function CreateProjectModal({
                   return cb('不能包含路径遍历字符（.. 或 ~）');
                 }
                 // 检查非法字符（控制字符 0x00-0x1F）
-                // biome-ignore lint/suspicious/noControlCharactersInRegex: 需要检测路径中的控制字符
+                // oxlint-disable-next-line eslint/no-control-regex
                 if (/[<>:"|?*\u0000-\u001f]/.test(value)) {
                   return cb('路径包含非法字符');
                 }
                 cb();
               },
             },
-          ]}
-        >
+          ]}>
           <Input placeholder="请输入绝对路径，如: /data/projects/my-app" />
         </Form.Item>
       </Form>

@@ -75,16 +75,8 @@ export const stepIdSchema = z.object({
 
 export const listStepsQuerySchema = z
   .object({
-    pipelineId: z.coerce
-      .number()
-      .int()
-      .positive({ message: '流水线ID必须是正整数' })
-      .optional(),
-    page: z.coerce
-      .number()
-      .int()
-      .min(1, { message: '页码必须大于0' })
-      .optional(),
+    pipelineId: z.coerce.number().int().positive({ message: '流水线ID必须是正整数' }).optional(),
+    page: z.coerce.number().int().min(1, { message: '页码必须大于0' }).optional(),
     pageSize: z.coerce
       .number()
       .int()
@@ -95,9 +87,7 @@ export const listStepsQuerySchema = z
   .optional();
 
 export const reorderStepsSchema = z.object({
-  ids: z
-    .array(z.number().int().positive())
-    .min(1, { message: '步骤ID列表不能为空' }),
+  ids: z.array(z.number().int().positive()).min(1, { message: '步骤ID列表不能为空' }),
 });
 
 // TypeScript 类型

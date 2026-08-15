@@ -61,12 +61,7 @@ class Gitea {
     });
     if (!response.ok) {
       const payload = await response.json().catch(() => null as unknown);
-      log.error(
-        TAG,
-        'Gitea token request failed: status=%d payload=%o',
-        response.status,
-        payload,
-      );
+      log.error(TAG, 'Gitea token request failed: status=%d payload=%o', response.status, payload);
       throw new Error(`Fetch failed: ${response.status}`);
     }
     return (await response.json()) as TokenResponse;
@@ -94,13 +89,10 @@ class Gitea {
    * @param accessToken 访问令牌
    */
   async getBranches(owner: string, repo: string, accessToken: string) {
-    const response = await fetch(
-      `${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/branches`,
-      {
-        method: 'GET',
-        headers: this.getHeaders(accessToken),
-      },
-    );
+    const response = await fetch(`${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/branches`, {
+      method: 'GET',
+      headers: this.getHeaders(accessToken),
+    });
     if (!response.ok) {
       throw new Error(`Fetch failed: ${response.status}`);
     }
@@ -115,17 +107,8 @@ class Gitea {
    * @param accessToken 访问令牌
    * @param sha 分支名称或提交SHA
    */
-  async getCommits(
-    owner: string,
-    repo: string,
-    accessToken: string,
-    sha?: string,
-    page = 1,
-    limit = 10,
-  ) {
-    const url = new URL(
-      `${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/commits`,
-    );
+  async getCommits(owner: string, repo: string, accessToken: string, sha?: string, page = 1, limit = 10) {
+    const url = new URL(`${this.config.giteaUrl}/api/v1/repos/${owner}/${repo}/commits`);
     if (sha) {
       url.searchParams.append('sha', sha);
     }

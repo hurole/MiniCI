@@ -33,16 +33,13 @@ export class GitManager {
   /**
    * 确保项目目录是一个Git仓库，并且关联了remote
    */
-  static async ensureGitRepository(
-    dirPath: string,
-    repoUrl: string,
-  ): Promise<void> {
+  static async ensureGitRepository(dirPath: string, repoUrl: string): Promise<void> {
     const gitDir = path.join(dirPath, '.git');
     let isDirectory = false;
     try {
       const status = await fs.stat(gitDir);
       isDirectory = status.isDirectory();
-    } catch (e) {
+    } catch (_e) {
       // Ignore error if directory doesn't exist
     }
 
@@ -62,11 +59,7 @@ export class GitManager {
    * @param branch 目标分支
    * @param commitHash 提交哈希
    */
-  static async pullRepository(
-    dirPath: string,
-    branch: string,
-    commitHash: string,
-  ): Promise<void> {
+  static async pullRepository(dirPath: string, branch: string, commitHash: string): Promise<void> {
     try {
       log.info(
         GitManager.TAG,
@@ -84,18 +77,9 @@ export class GitManager {
       // 切换到目标提交
       await $$`git checkout ${commitHash}`;
 
-      log.info(
-        GitManager.TAG,
-        'Repository updated successfully: %s (branch: %s)',
-        dirPath,
-        branch,
-      );
+      log.info(GitManager.TAG, 'Repository updated successfully: %s (branch: %s)', dirPath, branch);
     } catch (error) {
-      log.error(
-        GitManager.TAG,
-        'Failed to pull repository, error: %s',
-        (error as Error).message,
-      );
+      log.error(GitManager.TAG, 'Failed to pull repository, error: %s', (error as Error).message);
       throw new Error(`更新代码失败: ${(error as Error).message}`);
     }
   }
@@ -117,12 +101,7 @@ export class GitManager {
         lastCommitMessage: messageResult.stdout.trim(),
       };
     } catch (error) {
-      log.error(
-        GitManager.TAG,
-        'Failed to get git info: %s, error: %s',
-        dirPath,
-        (error as Error).message,
-      );
+      log.error(GitManager.TAG, 'Failed to get git info: %s, error: %s', dirPath, (error as Error).message);
       return {};
     }
   }
@@ -136,12 +115,7 @@ export class GitManager {
       const size = Number.parseInt(stdout.split('\t')[0], 10);
       return size;
     } catch (error) {
-      log.error(
-        GitManager.TAG,
-        'Failed to get directory size: %s, error: %s',
-        dirPath,
-        (error as Error).message,
-      );
+      log.error(GitManager.TAG, 'Failed to get directory size: %s, error: %s', dirPath, (error as Error).message);
       return 0;
     }
   }

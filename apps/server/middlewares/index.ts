@@ -1,4 +1,3 @@
-import type Koa from 'koa';
 import { Authorization } from './authorization.ts';
 import { BodyParser } from './body-parser.ts';
 // import { CORS } from './cors.ts';
@@ -6,6 +5,7 @@ import { Exception } from './exception.ts';
 import { HttpLogger } from './logger.ts';
 import { Router } from './router.ts';
 import { Session } from './session.ts';
+import type Koa from 'koa';
 
 /**
  * 初始化中间件

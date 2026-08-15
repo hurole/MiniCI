@@ -1,7 +1,7 @@
-import type Koa from 'koa';
 import { z } from 'zod';
 import { log } from '../libs/logger.ts';
 import type { Middleware } from './types.ts';
+import type Koa from 'koa';
 
 /**
  * 统一响应体结构
@@ -58,19 +58,14 @@ export class Exception implements Middleware {
       const errorMessage = firstError?.message || '参数验证失败';
       const fieldPath = firstError?.path?.join('.') || 'unknown';
 
-      log.info(
-        'Exception',
-        'Zod validation failed: %s at %s',
-        errorMessage,
-        fieldPath,
-      );
+      log.info('Exception', 'Zod validation failed: %s at %s', errorMessage, fieldPath);
       this.sendResponse(
         ctx,
         1003,
         errorMessage,
         {
           field: fieldPath,
-          validationErrors: error.issues.map((issue) => ({
+          validationErrors: error.issues.map(issue => ({
             field: issue.path.join('.'),
             message: issue.message,
             code: issue.code,
@@ -108,13 +103,7 @@ export class Exception implements Middleware {
   /**
    * 发送统一响应
    */
-  private sendResponse(
-    ctx: Koa.Context,
-    code: number,
-    message: string,
-    data: any = null,
-    httpStatus = 200,
-  ): void {
+  private sendResponse(ctx: Koa.Context, code: number, message: string, data: any = null, httpStatus = 200): void {
     const response: ApiResponse = {
       code,
       message,
@@ -131,10 +120,7 @@ export class Exception implements Middleware {
 /**
  * 创建成功响应的辅助函数
  */
-export function createSuccessResponse<T>(
-  data: T,
-  message = 'success',
-): ApiResponse<T> {
+export function createSuccessResponse<T>(data: T, message = 'success'): ApiResponse<T> {
   return {
     code: 0,
     message,

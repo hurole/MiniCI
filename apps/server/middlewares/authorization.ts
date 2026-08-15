@@ -1,12 +1,8 @@
-import type Koa from 'koa';
 import type { Middleware } from './types.ts';
+import type Koa from 'koa';
 
 export class Authorization implements Middleware {
-  private readonly ignoreAuth = [
-    '/api/auth/login',
-    '/api/auth/info',
-    '/api/auth/url',
-  ];
+  private readonly ignoreAuth = ['/api/auth/login', '/api/auth/info', '/api/auth/url'];
 
   apply(app: Koa) {
     app.use(async (ctx: Koa.Context, next: Koa.Next) => {

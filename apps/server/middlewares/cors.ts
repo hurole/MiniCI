@@ -1,6 +1,6 @@
 import cors from '@koa/cors';
-import type Koa from 'koa';
 import type { Middleware } from './types.ts';
+import type Koa from 'koa';
 
 export class CORS implements Middleware {
   apply(app: Koa) {

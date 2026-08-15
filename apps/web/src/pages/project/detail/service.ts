@@ -1,13 +1,5 @@
 import { net } from '@utils';
-import type {
-  Branch,
-  Commit,
-  CreateDeploymentRequest,
-  Deployment,
-  Pipeline,
-  Project,
-  Step,
-} from '../types';
+import type { Branch, Commit, CreateDeploymentRequest, Deployment, Pipeline, Project, Step } from '../types';
 
 class DetailService {
   async getProject(id: string) {
@@ -26,11 +18,7 @@ class DetailService {
     return Array.isArray(data) ? data : data.list;
   }
 
-  async getDeployments(
-    projectId: number,
-    page: number = 1,
-    pageSize: number = 10,
-  ) {
+  async getDeployments(projectId: number, page: number = 1, pageSize: number = 10) {
     const { data } = await net.request<DeploymentListResponse>({
       url: '/api/deployments',
       params: {
@@ -44,16 +32,7 @@ class DetailService {
 
   // 创建流水线
   async createPipeline(
-    pipeline: Omit<
-      Pipeline,
-      | 'id'
-      | 'createdAt'
-      | 'updatedAt'
-      | 'createdBy'
-      | 'updatedBy'
-      | 'valid'
-      | 'steps'
-    >,
+    pipeline: Omit<Pipeline, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'valid' | 'steps'>,
   ) {
     const { data } = await net.request<Pipeline>({
       url: '/api/pipelines',
@@ -66,18 +45,7 @@ class DetailService {
   // 更新流水线
   async updatePipeline(
     id: number,
-    pipeline: Partial<
-      Omit<
-        Pipeline,
-        | 'id'
-        | 'createdAt'
-        | 'updatedAt'
-        | 'createdBy'
-        | 'updatedBy'
-        | 'valid'
-        | 'steps'
-      >
-    >,
+    pipeline: Partial<Omit<Pipeline, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'valid' | 'steps'>>,
   ) {
     const { data } = await net.request<Pipeline>({
       url: `/api/pipelines/${id}`,
@@ -106,12 +74,7 @@ class DetailService {
   }
 
   // 创建步骤
-  async createStep(
-    step: Omit<
-      Step,
-      'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'valid'
-    >,
-  ) {
+  async createStep(step: Omit<Step, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'valid'>) {
     const { data } = await net.request<Step>({
       url: '/api/steps',
       method: 'POST',
@@ -123,12 +86,7 @@ class DetailService {
   // 更新步骤
   async updateStep(
     id: number,
-    step: Partial<
-      Omit<
-        Step,
-        'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'valid'
-      >
-    >,
+    step: Partial<Omit<Step, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'valid'>>,
   ) {
     const { data } = await net.request<Step>({
       url: `/api/steps/${id}`,
@@ -159,12 +117,7 @@ class DetailService {
   }
 
   // 获取项目的提交记录
-  async getCommits(
-    projectId: number,
-    branch?: string,
-    page: number = 1,
-    limit: number = 10,
-  ) {
+  async getCommits(projectId: number, branch?: string, page: number = 1, limit: number = 10) {
     const { data } = await net.request<Commit[] | { list: Commit[] }>({
       url: '/api/git/commits',
       params: {

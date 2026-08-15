@@ -1,9 +1,9 @@
-import type { User } from '@pages/login/types';
 import { net } from '@utils';
 import { create } from 'zustand';
 import type { GlobalStore } from './types';
+import type { User } from '@pages/login/types';
 
-export const useGlobalStore = create<GlobalStore>((set) => ({
+export const useGlobalStore = create<GlobalStore>(set => ({
   user: null,
   setUser: (user: User) => set({ user }),
   async refreshUser() {

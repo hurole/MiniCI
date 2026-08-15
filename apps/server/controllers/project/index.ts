@@ -1,14 +1,9 @@
-import type { Context } from 'koa';
 import { Controller, Delete, Get, Post, Put } from '../../decorators/route.ts';
 import { log } from '../../libs/logger.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
-import {
-  createProjectSchema,
-  listProjectQuerySchema,
-  projectIdSchema,
-  updateProjectSchema,
-} from './dto.ts';
+import { createProjectSchema, listProjectQuerySchema, projectIdSchema, updateProjectSchema } from './dto.ts';
+import type { Context } from 'koa';
 
 @Controller('/projects')
 export class ProjectController {
@@ -28,8 +23,7 @@ export class ProjectController {
       };
     }
 
-    const isPagination =
-      query?.page !== undefined && query?.pageSize !== undefined;
+    const isPagination = query?.page !== undefined && query?.pageSize !== undefined;
 
     const [total, projects] = await Promise.all([
       prisma.project.count({ where: whereCondition }),
@@ -104,12 +98,7 @@ export class ProjectController {
       },
     });
 
-    log.info(
-      'project',
-      'Created new project: %s with projectDir: %s',
-      project.name,
-      project.projectDir,
-    );
+    log.info('project', 'Created new project: %s with projectDir: %s', project.name, project.projectDir);
     return project;
   }
 

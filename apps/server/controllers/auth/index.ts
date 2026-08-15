@@ -1,9 +1,9 @@
-import type { Context } from 'koa';
 import { Controller, Get, Post } from '../../decorators/route.ts';
 import { gitea } from '../../libs/gitea.ts';
 import { log } from '../../libs/logger.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { loginSchema } from './dto.ts';
+import type { Context } from 'koa';
 
 @Controller('/auth')
 export class AuthController {
@@ -22,8 +22,7 @@ export class AuthController {
       return ctx.session.user;
     }
     const { code } = loginSchema.parse(ctx.request.body);
-    const { access_token, refresh_token, expires_in } =
-      await gitea.getToken(code);
+    const { access_token, refresh_token, expires_in } = await gitea.getToken(code);
     const giteaAuth = {
       access_token,
       refresh_token,

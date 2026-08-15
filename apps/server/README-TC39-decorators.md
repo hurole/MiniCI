@@ -20,7 +20,6 @@ import { BusinessError } from '../middlewares/exception.ts';
 
 @Controller('/api-prefix') // 控制器路由前缀
 export class MyController {
-
   @Get('/users')
   async getUsers(ctx: Context) {
     // 直接返回数据，自动包装成统一响应格式
@@ -59,7 +58,7 @@ export class MyController {
 this.routeScanner.registerControllers([
   ApplicationController,
   UserController,
-  MyController  // 添加你的控制器
+  MyController, // 添加你的控制器
 ]);
 ```
 
@@ -116,10 +115,10 @@ export class ApiController {
 ```json
 {
   "compilerOptions": {
-    "experimentalDecorators": false,  // 关闭实验性装饰器
-    "emitDecoratorMetadata": false,   // 关闭元数据发射
-    "target": "ES2022",               // 目标 ES2022+
-    "useDefineForClassFields": false  // 兼容装饰器行为
+    "experimentalDecorators": false, // 关闭实验性装饰器
+    "emitDecoratorMetadata": false, // 关闭元数据发射
+    "target": "ES2022", // 目标 ES2022+
+    "useDefineForClassFields": false // 兼容装饰器行为
   }
 }
 ```
@@ -153,7 +152,7 @@ export class ApiController {
 {
   "code": 0,
   "message": "操作成功",
-  "data": { /* 控制器返回的数据 */ },
+  "data": {/* 控制器返回的数据 */},
   "timestamp": 1693478400000
 }
 ```

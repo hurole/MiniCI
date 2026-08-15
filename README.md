@@ -15,16 +15,18 @@ MiniCI 是一个全栈 TypeScript 项目，旨在提供简单、高效的自动�
 - **现代化前端**: 基于 React 19、Rsbuild 和 Arco Design 构建的响应式 UI。
 - **高性能后端**: 使用 Node.js + Koa 框架，配合 Prisma ORM 操作 SQLite 数据库。
 - **类型安全**: 全链路 TypeScript 支持，严格的类型检查。
-- **工程化规范**: 集成 Biome 进行代码 Lint 和格式化，统一的代码风格。
+- **工程化规范**: 集成 oxlint 和 oxfmt 进行代码 Lint 和格式化，统一的代码风格。
 
 ## 🛠 技术栈
 
 ### Core
+
 - **包管理器**: [pnpm](https://pnpm.io/) (Workspaces)
 - **语言**: TypeScript (Strict Mode)
-- **工具链**: [Biome](https://biomejs.dev/) (Linting & Formatting)
+- **工具链**: [oxlint](https://oxc.rs/) (Linting) & [oxfmt](https://oxc.rs/) (Formatting, `@fka/oxfmt-config`)
 
 ### Frontend (`apps/web`)
+
 - **框架**: React 19
 - **构建工具**: Rsbuild
 - **UI 组件库**: Arco Design
@@ -33,6 +35,7 @@ MiniCI 是一个全栈 TypeScript 项目，旨在提供简单、高效的自动�
 - **路由**: React Router v7
 
 ### Backend (`apps/server`)
+
 - **运行时**: Node.js
 - **Web 框架**: Koa
 - **架构模式**: Controller-Service-Repository (Custom Decorators)
@@ -116,7 +119,8 @@ MiniCI/
 ├── .specify/              # AI Agent 记忆与宪法
 ├── package.json
 ├── pnpm-workspace.yaml
-└── biome.json             # 代码规范配置
+├── .oxlintrc.json         # oxlint 规范配置
+└── oxfmt.config.ts        # oxfmt 格式化配置 (@fka/oxfmt-config)
 ```
 
 ## 🤝 开发规范
@@ -129,11 +133,11 @@ MiniCI/
 2.  **后端架构**: 必须使用 `.ts` 扩展名导入，遵循 CSR 模式，Controller 禁止使用 try/catch（由中间件统一捕获）。
 3.  **前端现代化**: 仅使用函数式组件 + Hooks。类型定义必须提取到 `types.ts`。引入模块优先使用路径别名（如 `@components/*`）。
 4.  **无测试策略**: 本项目目前**不包含**单元测试基础设施，请勿编写 `*.test.ts` 文件。
-5.  **代码风格**: 提交前请确保通过 Biome 检查。
+5.  **代码风格**: 提交前请确保通过 oxlint 和 oxfmt 检查。
 
 ```bash
-# Web 端格式化与检查
-cd apps/web && pnpm check
+# 全量代码格式化与检查
+pnpm check
 ```
 
 ## 📄 License

@@ -1,6 +1,6 @@
+import { log } from '../libs/logger.ts';
 import { PipelineRunner } from '../runners/index.ts';
 import { prisma } from './prisma.ts';
-import { log } from '../libs/logger.ts';
 
 const TAG = 'Queue';
 // 存储正在运行的部署任务
@@ -136,19 +136,13 @@ export class ExecutionQueue {
         },
       });
 
-      log.info(
-        TAG,
-        `Found ${pendingDeployments.length} pending deployments in polling`,
-      );
+      log.info(TAG, `Found ${pendingDeployments.length} pending deployments in polling`);
 
       // 检查这些任务是否已经在队列中，如果没有则添加
       for (const deployment of pendingDeployments) {
         // 检查是否已经在运行队列中
         if (!runningDeployments.has(deployment.id)) {
-          log.info(
-            TAG,
-            `Adding deployment ${deployment.id} to queue from polling`,
-          );
+          log.info(TAG, `Adding deployment ${deployment.id} to queue from polling`);
           await this.addTask(deployment.id, deployment.pipelineId);
         }
       }
@@ -162,10 +156,7 @@ export class ExecutionQueue {
    * @param deploymentId 部署ID
    * @param pipelineId 流水线ID
    */
-  public async addTask(
-    deploymentId: number,
-    pipelineId: number,
-  ): Promise<void> {
+  public async addTask(deploymentId: number, pipelineId: number): Promise<void> {
     // 检查是否已经在运行队列中
     if (runningDeployments.has(deploymentId)) {
       log.info(TAG, `Deployment ${deploymentId} is already queued or running`);
@@ -207,7 +198,7 @@ export class ExecutionQueue {
       }
 
       // 添加一个小延迟以避免过度占用资源
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     this.isProcessing = false;
@@ -218,10 +209,7 @@ export class ExecutionQueue {
    * @param deploymentId 部署ID
    * @param pipelineId 流水线ID
    */
-  private async executePipeline(
-    deploymentId: number,
-    pipelineId: number,
-  ): Promise<void> {
+  private async executePipeline(deploymentId: number, pipelineId: number): Promise<void> {
     try {
       const deployment = await prisma.deployment.findUnique({
         where: { id: deploymentId },

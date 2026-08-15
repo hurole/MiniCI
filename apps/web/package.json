@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "rsbuild build",
-    "check": "biome check --write",
+    "check": "oxlint && oxfmt --check",
     "dev": "rsbuild dev",
-    "format": "biome format --write",
+    "fmt": "oxfmt",
+    "lint": "oxlint",
     "preview": "rsbuild preview"
   },
   "dependencies": {

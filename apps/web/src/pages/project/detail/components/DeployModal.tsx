@@ -1,17 +1,10 @@
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
 import { formatDateTime } from '@utils/time';
 import { useCallback, useEffect, useState } from 'react';
-import type { Branch, Commit, DeployModalProps, EnvPreset } from '../../types';
 import { detailService } from '../service';
+import type { Branch, Commit, DeployModalProps, EnvPreset } from '../../types';
 
-function DeployModal({
-  visible,
-  onCancel,
-  onOk,
-  pipelines,
-  projectId,
-  project,
-}: DeployModalProps) {
+function DeployModal({ visible, onCancel, onOk, pipelines, projectId, project }: DeployModalProps) {
   const [form] = Form.useForm();
   const [branches, setBranches] = useState<Branch[]>([]);
   const [commits, setCommits] = useState<Commit[]>([]);
@@ -40,16 +33,11 @@ function DeployModal({
     async (branch: string, currentPage = 1) => {
       try {
         setLoading(true);
-        const data = await detailService.getCommits(
-          projectId,
-          branch,
-          currentPage,
-          10,
-        );
+        const data = await detailService.getCommits(projectId, branch, currentPage, 10);
         if (currentPage === 1) {
           setCommits(data);
         } else {
-          setCommits((prev) => [...prev, ...data]);
+          setCommits(prev => [...prev, ...data]);
         }
         setHasMore(data.length === 10);
       } catch (error) {
@@ -108,10 +96,8 @@ function DeployModal({
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
-      const selectedCommit = commits.find((c) => c.sha === values.commitHash);
-      const selectedPipeline = pipelines.find(
-        (p) => p.id === values.pipelineId,
-      );
+      const selectedCommit = commits.find(c => c.sha === values.commitHash);
+      const selectedPipeline = pipelines.find(p => p.id === values.pipelineId);
 
       if (!selectedCommit || !selectedPipeline) {
         return;
@@ -156,22 +142,15 @@ function DeployModal({
       onCancel={onCancel}
       autoFocus={false}
       focusLock={true}
-      style={{ width: 650 }}
-    >
+      style={{ width: 650 }}>
       <Form form={form} layout="vertical">
         {/* 基本参数 */}
-        <div className="mb-4 pb-4 border-b border-gray-200">
-          <div className="text-sm font-semibold text-gray-700 mb-3">
-            基本参数
-          </div>
+        <div className="mb-4 border-b border-gray-200 pb-4">
+          <div className="mb-3 text-sm font-semibold text-gray-700">基本参数</div>
 
-          <Form.Item
-            label="选择流水线"
-            field="pipelineId"
-            rules={[{ required: true, message: '请选择流水线' }]}
-          >
+          <Form.Item label="选择流水线" field="pipelineId" rules={[{ required: true, message: '请选择流水线' }]}>
             <Select placeholder="请选择流水线">
-              {pipelines.map((pipeline) => (
+              {pipelines.map(pipeline => (
                 <Select.Option key={pipeline.id} value={pipeline.id}>
                   {pipeline.name}
                 </Select.Option>
@@ -179,17 +158,9 @@ function DeployModal({
             </Select>
           </Form.Item>
 
-          <Form.Item
-            label="选择分支"
-            field="branch"
-            rules={[{ required: true, message: '请选择分支' }]}
-          >
-            <Select
-              placeholder="请选择分支"
-              loading={branchLoading}
-              onChange={handleBranchChange}
-            >
-              {branches.map((branch) => (
+          <Form.Item label="选择分支" field="branch" rules={[{ required: true, message: '请选择分支' }]}>
+            <Select placeholder="请选择分支" loading={branchLoading} onChange={handleBranchChange}>
+              {branches.map(branch => (
                 <Select.Option key={branch.name} value={branch.name}>
                   {branch.name}
                 </Select.Option>
@@ -197,18 +168,12 @@ function DeployModal({
             </Select>
           </Form.Item>
 
-          <Form.Item
-            label="选择提交"
-            field="commitHash"
-            rules={[{ required: true, message: '请选择提交记录' }]}
-          >
+          <Form.Item label="选择提交" field="commitHash" rules={[{ required: true, message: '请选择提交记录' }]}>
             <Select
               placeholder="请选择提交记录"
               loading={loading}
               renderFormat={(option: any) => {
-                const commit = commits.find(
-                  (item) => item.sha === option?.value,
-                );
+                const commit = commits.find(item => item.sha === option?.value);
                 return commit ? commit.sha.substring(0, 7) : '';
               }}
               onPopupScroll={(event: any) => {
@@ -216,25 +181,16 @@ function DeployModal({
                 if (scrollTop + clientHeight >= scrollHeight - 10) {
                   loadMoreCommits();
                 }
-              }}
-            >
-              {commits.map((commit) => (
+              }}>
+              {commits.map(commit => (
                 <Select.Option key={commit.sha} value={commit.sha}>
                   <div className="flex flex-col py-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono font-medium">
-                        {commit.sha.substring(0, 7)}
-                      </span>
-                      <span className="text-gray-500 text-xs">
-                        {formatDateTime(commit.commit.author.date)}
-                      </span>
+                      <span className="font-mono font-medium">{commit.sha.substring(0, 7)}</span>
+                      <span className="text-xs text-gray-500">{formatDateTime(commit.commit.author.date)}</span>
                     </div>
-                    <div className="text-gray-600 text-sm truncate">
-                      {commit.commit.message}
-                    </div>
-                    <div className="text-gray-400 text-xs">
-                      {commit.commit.author.name}
-                    </div>
+                    <div className="truncate text-sm text-gray-600">{commit.commit.message}</div>
+                    <div className="text-xs text-gray-400">{commit.commit.author.name}</div>
                   </div>
                 </Select.Option>
               ))}
@@ -245,24 +201,17 @@ function DeployModal({
         {/* 环境变量预设 */}
         {envPresets.length > 0 && (
           <div>
-            <div className="text-sm font-semibold text-gray-700 mb-3">
-              环境变量
-            </div>
-            {envPresets.map((preset) => {
+            <div className="mb-3 text-sm font-semibold text-gray-700">环境变量</div>
+            {envPresets.map(preset => {
               if (preset.type === 'select' && preset.options) {
                 return (
                   <Form.Item
                     key={preset.key}
                     label={preset.label}
                     field={preset.key}
-                    rules={
-                      preset.required
-                        ? [{ required: true, message: `请选择${preset.label}` }]
-                        : []
-                    }
-                  >
+                    rules={preset.required ? [{ required: true, message: `请选择${preset.label}` }] : []}>
                     <Select placeholder={`请选择${preset.label}`}>
-                      {preset.options.map((option) => (
+                      {preset.options.map(option => (
                         <Select.Option key={option.value} value={option.value}>
                           {option.label}
                         </Select.Option>
@@ -278,18 +227,9 @@ function DeployModal({
                     key={preset.key}
                     label={preset.label}
                     field={preset.key}
-                    rules={
-                      preset.required
-                        ? [{ required: true, message: `请选择${preset.label}` }]
-                        : []
-                    }
-                  >
-                    <Select
-                      mode="multiple"
-                      placeholder={`请选择${preset.label}`}
-                      allowClear
-                    >
-                      {preset.options.map((option) => (
+                    rules={preset.required ? [{ required: true, message: `请选择${preset.label}` }] : []}>
+                    <Select mode="multiple" placeholder={`请选择${preset.label}`} allowClear>
+                      {preset.options.map(option => (
                         <Select.Option key={option.value} value={option.value}>
                           {option.label}
                         </Select.Option>
@@ -305,12 +245,7 @@ function DeployModal({
                     key={preset.key}
                     label={preset.label}
                     field={preset.key}
-                    rules={
-                      preset.required
-                        ? [{ required: true, message: `请输入${preset.label}` }]
-                        : []
-                    }
-                  >
+                    rules={preset.required ? [{ required: true, message: `请输入${preset.label}` }] : []}>
                     <Input placeholder={`请输入${preset.label}`} />
                   </Form.Item>
                 );

@@ -1,8 +1,8 @@
 import { Message, Notification } from '@arco-design/web-react';
 import { useGlobalStore } from '@stores/global';
 import { net } from '@utils';
-import type { NavigateFunction } from 'react-router';
 import type { AuthURL, User } from './types';
+import type { NavigateFunction } from 'react-router';
 
 class LoginService {
   async getAuthUrl() {

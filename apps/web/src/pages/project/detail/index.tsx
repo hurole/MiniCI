@@ -12,16 +12,12 @@ function ProjectDetailPage() {
   const [deployModalVisible, setDeployModalVisible] = useState(false);
 
   return (
-    <div className="p-6 flex flex-col h-full">
+    <div className="flex h-full flex-col p-6">
       <div className="mb-6 flex items-center justify-between">
         <Typography.Title heading={2} className="!m-0 !text-gray-900">
           {detail?.name}
         </Typography.Title>
-        <Button
-          type="primary"
-          icon={<IconPlayArrow />}
-          onClick={() => setDeployModalVisible(true)}
-        >
+        <Button type="primary" icon={<IconPlayArrow />} onClick={() => setDeployModalVisible(true)}>
           部署
         </Button>
       </div>

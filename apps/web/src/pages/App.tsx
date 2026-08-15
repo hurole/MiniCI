@@ -3,7 +3,6 @@ import Login from '@pages/login';
 import ProjectDetail from '@pages/project/detail';
 import ProjectList from '@pages/project/list';
 import { Navigate, Route, Routes } from 'react-router';
-
 import '@styles/index.css';
 const App = () => {
   return (

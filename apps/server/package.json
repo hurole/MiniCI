@@ -2,14 +2,14 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch ./app.ts",
     "build": "tsc"
   },
-  "keywords": [],
-  "type": "module",
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@koa/router": "^14.0.0",

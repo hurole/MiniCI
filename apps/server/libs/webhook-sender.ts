@@ -21,11 +21,7 @@ export class WebhookSender {
    * @param payload Webhook 负载数据
    * @param timeoutMs 请求超时时间（毫秒，默认 10000ms）
    */
-  async send(
-    url: string,
-    payload: WebhookPayload,
-    timeoutMs: number = this.DEFAULT_TIMEOUT_MS,
-  ): Promise<void> {
+  async send(url: string, payload: WebhookPayload, timeoutMs: number = this.DEFAULT_TIMEOUT_MS): Promise<void> {
     if (!url) {
       log.info(this.TAG, 'Webhook URL is empty, skipping.');
       return;
@@ -47,9 +43,7 @@ export class WebhookSender {
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Webhook request failed with status: ${response.status} ${response.statusText}`,
-        );
+        throw new Error(`Webhook request failed with status: ${response.status} ${response.statusText}`);
       }
 
       log.info(this.TAG, 'Webhook sent successfully.');
@@ -59,11 +53,7 @@ export class WebhookSender {
         throw new Error(`Webhook request timed out after ${timeoutMs}ms`);
       }
 
-      log.error(
-        this.TAG,
-        'Failed to send webhook: %s',
-        (error as Error).message,
-      );
+      log.error(this.TAG, 'Failed to send webhook: %s', (error as Error).message);
       throw error;
     } finally {
       clearTimeout(timeoutId);
@@ -73,11 +63,7 @@ export class WebhookSender {
   /**
    * 构建部署失败事件的负载数据
    */
-  buildFailurePayload(
-    projectName: string,
-    deploymentId: number,
-    errorMessage: string,
-  ): WebhookPayload {
+  buildFailurePayload(projectName: string, deploymentId: number, errorMessage: string): WebhookPayload {
     return {
       msg_type: 'text',
       content: {

@@ -1,10 +1,10 @@
-import type { Context } from 'koa';
 import { Controller, Get } from '../../decorators/route.ts';
 import { gitea } from '../../libs/gitea.ts';
 import { log } from '../../libs/logger.ts';
 import { prisma } from '../../libs/prisma.ts';
 import { BusinessError } from '../../middlewares/exception.ts';
 import { getBranchesQuerySchema, getCommitsQuerySchema } from './dto.ts';
+import type { Context } from 'koa';
 
 const TAG = 'Git';
 
@@ -12,9 +12,7 @@ const TAG = 'Git';
 export class GitController {
   @Get('/commits')
   async getCommits(ctx: Context) {
-    const { projectId, branch, page, limit } = getCommitsQuerySchema.parse(
-      ctx.query,
-    );
+    const { projectId, branch, page, limit } = getCommitsQuerySchema.parse(ctx.query);
 
     const project = await prisma.project.findFirst({
       where: {
@@ -38,22 +36,11 @@ export class GitController {
     log.debug(TAG, 'Access token present: %s', !!accessToken);
 
     if (!accessToken) {
-      throw new BusinessError(
-        'Gitea access token not found. Please login again.',
-        1004,
-        401,
-      );
+      throw new BusinessError('Gitea access token not found. Please login again.', 1004, 401);
     }
 
     try {
-      const commits = await gitea.getCommits(
-        owner,
-        repo,
-        accessToken,
-        branch,
-        page,
-        limit,
-      );
+      const commits = await gitea.getCommits(owner, repo, accessToken, branch, page, limit);
       return commits;
     } catch (error) {
       log.error(TAG, 'Failed to fetch commits:', error);
@@ -81,11 +68,7 @@ export class GitController {
     const accessToken = ctx.session?.gitea?.access_token;
 
     if (!accessToken) {
-      throw new BusinessError(
-        'Gitea access token not found. Please login again.',
-        1004,
-        401,
-      );
+      throw new BusinessError('Gitea access token not found. Please login again.', 1004, 401);
     }
 
     try {

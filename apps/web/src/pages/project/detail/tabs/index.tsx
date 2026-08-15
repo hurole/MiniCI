@@ -1,10 +1,5 @@
 import { Space, Tabs } from '@arco-design/web-react';
-import {
-  IconCode,
-  IconCommand,
-  IconHistory,
-  IconSettings,
-} from '@arco-design/web-react/icon';
+import { IconCode, IconCommand, IconHistory, IconSettings } from '@arco-design/web-react/icon';
 import { useMemo, useState } from 'react';
 import { DeployRecordsTab } from './DeployRecordsTab';
 import { EnvPresetsTab } from './EnvPresetsTab';
@@ -56,19 +51,13 @@ function ProjectTabs() {
   }, []);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md flex-1 min-h-0 flex flex-col">
-      <Tabs
-        type="line"
-        size="large"
-        activeTab={activeTab}
-        onChange={setActiveTab}
-        className="pb-4"
-      >
-        {tabTitles.map((tab) => (
+    <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-6 shadow-md">
+      <Tabs type="line" size="large" activeTab={activeTab} onChange={setActiveTab} className="pb-4">
+        {tabTitles.map(tab => (
           <Tabs.TabPane key={tab.key} title={tab.title} />
         ))}
       </Tabs>
-      <div className="flex-1 min-h-0">
+      <div className="min-h-0 flex-1">
         {activeTab === 'deployRecords' && <DeployRecordsTab />}
         {activeTab === 'pipeline' && <PipelineTab />}
         {activeTab === 'settings' && <SettingsTab />}

@@ -1,9 +1,9 @@
 import { $ } from 'zx';
-import type { Deployment, Project, Step } from '../generated/client.ts';
 import { GitManager } from '../libs/git-manager.ts';
 import { log } from '../libs/logger.ts';
 import { prisma } from '../libs/prisma.ts';
 import { WebhookSender } from '../libs/webhook-sender.ts';
+import type { Deployment, Project, Step } from '../generated/client.ts';
 
 export class PipelineRunner {
   private readonly TAG = 'PipelineRunner';
@@ -61,9 +61,7 @@ export class PipelineRunner {
         const progress = `[${index + 1}/${pipeline.steps.length}]`;
 
         // 记录开始执行步骤的日志
-        const startLog = this.addTimestamp(
-          `${progress} 开始执行: ${step.name}`,
-        );
+        const startLog = this.addTimestamp(`${progress} 开始执行: ${step.name}`);
         logs += startLog;
 
         // 执行步骤
@@ -92,11 +90,7 @@ export class PipelineRunner {
       const errorMsg = this.addTimestamp(`Error: ${(error as Error).message}`);
       logs += errorMsg;
 
-      log.error(
-        this.TAG,
-        'Pipeline execution failed: %s',
-        (error as Error).message,
-      );
+      log.error(this.TAG, 'Pipeline execution failed: %s', (error as Error).message);
 
       // 记录错误日志
       await prisma.deployment.update({
@@ -120,11 +114,7 @@ export class PipelineRunner {
           await this.webhookSender.send(project.webhookUrl, payload);
         }
       } catch (webhookError) {
-        log.error(
-          this.TAG,
-          'Failed to trigger webhook: %s',
-          (webhookError as Error).message,
-        );
+        log.error(this.TAG, 'Failed to trigger webhook: %s', (webhookError as Error).message);
         // webhook错误不应影响部署状态（部署已经失败了）
       }
 
@@ -155,23 +145,14 @@ export class PipelineRunner {
 
       // 不是git仓库，初始话为git仓库，然后添加remote并拉取代码
       logs += this.addTimestamp('确保Git仓库存在...\n');
-      await GitManager.ensureGitRepository(
-        project.projectDir,
-        project.repository,
-      );
+      await GitManager.ensureGitRepository(project.projectDir, project.repository);
 
       // 拉取代码
       logs += this.addTimestamp(`拉取指定代码...\n`);
-      await GitManager.pullRepository(
-        project.projectDir,
-        this.deployment.branch,
-        this.deployment.commitHash,
-      );
+      await GitManager.pullRepository(project.projectDir, this.deployment.branch, this.deployment.commitHash);
       logs += this.addTimestamp('工作目录准备完成。\n');
     } catch (error) {
-      logs += this.addTimestamp(
-        `准备工作目录失败: ${(error as Error).message}`,
-      );
+      logs += this.addTimestamp(`准备工作目录失败: ${(error as Error).message}`);
       throw error;
     }
 
@@ -193,11 +174,7 @@ export class PipelineRunner {
    * @param step 步骤对象
    * @param envVars 环境变量
    */
-  private async executeStep(
-    step: Step,
-    envVars: Record<string, string>,
-    project: Project,
-  ): Promise<string> {
+  private async executeStep(step: Step, envVars: Record<string, string>, project: Project): Promise<string> {
     let logs = '';
 
     // 使用zx执行脚本，设置项目目录为工作目录和环境变量

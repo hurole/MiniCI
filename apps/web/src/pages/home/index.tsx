@@ -12,18 +12,15 @@ function Home() {
 
   return (
     <Layout className="h-screen">
-      <Layout.Header className="h-14 border-b-gray-100 border-b-[1px] flex items-center justify-between px-4">
+      <Layout.Header className="flex h-14 items-center justify-between border-b-[1px] border-b-gray-100 px-4">
         <button
-          className="flex flex-row items-center cursor-pointer bg-transparent border-none p-0 outline-none"
+          className="flex cursor-pointer flex-row items-center border-none bg-transparent p-0 outline-none"
           onClick={() => navigate('/project')}
-          type="button"
-        >
+          type="button">
           <Logo className="h-8 w-8" aria-label="MiniCI" />
-          <h2 className="ml-3 text-lg font-medium m-0 text-gray-800">
-            Mini CI
-          </h2>
+          <h2 className="m-0 ml-3 text-lg font-medium text-gray-800">Mini CI</h2>
         </button>
-        <div className="flex items-center justify-end h-full">
+        <div className="flex h-full items-center justify-end">
           <Dropdown
             droplist={
               <Menu className="px-3">
@@ -32,26 +29,20 @@ function Home() {
                   <span className="ml-2">退出登录</span>
                 </Menu.Item>
               </Menu>
-            }
-          >
-            <div className="p-2 rounded-xl cursor-pointer flex items-center hover:bg-gray-100">
-              <Avatar size={28} className="border-gray-300 border border-solid">
-                <img
-                  alt="avatar"
-                  src={globalStore.user?.avatar_url.replace('https', 'http')}
-                />
+            }>
+            <div className="flex cursor-pointer items-center rounded-xl p-2 hover:bg-gray-100">
+              <Avatar size={28} className="border border-solid border-gray-300">
+                <img alt="avatar" src={globalStore.user?.avatar_url.replace('https', 'http')} />
               </Avatar>
-              <span className="ml-2 font-semibold text-gray-500">
-                {globalStore.user?.username}
-              </span>
+              <span className="ml-2 font-semibold text-gray-500">{globalStore.user?.username}</span>
             </div>
           </Dropdown>
         </div>
       </Layout.Header>
-      <Layout.Content className="bg-gray-100 min-h-0">
-        <div className="h-full flex flex-col">
+      <Layout.Content className="min-h-0 bg-gray-100">
+        <div className="flex h-full flex-col">
           <PageBreadcrumb />
-          <div className="flex-1 min-h-0">
+          <div className="min-h-0 flex-1">
             <Outlet />
           </div>
         </div>

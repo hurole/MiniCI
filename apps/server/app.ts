@@ -22,7 +22,7 @@ async function initializeApp() {
 }
 
 // 启动应用
-initializeApp().catch((error) => {
+initializeApp().catch(error => {
   log.error('APP', 'Failed to start application:', error);
   process.exit(1);
 });

@@ -8,9 +8,7 @@ class ProjectService {
       url: '/api/projects',
       params,
     });
-    return Array.isArray(data)
-      ? { list: data, page: 1, pageSize: data.length, total: data.length }
-      : data;
+    return Array.isArray(data) ? { list: data, page: 1, pageSize: data.length, total: data.length } : data;
   }
 
   async show(id: string) {
@@ -21,11 +19,7 @@ class ProjectService {
     return data;
   }
 
-  async create(project: {
-    name: string;
-    description?: string;
-    repository: string;
-  }) {
+  async create(project: { name: string; description?: string; repository: string }) {
     const { data } = await net.request<Project>({
       method: 'POST',
       url: '/api/projects',
@@ -34,10 +28,7 @@ class ProjectService {
     return data;
   }
 
-  async update(
-    id: string,
-    project: Partial<{ name: string; description: string; repository: string }>,
-  ) {
+  async update(id: string, project: Partial<{ name: string; description: string; repository: string }>) {
     const { data } = await net.request<Project>({
       method: 'PUT',
       url: `/api/projects/${id}`,
