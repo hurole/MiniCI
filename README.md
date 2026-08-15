@@ -1,145 +1,159 @@
 # MiniCI
 
-> 一个基于 Monorepo 架构的轻量级持续集成（CI）系统。
+<p align="center">
+  <strong>A lightweight, modern continuous integration (CI) and deployment platform built on a TypeScript monorepo.</strong>
+</p>
 
-![License](https://img.shields.io/badge/license-ISC-blue.svg)
-![TypeScript](https://img.shields.io/badge/language-TypeScript-blue.svg)
-![React](https://img.shields.io/badge/React-19-61dafb.svg)
-![Koa](https://img.shields.io/badge/Server-Koa-green.svg)
-![Prisma](https://img.shields.io/badge/ORM-Prisma-white.svg)
+<p align="center">
+  <a href="./README.md">English</a> •
+  <a href="./README.zh-CN.md">简体中文</a>
+</p>
 
-MiniCI 是一个全栈 TypeScript 项目，旨在提供简单、高效的自动化构建与部署流程。项目采用 `pnpm` workspaces 管理，实现了前后端代码的严格分离与高效协作。
+<p align="center">
+  <img src="https://img.shields.io/badge/license-ISC-blue.svg" alt="License" />
+  <img src="https://img.shields.io/badge/Node.js-20%2B-green.svg" alt="Node.js" />
+  <img src="https://img.shields.io/badge/pnpm-10%2B-orange.svg" alt="pnpm" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/React-19-61dafb.svg" alt="React 19" />
+  <img src="https://img.shields.io/badge/Server-Koa-green.svg" alt="Koa" />
+  <img src="https://img.shields.io/badge/ORM-Prisma-white.svg" alt="Prisma" />
+</p>
 
-## ✨ 特性
+---
 
-- **现代化前端**: 基于 React 19、Rsbuild 和 Arco Design 构建的响应式 UI。
-- **高性能后端**: 使用 Node.js + Koa 框架，配合 Prisma ORM 操作 SQLite 数据库。
-- **类型安全**: 全链路 TypeScript 支持，严格的类型检查。
-- **工程化规范**: 集成 oxlint 和 oxfmt 进行代码 Lint 和格式化，统一的代码风格。
+## 📖 Introduction
 
-## 🛠 技术栈
+**MiniCI** is an end-to-end continuous integration and deployment management system. Managed via `pnpm` workspaces, it pairs a fast Node.js/Koa backend with a responsive React 19 single-page application to provide an intuitive, flexible pipeline execution engine.
 
-### Core
+## ✨ Features
 
-- **包管理器**: [pnpm](https://pnpm.io/) (Workspaces)
-- **语言**: TypeScript (Strict Mode)
-- **工具链**: [oxlint](https://oxc.rs/) (Linting) & [oxfmt](https://oxc.rs/) (Formatting, `@fka/oxfmt-config`)
+- ⚡ **Modern Frontend**: React 19, Rsbuild, Arco Design, TailwindCSS, and atomic Zustand state management.
+- 🚀 **Robust Backend**: Node.js + Koa 2 with TC39 Stage 3 routing decorators and CSR architecture.
+- 🗄️ **Data Persistence**: Prisma ORM with SQLite backend and built-in migration management.
+- 🔄 **Git & OAuth Integration**: First-class support for Gitea OAuth authentication, repository cloning, and branch/commit tracking.
+- 🛠️ **Unified Toolchain**: Ultra-fast linting and formatting powered by [oxlint](https://oxc.rs/) and [oxfmt](https://oxc.rs/) (`@fka/oxfmt-config`).
+- 🔒 **Type-Safe**: Full-stack TypeScript strictly enforced throughout the monorepo.
 
-### Frontend (`apps/web`)
+## 🛠 Tech Stack
 
-- **框架**: React 19
-- **构建工具**: Rsbuild
-- **UI 组件库**: Arco Design
-- **样式**: TailwindCSS
-- **状态管理**: Zustand (Atomic Selectors)
-- **路由**: React Router v7
+| Domain                            | Technologies                                                                                                                                                                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Monorepo & Package Management** | [pnpm](https://pnpm.io/) Workspaces, [TypeScript](https://www.typescriptlang.org/)                                                                                                                                                   |
+| **Linting & Formatting**          | [oxlint](https://oxc.rs/), [oxfmt](https://oxc.rs/) (`@fka/oxfmt-config`)                                                                                                                                                            |
+| **Frontend (`apps/web`)**         | [React 19](https://react.dev/), [Rsbuild](https://rsbuild.dev/), [Arco Design](https://arco.design/), [TailwindCSS](https://tailwindcss.com/), [Zustand](https://zustand.docs.pmnd.rs/), [React Router v7](https://reactrouter.com/) |
+| **Backend (`apps/server`)**       | [Node.js](https://nodejs.org/), [Koa](https://koajs.com/), [Prisma](https://www.prisma.io/) (SQLite), [Pino](https://getpino.io/), [zx](https://google.github.io/zx/)                                                                |
 
-### Backend (`apps/server`)
+## 📂 Project Structure
 
-- **运行时**: Node.js
-- **Web 框架**: Koa
-- **架构模式**: Controller-Service-Repository (Custom Decorators)
-- **ORM**: Prisma (SQLite)
-- **日志**: Pino
+```text
+MiniCI/
+├── apps/
+│   ├── server/             # Backend Koa application
+│   │   ├── controllers/    # API Controllers
+│   │   ├── decorators/     # TC39 Stage 3 route decorators (@Get, @Post, etc.)
+│   │   ├── libs/           # Utility libraries (Git, Execution Queue, Webhook, etc.)
+│   │   ├── middlewares/    # Koa middleware stack
+│   │   ├── prisma/         # Prisma schema and SQLite database
+│   │   └── .env.example    # Server environment template
+│   └── web/                # Frontend React application
+│       └── src/
+│           ├── components/ # Shared UI components
+│           ├── pages/      # Route views (pages, sub-components, services)
+│           ├── stores/     # Zustand state stores
+│           └── utils/      # HTTP client and helpers
+├── .oxlintrc.json          # Oxlint configuration
+├── oxfmt.config.ts         # Oxfmt configuration
+├── package.json            # Root workspace scripts & dev tools
+└── pnpm-workspace.yaml     # pnpm workspace definition
+```
 
-## 🚀 快速开始
+## 🚀 Getting Started
 
-### 前置要求
+### Prerequisites
 
-- Node.js (推荐 v20+)
-- pnpm (本项目强制使用 pnpm)
+- [Node.js](https://nodejs.org/) (v20.0.0 or higher recommended)
+- [pnpm](https://pnpm.io/) (`corepack enable` or `npm install -g pnpm`)
 
-### 1. 安装依赖
-
-在根目录下运行：
+### 1. Clone & Install Dependencies
 
 ```bash
+git clone https://github.com/hurole/MiniCI.git
+cd MiniCI
 pnpm install
 ```
 
-### 2. 环境配置
+### 2. Environment Configuration
 
-确保根目录或各应用目录下存在 `.env` 配置文件。
+Copy the example environment configuration in `apps/server`:
 
-**服务端 (`apps/server/.env`) 示例:**
+```bash
+cp apps/server/.env.example apps/server/.env
+```
+
+Edit `apps/server/.env` to configure your database path and Gitea OAuth credentials:
 
 ```env
-# 基础配置
+# Server
 PORT=3001
 NODE_ENV=development
 
-# 数据库 (SQLite)
-DATABASE_URL="file:./data/dev.db"
+# SQLite Database
+DATABASE_URL="file:./prisma/data/dev.db"
 
-# Gitea OAuth 配置 (用于登录)
+# Gitea OAuth (for authentication & repository access)
 GITEA_URL="https://your-gitea-instance.com"
-GITEA_CLIENT_ID="your_client_id"
-GITEA_CLIENT_SECRET="your_client_secret"
-GITEA_REDIRECT_URI="http://localhost:3001/api/auth/callback"
+GITEA_CLIENT_ID="your_oauth_client_id"
+GITEA_CLIENT_SECRET="your_oauth_client_secret"
+GITEA_REDIRECT_URI="http://localhost:3000/login"
+
+# Logging & Workspace
+LOG_LEVEL="debug"
+PIPELINE_WORKSPACE="/tmp/minici/workspace"
 ```
 
-### 3. 数据库初始化
+### 3. Database Initialization
 
-初始化 SQLite 数据库并同步 Schema：
+Generate the Prisma client and push the schema to SQLite:
 
 ```bash
-# 生成 Prisma Client
+cd apps/server
 pnpm prisma generate
-
-# 推送数据库结构到 dev.db
 pnpm prisma db push
+cd ../..
 ```
 
-### 4. 启动开发服务器
+### 4. Run Development Servers
 
-并行启动前端和后端服务：
+Start both frontend and backend development servers concurrently:
 
 ```bash
 pnpm dev
 ```
 
-- **Web 端**: [http://localhost:3000](http://localhost:3000)
-- **服务端**: [http://localhost:3001](http://localhost:3001) (视具体配置而定)
+- **Web UI**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:3001](http://localhost:3001)
 
-## 📂 项目结构
+## 📜 Available Scripts
 
-```text
-MiniCI/
-├── apps/
-│   ├── server/            # 后端应用
-│   │   ├── controllers/   # 请求控制器
-│   │   ├── decorators/    # 路由装饰器 (@Get, @Post)
-│   │   ├── prisma/        # 数据库 Schema
-│   │   └── ...
-│   └── web/               # 前端应用
-│       ├── src/
-│       │   ├── pages/     # 页面视图 (含 components, service, types)
-│       │   ├── stores/    # Zustand 状态
-│       │   └── ...
-├── .specify/              # AI Agent 记忆与宪法
-├── package.json
-├── pnpm-workspace.yaml
-├── .oxlintrc.json         # oxlint 规范配置
-└── oxfmt.config.ts        # oxfmt 格式化配置 (@fka/oxfmt-config)
-```
+| Command                      | Description                                         |
+| ---------------------------- | --------------------------------------------------- |
+| `pnpm dev`                   | Starts all workspace applications in parallel       |
+| `pnpm lint`                  | Runs `oxlint` for fast static code analysis         |
+| `pnpm lint:fix`              | Automatically fixes lint issues with `oxlint --fix` |
+| `pnpm fmt`                   | Formats all code with `oxfmt`                       |
+| `pnpm fmt:check`             | Verifies code formatting across the repository      |
+| `pnpm check`                 | Runs full static check (`oxlint && oxfmt --check`)  |
+| `pnpm --filter web build`    | Builds the frontend production bundle               |
+| `pnpm --filter server build` | Compiles the backend TypeScript code                |
 
-## 🤝 开发规范
+## 🤝 Development Guidelines
 
-本项目遵循严格的代码宪法（Constitution），请在贡献代码前阅读 [AGENTS.md](./AGENTS.md)。
+Please refer to [AGENTS.md](./AGENTS.md) for code conventions, architectural patterns, and development workflow.
 
-### 核心原则
-
-1.  **Monorepo 严格性**: `server` 与 `web` 依赖隔离，禁止交叉引用。
-2.  **后端架构**: 必须使用 `.ts` 扩展名导入，遵循 CSR 模式，Controller 禁止使用 try/catch（由中间件统一捕获）。
-3.  **前端现代化**: 仅使用函数式组件 + Hooks。类型定义必须提取到 `types.ts`。引入模块优先使用路径别名（如 `@components/*`）。
-4.  **无测试策略**: 本项目目前**不包含**单元测试基础设施，请勿编写 `*.test.ts` 文件。
-5.  **代码风格**: 提交前请确保通过 oxlint 和 oxfmt 检查。
-
-```bash
-# 全量代码格式化与检查
-pnpm check
-```
+1. **Strict Monorepo Isolation**: Do not cross-import code between `server` and `web`.
+2. **ESM Imports**: Relative imports in the backend must include `.ts` extensions.
+3. **Format & Lint**: Ensure `pnpm check` passes before committing code.
 
 ## 📄 License
 
-[ISC](./package.json) © hurole
+This project is licensed under the [ISC License](./package.json).
