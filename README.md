@@ -1,4 +1,8 @@
-# MiniCI
+<p align="center">
+  <img src="./apps/web/src/assets/images/logo.svg" alt="MiniCI Logo" width="96" height="96" />
+</p>
+
+<h1 align="center">MiniCI</h1>
 
 <p align="center">
   <strong>A lightweight, modern continuous integration (CI) and deployment platform built on a TypeScript monorepo.</strong>

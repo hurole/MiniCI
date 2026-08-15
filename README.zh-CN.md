@@ -1,4 +1,8 @@
-# MiniCI
+<p align="center">
+  <img src="./apps/web/src/assets/images/logo.svg" alt="MiniCI Logo" width="96" height="96" />
+</p>
+
+<h1 align="center">MiniCI</h1>
 
 <p align="center">
   <strong>基于 TypeScript Monorepo 架构构建的现代化轻量级持续集成（CI）与自动化部署平台。</strong>
