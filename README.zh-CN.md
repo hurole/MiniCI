@@ -146,6 +146,20 @@ pnpm dev
 | `pnpm --filter web build`    | 构建前端生产环境包                             |
 | `pnpm --filter server build` | 编译服务端 TypeScript 代码                     |
 
+## 🗺️ 路线图 (Roadmap)
+
+- [x] **Gitea 平台集成**: OAuth2 授权登录、仓库列表浏览、分支与 Commit 动态获取。
+- [ ] **多代码托管平台支持**:
+  - [ ] GitHub OAuth 与 API 集成（仓库、分支、Commit、PR 等）。
+  - [ ] GitLab（自建版与 SaaS 版）API 集成。
+  - [ ] 通用 Git 托管平台适配器抽象层（`GitProvider` 接口）。
+- [ ] **Webhook 自动化触发**: 支持在代码 Push / Tag / PR 合并事件发生时自动触发流水线。
+- [ ] **多渠道通知**: 集成飞书/Lark、钉钉、企业微信、Slack、Discord 等通知通道。
+- [ ] **流水线能力演进**:
+  - [ ] 矩阵式多任务并发构建。
+  - [ ] Docker-in-Docker 隔离容器运行环境。
+  - [ ] 构建产物归档与构建缓存机制。
+
 ## 🤝 开发规范
 
 请在贡献代码前阅读 [AGENTS.md](./AGENTS.md) 了解详细的代码规范和架构设计。

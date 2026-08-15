@@ -146,6 +146,20 @@ pnpm dev
 | `pnpm --filter web build`    | Builds the frontend production bundle               |
 | `pnpm --filter server build` | Compiles the backend TypeScript code                |
 
+## 🗺️ Roadmap
+
+- [x] **Gitea Integration**: OAuth2 authentication, repository browsing, branch & commit discovery.
+- [ ] **Multi-Git Providers Support**:
+  - [ ] GitHub OAuth & API integration (Repositories, Branches, Commits, Pull Requests).
+  - [ ] GitLab self-hosted & SaaS integration.
+  - [ ] Custom Git provider adapter interface (`GitProvider` abstraction).
+- [ ] **Webhook Automation**: Trigger automated pipeline executions on Git push / tag / PR events.
+- [ ] **Notification Channels**: Lark/Feishu, DingTalk, WeChat Work, Slack, and Discord webhook integration.
+- [ ] **Pipeline Execution Enhancements**:
+  - [ ] Concurrent matrix builds.
+  - [ ] Docker-in-Docker isolated container execution environments.
+  - [ ] Artifacts archiving & cache management.
+
 ## 🤝 Development Guidelines
 
 Please refer to [AGENTS.md](./AGENTS.md) for code conventions, architectural patterns, and development workflow.
