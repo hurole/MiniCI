@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-ISC-blue.svg" alt="License" />
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
   <img src="https://img.shields.io/badge/Node.js-20%2B-green.svg" alt="Node.js" />
   <img src="https://img.shields.io/badge/pnpm-10%2B-orange.svg" alt="pnpm" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript" />
@@ -156,4 +156,4 @@ pnpm dev
 
 ## 📄 开源协议
 
-本项目基于 [ISC License](./package.json) 协议开源。
+本项目基于 [MIT License](./LICENSE) 协议开源。

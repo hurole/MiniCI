@@ -7,7 +7,7 @@
     "ark-ci",
     "ci"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "author": "hurole",
   "type": "module",
   "scripts": {

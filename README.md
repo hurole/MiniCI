@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-ISC-blue.svg" alt="License" />
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
   <img src="https://img.shields.io/badge/Node.js-20%2B-green.svg" alt="Node.js" />
   <img src="https://img.shields.io/badge/pnpm-10%2B-orange.svg" alt="pnpm" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript" />
@@ -156,4 +156,4 @@ Please refer to [AGENTS.md](./AGENTS.md) for code conventions, architectural pat
 
 ## 📄 License
 
-This project is licensed under the [ISC License](./package.json).
+This project is licensed under the [MIT License](./LICENSE).
