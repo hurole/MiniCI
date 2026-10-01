@@ -1,11 +1,10 @@
 {
   "extends": ["@tsconfig/node22/tsconfig.json", "@tsconfig/node-ts/tsconfig.json"],
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "ES2023",
     "strict": true,
-    "esModuleInterop": true,
     "outDir": "dist"
   }
 }

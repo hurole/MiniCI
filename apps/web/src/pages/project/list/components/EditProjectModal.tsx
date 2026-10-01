@@ -49,7 +49,7 @@ function EditProjectModal({ visible, project, onCancel, onSuccess }: EditProject
         envPresets: values.envPresets ? JSON.stringify(values.envPresets) : undefined,
       };
 
-      const updatedProject = await projectService.update(project.id, submitData);
+      const updatedProject = await projectService.update(String(project.id), submitData);
 
       Message.success('项目更新成功');
       onSuccess(updatedProject);

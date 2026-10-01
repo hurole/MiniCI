@@ -205,11 +205,11 @@ export function PipelineTab() {
                           <Switch
                             size="small"
                             checked={pipeline.enabled}
-                            onChange={(enabled: boolean, e: MouseEvent) => {
+                            onChange={(enabled: boolean, e) => {
                               e?.stopPropagation?.();
                               handleTogglePipeline(pipeline.id, enabled);
                             }}
-                            onClick={(e: MouseEvent) => e.stopPropagation()}
+                            onClick={e => e.stopPropagation()}
                           />
                           {!pipeline.enabled && (
                             <Tag color="gray" size="small">

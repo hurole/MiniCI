@@ -171,7 +171,7 @@ export default function LoginPage() {
           {['MiniCI', 'v0.1.1'].map((item, i) => (
             <Space key={item} size={16}>
               <Text
-                type="tertiary"
+                type="secondary"
                 style={{
                   fontSize: 11,
                   fontFamily: 'monospace',
