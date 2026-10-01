@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:8a441f318e46fd23207480adb6e06a5e80ae80a2393efb6b0ac42fbfbc1b8108",
+  "claims": [
+    {
+      "id": "claim_429d23bf465b4b30aaa04c90a6b05021",
+      "statement": "Gitea 集成通过 OAuth2 授权码流程获取 Access Token，封装了获取用户信息、分支列表、提交记录等 API，全部通过原生 fetch 发起",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/libs/gitea.ts",
+          "version": "repo-file-v1:sha256:cee530d72b32c1ae598cfb6c38b74036af93107808a5ccc4425c8f56d4bbe6ec"
+        }
+      ]
+    },
+    {
+      "id": "claim_e9166d6987214c5d887658a5ec8f5e72",
+      "statement": "OAuth2 Access Token 存储在 Koa Session 的 ctx.session.gitea 字段中，首次登录时自动在数据库中创建或更新用户信息",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/controllers/auth/index.ts",
+          "version": "repo-file-v1:sha256:cb48b434eb79b83d63283400c7f872d7673cab10945e2e31f058c698d8800b77"
+        }
+      ]
+    },
+    {
+      "id": "claim_3a58c11a28734e08aa3f06f42de47530",
+      "statement": "WebhookSender 使用 AbortController 实现请求超时保护（默认 10 秒），发送固定格式的文本消息负载",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/libs/webhook-sender.ts",
+          "version": "repo-file-v1:sha256:d32236dc958e6fe2f6c997a855fce1e1eb8f87fba00850b2845b5dfac504607a"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}

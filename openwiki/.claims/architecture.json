@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:45cdea3100b41b0802fc63b8d544857c1ea6ea3569c3e6274f417f5adfa8cedd",
+  "claims": [
+    {
+      "id": "claim_993801598297497787a34bb5688434cb",
+      "statement": "MiniCI 服务端以 Koa 为基础，启动时初始化 ExecutionQueue 单例并通过 initMiddlewares 加载中间件链",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/app.ts",
+          "version": "repo-file-v1:sha256:d7ee0782ef529183ac9746bb02948898d16a8c1a46c136c5d39a5b57867f32fd"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}

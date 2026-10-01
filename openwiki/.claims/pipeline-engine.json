@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:e5f954a7afbd531bf51423789f46467119ed91eda91aa369ad4afa3ee3ad0084",
+  "claims": [
+    {
+      "id": "claim_fdbdab13ef7f4befb6d37328dbd495d4",
+      "statement": "ExecutionQueue 是单例模式的任务调度器，内部使用 runningDeployments Set 和 pendingQueue 数组实现幂等保护与串行执行，轮询间隔 30 秒",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/libs/execution-queue.ts",
+          "version": "repo-file-v1:sha256:6f6c5f2c69b518fd7c3bda83a45315ee90e2815a3a195fcf2f17cd74e5baa070"
+        }
+      ]
+    },
+    {
+      "id": "claim_bee744f4505749ff9ac9d01532cc7bb5",
+      "statement": "服务启动时自动从数据库恢复 status=pending AND valid=1 的未完成部署任务",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/libs/execution-queue.ts",
+          "version": "repo-file-v1:sha256:6f6c5f2c69b518fd7c3bda83a45315ee90e2815a3a195fcf2f17cd74e5baa070"
+        }
+      ]
+    },
+    {
+      "id": "claim_70fa4e31cf2f4da0bfeee11ef7b257c0",
+      "statement": "GitManager 是无状态静态工具类，通过 zx 调用 git 命令，支持 fetch 哪个分支再 checkout 到精确 commit，并在首次运行时自动初始化 Git 仓库",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/libs/git-manager.ts",
+          "version": "repo-file-v1:sha256:da19ec3f8bc5cf3cb06a39d609bc480fbcf036e453ec7180e691a24e53bf8829"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}

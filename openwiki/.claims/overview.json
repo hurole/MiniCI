@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:3697ee3ec53420d498a4c4c739df2420864759af1f810c87a4d2913833e69ecd",
+  "claims": [
+    {
+      "id": "claim_b92a82755fb14e5d969968b974f29455",
+      "statement": "MiniCI 是基于 TypeScript Monorepo 架构的轻量级 CI/CD 平台，支持 Gitea OAuth2 登录、代码仓库管理与可视化流水线管理",
+      "evidence": [
+        {
+          "resource": "repo://README.zh-CN.md",
+          "version": "repo-file-v1:sha256:c4518d83f5f6d835aa2d67ac75c07f008a5b82004c54130c82a2d323779b6b12"
+        }
+      ]
+    },
+    {
+      "id": "claim_5657a6d8d62045e288e3cf48f76a23cc",
+      "statement": "服务端依赖 Koa 3、Prisma 7 (SQLite)、Pino、zx、zod 等核心库",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/package.json",
+          "version": "repo-file-v1:sha256:8245da850b5cae50d55361774a1a208babf2f8a758a28cecec8f7a8d317b4c96"
+        }
+      ]
+    },
+    {
+      "id": "claim_21b6e5caa1fe4e039c7caf86bd5b1a3e",
+      "statement": "前端包含首页 (home)、登录 (login)、项目列表 (project) 和项目详情 (project/:id) 四个页面路由",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/src/pages/App.tsx",
+          "version": "repo-file-v1:sha256:103fd1f3fb95ca548e7cb9bfbb159ec3ab1610c9e5104de91cdcf7ef552407fb"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}

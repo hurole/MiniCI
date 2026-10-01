@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:eb71eb139e5ff9a04f3cebe6026238a9e4e895077f84d8a9147eeccb4dcc5774",
+  "claims": [
+    {
+      "id": "claim_8e42f714a79044e4b70d3a7f7beb5448",
+      "statement": "前端使用 Rsbuild 构建，集成 pluginReact、pluginLess、pluginSvgr 与 ArcoDesignPlugin，开发服务器运行在 3000 端口并代理 /api 到 3001 端口",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/rsbuild.config.ts",
+          "version": "repo-file-v1:sha256:b14343cc13f98799fb9b6e559ae5cdfa2f62fce3d5ce90fcb22fcb8e4ea018bb"
+        }
+      ]
+    },
+    {
+      "id": "claim_8f961fc205224c0cad5ee110571f0642",
+      "statement": "net 是基于 axios 封装的单例客户端，超时 20 秒，自动携带 Cookie，非 /api/auth/info 的 401 响应自动跳转登录页",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/src/utils/request.ts",
+          "version": "repo-file-v1:sha256:f1cd4514c9253b0ffd136bcda9a0c9fa6c6fbadafd222ca75a6b3c7f2aa8d447"
+        }
+      ]
+    },
+    {
+      "id": "claim_a2d259208f9941109e250faf4d55e87b",
+      "statement": "useGlobalStore 是全局唯一 Zustand Store，存储登录用户信息并提供 refreshUser 方法从服务端刷新",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/src/stores/global.tsx",
+          "version": "repo-file-v1:sha256:9f9e17c89bec7a6b007d0332f9bb2b7026453746e2ef56ba74b5d184ba78f601"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}

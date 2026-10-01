@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:1a479a33a1094f80dc31fc6b43f0f361b0c5442f04b1953a714ed28948df3094",
+  "claims": [
+    {
+      "id": "claim_c1f9a024b63d4b289125759c2828e250",
+      "statement": "根工作区提供 dev/lint/fmt/check/start/stop 等统一脚本，pnpm dev 并行启动所有应用",
+      "evidence": [
+        {
+          "resource": "repo://package.json",
+          "version": "repo-file-v1:sha256:9e9ddbbf4fd6fb4c04a4dd85465462d4627d5109d40bacd9865dcdc807a77d45"
+        }
+      ]
+    },
+    {
+      "id": "claim_724053cff158452aad53896b95394664",
+      "statement": "生产部署使用 Nginx 服务前端静态文件，PM2 管理后端进程（进程名 MiniCI）",
+      "evidence": [
+        {
+          "resource": "repo://bin/start.sh",
+          "version": "repo-file-v1:sha256:0ae664486e522b3c801988bdc0b360635e6407971ba0f045a8de45519f81c210"
+        }
+      ]
+    },
+    {
+      "id": "claim_013a79d28df341018a0abf5706d15300",
+      "statement": "停止运行时使用 nginx -s stop 停止前端，pm2 stop MiniCI 停止后端",
+      "evidence": [
+        {
+          "resource": "repo://bin/stop.sh",
+          "version": "repo-file-v1:sha256:419783d1dd97f59d1030a747f37c86fdc42c0f74875fb8f1dfdec802f3e051fd"
+        }
+      ]
+    },
+    {
+      "id": "claim_09a89d80fbe6436dbeb1225a4d6647e9",
+      "statement": "服务端开发模式使用 tsx watch 启动，支持代码变更自动重启",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/package.json",
+          "version": "repo-file-v1:sha256:8245da850b5cae50d55361774a1a208babf2f8a758a28cecec8f7a8d317b4c96"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}

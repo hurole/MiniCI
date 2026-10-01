@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:3d3ce83cb913c5519a7afd611a866ab1e6bc8ae7da222a261bd5c0afe176180f",
+  "claims": [
+    {
+      "id": "claim_fe92b551e6d44789803a82f73206b1a6",
+      "statement": "MiniCI 是基于 TypeScript Monorepo 的轻量级 CI/CD 平台，在 3000 端口提供前端，在 3001 端口提供 API",
+      "evidence": [
+        {
+          "resource": "repo://README.zh-CN.md",
+          "version": "repo-file-v1:sha256:c4518d83f5f6d835aa2d67ac75c07f008a5b82004c54130c82a2d323779b6b12"
+        }
+      ]
+    },
+    {
+      "id": "claim_1cd077fee33c4da6b845cf280e166f4c",
+      "statement": "pnpm dev 命令并行启动所有应用的开发服务器，pnpm check 执行 oxlint 与 oxfmt --check 全量检查",
+      "evidence": [
+        {
+          "resource": "repo://package.json",
+          "version": "repo-file-v1:sha256:9e9ddbbf4fd6fb4c04a4dd85465462d4627d5109d40bacd9865dcdc807a77d45"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}

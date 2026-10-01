@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:250b534a9ab19f086335a2a225696feb87af8bfdc5eb1bdb50ead42ba8bcbc3e",
+  "claims": [
+    {
+      "id": "claim_ad8aba6619de4caba2ad96265fe8c13e",
+      "statement": "TC39 Stage 3 装饰器使用 WeakMap 作为元数据存储，通过 addInitializer 在实例初始化时将路由元数据追加到类构造函数上，无需 reflect-metadata",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/decorators/route.ts",
+          "version": "repo-file-v1:sha256:0099f89b3ff62dc24ad47b515ea2ddd4b582ac248c42692d30087e53c5a3be8c"
+        }
+      ]
+    },
+    {
+      "id": "claim_c097c17b31524f06af885920bee3edc4",
+      "statement": "RouteScanner 通过读取装饰器元数据将 Controller 方法动态注册到 @koa/router，并自动封装响应为标准 { code, message, data, timestamp } 格式",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/libs/route-scanner.ts",
+          "version": "repo-file-v1:sha256:72d3bdecb35efc09ed00f4092b038da31d2d5e4f743a4ef64d4a603dcd92273d"
+        }
+      ]
+    },
+    {
+      "id": "claim_51a3723b350546f7867fd5ac0b68c71b",
+      "statement": "Prisma 数据模型包含 Project、Pipeline、Step、Deployment、User，所有模型均有 valid 软删除字段， Deployment.status 合法值为 pending/running/success/failed/cancelled",
+      "evidence": [
+        {
+          "resource": "repo://apps/server/prisma/schema.prisma",
+          "version": "repo-file-v1:sha256:b78e8fac3126b38f0350d7c65e931e0190c6151f804686fcbf9e961697da4a9f"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.6.1",
+    "at": "2026-10-01T08:53:56.886Z"
+  }
+}
