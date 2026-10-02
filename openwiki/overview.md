@@ -2,9 +2,6 @@
 type: '参考'
 title: 'MiniCI 概览'
 openwiki_generated: true
-verified:
-  - by: openwiki/0.6.1
-    at: 2026-10-01T08:53:56.886Z
 sources:
   - id: openwiki-source-327e8e84fb9c5c41f197ee11
     resource: repo://apps/server/package.json
@@ -13,6 +10,9 @@ sources:
   - id: openwiki-source-3991e5820212155f6efc5331
     resource: repo://README.zh-CN.md
 generated: { by: 'antigravity', at: '2026-10-01T08:53:56.886Z' }
+verified:
+  - by: openwiki/0.6.1
+    at: 2026-10-02T00:56:02.982Z
 ---
 
 # MiniCI 概览
